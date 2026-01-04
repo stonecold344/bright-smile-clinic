@@ -1,89 +1,147 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/styled/Button';
+import { Container, Section, Badge, Card } from '@/components/styled/Layout';
+import { Title, Text } from '@/components/styled/Typography';
 
 const services = [
   {
-    icon: "🦷",
-    title: "טיפולי שיניים כלליים",
-    description: "טיפולים מונעים, סתימות, ניקוי שיניים מקצועי ובדיקות תקופתיות.",
+    icon: '🦷',
+    title: 'טיפולי שיניים כלליים',
+    description: 'טיפולים מונעים, סתימות, ניקוי שיניים מקצועי ובדיקות תקופתיות.',
   },
   {
-    icon: "✨",
-    title: "הלבנת שיניים",
-    description: "טיפולי הלבנה מתקדמים לחיוך לבן וזוהר יותר.",
+    icon: '✨',
+    title: 'הלבנת שיניים',
+    description: 'טיפולי הלבנה מתקדמים לחיוך לבן וזוהר יותר.',
   },
   {
-    icon: "🔧",
-    title: "שתלים דנטליים",
-    description: "שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים.",
+    icon: '🔧',
+    title: 'שתלים דנטליים',
+    description: 'שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים.',
   },
   {
-    icon: "👶",
-    title: "רפואת שיניים לילדים",
-    description: "טיפול עדין ומותאם לילדים בסביבה ידידותית ונעימה.",
+    icon: '👶',
+    title: 'רפואת שיניים לילדים',
+    description: 'טיפול עדין ומותאם לילדים בסביבה ידידותית ונעימה.',
   },
   {
-    icon: "😁",
-    title: "יישור שיניים",
-    description: "פתרונות אורתודנטיים מתקדמים כולל קשתיות שקופות.",
+    icon: '😁',
+    title: 'יישור שיניים',
+    description: 'פתרונות אורתודנטיים מתקדמים כולל קשתיות שקופות.',
   },
   {
-    icon: "🏆",
-    title: "אסתטיקה דנטלית",
-    description: "ציפויי חרסינה, עיצוב חיוך ושיפור מראה השיניים.",
+    icon: '🏆',
+    title: 'אסתטיקה דנטלית',
+    description: 'ציפויי חרסינה, עיצוב חיוך ושיפור מראה השיניים.',
   },
 ];
 
+const SectionWrapper = styled.section`
+  padding: ${({ theme }) => theme.spacing[24]} 0;
+  background: ${({ theme }) => theme.colors.secondary}4d;
+`;
+
+const Header = styled.div`
+  text-align: center;
+  max-width: 42rem;
+  margin: 0 auto ${({ theme }) => theme.spacing[16]};
+`;
+
+const ServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+`;
+
+const ServiceCard = styled.div`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  padding: ${({ theme }) => theme.spacing[8]};
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+  transition: all ${({ theme }) => theme.transitions.normal};
+  
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.elevated};
+    transform: translateY(-0.5rem);
+  }
+`;
+
+const ServiceIcon = styled.div`
+  width: 4rem;
+  height: 4rem;
+  background: ${({ theme }) => theme.gradients.hero};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.875rem;
+  margin-bottom: 1.5rem;
+  transition: transform ${({ theme }) => theme.transitions.normal};
+  
+  ${ServiceCard}:hover & {
+    transform: scale(1.1);
+  }
+`;
+
+const ServiceTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin-bottom: 0.75rem;
+`;
+
+const ServiceDescription = styled.p`
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  line-height: 1.7;
+`;
+
+const CTAWrapper = styled.div`
+  text-align: center;
+  margin-top: 3rem;
+`;
+
 const ServicesSection = () => {
   return (
-    <section className="py-24 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-            השירותים שלנו
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+    <SectionWrapper>
+      <Container>
+        <Header>
+          <Badge>השירותים שלנו</Badge>
+          <Title $size="lg" style={{ marginTop: '1rem' }}>
             טיפולי שיניים מקצועיים
-          </h2>
-          <p className="text-muted-foreground text-lg">
+          </Title>
+          <Text $color="muted" $size="lg">
             אנו מציעים מגוון רחב של טיפולי שיניים מתקדמים לכל המשפחה
-          </p>
-        </div>
+          </Text>
+        </Header>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <ServicesGrid>
           {services.map((service, index) => (
-            <div
-              key={index}
-              className="group bg-card rounded-2xl p-8 shadow-soft hover:shadow-elevated transition-all duration-300 hover:-translate-y-2"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                {service.icon}
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">
-                {service.title}
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {service.description}
-              </p>
-            </div>
+            <ServiceCard key={index}>
+              <ServiceIcon>{service.icon}</ServiceIcon>
+              <ServiceTitle>{service.title}</ServiceTitle>
+              <ServiceDescription>{service.description}</ServiceDescription>
+            </ServiceCard>
           ))}
-        </div>
+        </ServicesGrid>
 
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <Link to="/services">
-            <Button variant="heroPrimary" size="lg" className="gap-2">
-              לכל השירותים
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
+        <CTAWrapper>
+          <Button as={Link} to="/services" $variant="heroPrimary" $size="lg">
+            לכל השירותים
+            <ArrowLeft size={20} />
+          </Button>
+        </CTAWrapper>
+      </Container>
+    </SectionWrapper>
   );
 };
 

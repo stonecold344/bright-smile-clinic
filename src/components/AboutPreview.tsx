@@ -1,84 +1,190 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Award, Clock, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import teamImage from "@/assets/dental-team.jpg";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { ArrowLeft, Award, Clock, Users } from 'lucide-react';
+import { Button } from '@/components/styled/Button';
+import { Container, Badge } from '@/components/styled/Layout';
+import { Title, Text } from '@/components/styled/Typography';
+import teamImage from '@/assets/dental-team.jpg';
 
 const stats = [
-  { icon: Users, value: "5,000+", label: "מטופלים מרוצים" },
-  { icon: Award, value: "15+", label: "שנות ניסיון" },
-  { icon: Clock, value: "24/7", label: "זמינות לחירום" },
+  { icon: Users, value: '5,000+', label: 'מטופלים מרוצים' },
+  { icon: Award, value: '15+', label: 'שנות ניסיון' },
+  { icon: Clock, value: '24/7', label: 'זמינות לחירום' },
 ];
+
+const SectionWrapper = styled.section`
+  padding: ${({ theme }) => theme.spacing[24]} 0;
+  background: ${({ theme }) => theme.colors.background};
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const ImageWrapper = styled.div`
+  position: relative;
+`;
+
+const ImageContainer = styled.div`
+  position: relative;
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.elevated};
+`;
+
+const Image = styled.img`
+  width: 100%;
+  height: auto;
+`;
+
+const ImageOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, ${({ theme }) => theme.colors.foreground}33, transparent);
+`;
+
+const FloatingCard = styled.div`
+  position: absolute;
+  bottom: -2rem;
+  left: -2rem;
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  padding: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.elevated};
+  animation: float 6s ease-in-out infinite;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+`;
+
+const FloatingCardInner = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const FloatingCardIcon = styled.div`
+  width: 3.5rem;
+  height: 3.5rem;
+  background: ${({ theme }) => theme.gradients.hero};
+  border-radius: ${({ theme }) => theme.radii.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+`;
+
+const FloatingCardValue = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin: 0;
+`;
+
+const FloatingCardLabel = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin: 0;
+`;
+
+const ContentWrapper = styled.div``;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatIcon = styled.div`
+  color: ${({ theme }) => theme.colors.primary};
+  margin: 0 auto 0.5rem;
+`;
+
+const StatValue = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin: 0;
+`;
+
+const StatLabel = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin: 0;
+`;
 
 const AboutPreview = () => {
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Image Side */}
-          <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-elevated">
-              <img
-                src={teamImage}
-                alt="צוות מרפאת השיניים"
-                className="w-full h-auto"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
-            </div>
+    <SectionWrapper>
+      <Container>
+        <Grid>
+          <ImageWrapper>
+            <ImageContainer>
+              <Image src={teamImage} alt="צוות מרפאת השיניים" />
+              <ImageOverlay />
+            </ImageContainer>
             
-            {/* Floating Card */}
-            <div className="absolute -bottom-8 -left-8 bg-card rounded-2xl p-6 shadow-elevated animate-float">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-hero rounded-full flex items-center justify-center text-2xl">
-                  ⭐
-                </div>
+            <FloatingCard>
+              <FloatingCardInner>
+                <FloatingCardIcon>⭐</FloatingCardIcon>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">4.9/5</p>
-                  <p className="text-sm text-muted-foreground">דירוג גוגל</p>
+                  <FloatingCardValue>4.9/5</FloatingCardValue>
+                  <FloatingCardLabel>דירוג גוגל</FloatingCardLabel>
                 </div>
-              </div>
-            </div>
-          </div>
+              </FloatingCardInner>
+            </FloatingCard>
+          </ImageWrapper>
 
-          {/* Content Side */}
-          <div>
-            <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-              אודותינו
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+          <ContentWrapper>
+            <Badge>אודותינו</Badge>
+            <Title $size="lg" style={{ marginTop: '1rem' }}>
               מרפאת שיניים מובילה
               <br />
-              <span className="text-primary">עם צוות מומחים</span>
-            </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+              <span style={{ color: 'hsl(174, 62%, 45%)' }}>עם צוות מומחים</span>
+            </Title>
+            <Text $color="muted" $size="lg" style={{ marginBottom: '1.5rem' }}>
               אנו מרפאת שיניים מתקדמת המספקת טיפולי שיניים איכותיים לכל המשפחה.
               הצוות המקצועי שלנו מחויב לספק לכם את הטיפול הטוב ביותר בסביבה נעימה ומרגיעה.
-            </p>
-            <p className="text-muted-foreground leading-relaxed mb-8">
+            </Text>
+            <Text $color="muted" style={{ marginBottom: '2rem' }}>
               אנו משתמשים בטכנולוגיות המתקדמות ביותר ובציוד חדיש כדי להבטיח
               תוצאות מעולות ונוחות מקסימלית למטופלים שלנו.
-            </p>
+            </Text>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
+            <StatsGrid>
               {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <stat.icon className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </div>
+                <StatItem key={index}>
+                  <StatIcon>
+                    <stat.icon size={32} />
+                  </StatIcon>
+                  <StatValue>{stat.value}</StatValue>
+                  <StatLabel>{stat.label}</StatLabel>
+                </StatItem>
               ))}
-            </div>
+            </StatsGrid>
 
-            <Link to="/about">
-              <Button variant="heroPrimary" size="lg" className="gap-2">
-                קראו עוד
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
+            <Button as={Link} to="/about" $variant="heroPrimary" $size="lg">
+              קראו עוד
+              <ArrowLeft size={20} />
+            </Button>
+          </ContentWrapper>
+        </Grid>
+      </Container>
+    </SectionWrapper>
   );
 };
 

@@ -1,184 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Dental Clinic Design System - Professional, Calming, Trustworthy */
-
-@layer base {
-  :root {
-    /* Main background - clean white with slight warmth */
-    --background: 200 20% 99%;
-    --foreground: 200 50% 15%;
-
-    /* Cards - pure white for contrast */
-    --card: 0 0% 100%;
-    --card-foreground: 200 50% 15%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 200 50% 15%;
-
-    /* Primary - Calming Teal (medical/dental trust color) */
-    --primary: 174 62% 45%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Secondary - Soft sky blue */
-    --secondary: 200 40% 96%;
-    --secondary-foreground: 200 50% 25%;
-
-    /* Muted - Soft gray-blue */
-    --muted: 200 20% 96%;
-    --muted-foreground: 200 15% 45%;
-
-    /* Accent - Warm gold for CTAs */
-    --accent: 38 90% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 200 20% 90%;
-    --input: 200 20% 90%;
-    --ring: 174 62% 45%;
-
-    --radius: 0.75rem;
-
-    /* Custom dental colors */
-    --dental-teal: 174 62% 45%;
-    --dental-teal-light: 174 50% 92%;
-    --dental-navy: 200 50% 20%;
-    --dental-gold: 38 90% 55%;
-    --dental-mint: 160 40% 95%;
-    
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(174 62% 45%) 0%, hsl(190 60% 50%) 100%);
-    --gradient-cta: linear-gradient(135deg, hsl(38 90% 55%) 0%, hsl(28 90% 50%) 100%);
-
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(200 50% 20% / 0.08);
-    --shadow-card: 0 8px 30px -8px hsl(200 50% 20% / 0.12);
-    --shadow-elevated: 0 20px 50px -15px hsl(200 50% 20% / 0.15);
-  }
-
-  .dark {
-    --background: 200 40% 8%;
-    --foreground: 200 20% 95%;
-
-    --card: 200 40% 12%;
-    --card-foreground: 200 20% 95%;
-
-    --popover: 200 40% 12%;
-    --popover-foreground: 200 20% 95%;
-
-    --primary: 174 55% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 200 30% 18%;
-    --secondary-foreground: 200 20% 90%;
-
-    --muted: 200 30% 18%;
-    --muted-foreground: 200 15% 60%;
-
-    --accent: 38 85% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 200 30% 20%;
-    --input: 200 30% 20%;
-    --ring: 174 55% 50%;
-  }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Heebo', sans-serif;
-    direction: rtl;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
-@layer utilities {
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-hero);
-  }
-
-  .bg-gradient-hero {
-    background-image: var(--gradient-hero);
-  }
-
-  .bg-gradient-cta {
-    background-image: var(--gradient-cta);
-  }
-
-  .shadow-soft {
-    box-shadow: var(--shadow-soft);
-  }
-
-  .shadow-card {
-    box-shadow: var(--shadow-card);
-  }
-
-  .shadow-elevated {
-    box-shadow: var(--shadow-elevated);
-  }
-
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-fade-up {
-    animation: fadeUp 0.6s ease-out forwards;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
-  }
+body {
+  font-family: 'Heebo', sans-serif;
+  background-color: hsl(200, 20%, 99%);
+  color: hsl(200, 50%, 15%);
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
-@keyframes fadeUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+ul, ol {
+  list-style: none;
 }
 
-@keyframes scaleIn {
-  from { 
-    opacity: 0; 
-    transform: scale(0.95); 
-  }
-  to { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+input, textarea {
+  font-family: inherit;
 }

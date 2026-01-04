@@ -1,100 +1,208 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Phone, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+import { Phone, Menu, X } from 'lucide-react';
+import { Button } from '@/components/styled/Button';
+import { Container, Flex } from '@/components/styled/Layout';
+
+const HeaderWrapper = styled.header`
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 50;
+  background: ${({ theme }) => theme.colors.card}f2;
+  backdrop-filter: blur(12px);
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+`;
+
+const HeaderInner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 5rem;
+`;
+
+const Logo = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const LogoIcon = styled.div`
+  width: 3rem;
+  height: 3rem;
+  background: ${({ theme }) => theme.gradients.hero};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+`;
+
+const LogoText = styled.div`
+  display: none;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    display: block;
+  }
+`;
+
+const LogoTitle = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin: 0;
+`;
+
+const LogoSubtitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin: 0;
+`;
+
+const Nav = styled.nav`
+  display: none;
+  align-items: center;
+  gap: 2rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+  }
+`;
+
+const NavLink = styled(Link)<{ $active?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
+  transition: color ${({ theme }) => theme.transitions.normal};
+  padding-bottom: 0.25rem;
+  border-bottom: ${({ $active, theme }) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const CTAWrapper = styled.div`
+  display: none;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+`;
+
+const MobileMenuButton = styled.button`
+  display: flex;
+  padding: 0.5rem;
+  color: ${({ theme }) => theme.colors.foreground};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
+`;
+
+const MobileNav = styled.nav`
+  background: ${({ theme }) => theme.colors.card};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  animation: fadeIn 0.3s ease-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
+`;
+
+const MobileNavInner = styled.div`
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const MobileNavLink = styled(Link)<{ $active?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  padding: 0.5rem 0;
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
+  transition: color ${({ theme }) => theme.transitions.normal};
+`;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
-    { name: "בית", path: "/" },
-    { name: "אודות", path: "/about" },
-    { name: "שירותים", path: "/services" },
-    { name: "צור קשר", path: "/contact" },
+    { name: 'בית', path: '/' },
+    { name: 'אודות', path: '/about' },
+    { name: 'שירותים', path: '/services' },
+    { name: 'צור קשר', path: '/contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 bg-card/95 backdrop-blur-md shadow-soft">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-hero rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🦷</span>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-foreground">מרפאת שיניים</h1>
-              <p className="text-xs text-muted-foreground">חיוך בריא לכל החיים</p>
-            </div>
-          </Link>
+    <HeaderWrapper>
+      <Container>
+        <HeaderInner>
+          <Logo to="/">
+            <LogoIcon>🦷</LogoIcon>
+            <LogoText>
+              <LogoTitle>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
+            </LogoText>
+          </Logo>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <Nav>
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-base font-medium transition-colors duration-300 hover:text-primary ${
-                  isActive(link.path)
-                    ? "text-primary border-b-2 border-primary pb-1"
-                    : "text-foreground"
-                }`}
-              >
+              <NavLink key={link.path} to={link.path} $active={isActive(link.path)}>
                 {link.name}
-              </Link>
+              </NavLink>
             ))}
-          </nav>
+          </Nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-4">
-            <a href="tel:+972-00-000-0000">
-              <Button variant="call" size="lg" className="gap-2">
-                <Phone className="w-5 h-5" />
-                קביעת תור
-              </Button>
-            </a>
-          </div>
+          <CTAWrapper>
+            <Button as="a" href="tel:+972-00-000-0000" $variant="call" $size="lg">
+              <Phone size={20} />
+              קביעת תור
+            </Button>
+          </CTAWrapper>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-foreground"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
+          <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </MobileMenuButton>
+        </HeaderInner>
+      </Container>
 
-      {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-card border-t border-border animate-fade-in">
-          <nav className="container mx-auto px-4 py-6 flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-lg font-medium py-2 transition-colors ${
-                  isActive(link.path) ? "text-primary" : "text-foreground"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <a href="tel:+972-00-000-0000" className="mt-4">
-              <Button variant="call" size="lg" className="w-full gap-2">
-                <Phone className="w-5 h-5" />
+        <MobileNav>
+          <Container>
+            <MobileNavInner>
+              {navLinks.map((link) => (
+                <MobileNavLink
+                  key={link.path}
+                  to={link.path}
+                  $active={isActive(link.path)}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </MobileNavLink>
+              ))}
+              <Button as="a" href="tel:+972-00-000-0000" $variant="call" $size="lg" $fullWidth style={{ marginTop: '1rem' }}>
+                <Phone size={20} />
                 קביעת תור
               </Button>
-            </a>
-          </nav>
-        </div>
+            </MobileNavInner>
+          </Container>
+        </MobileNav>
       )}
-    </header>
+    </HeaderWrapper>
   );
 };
 

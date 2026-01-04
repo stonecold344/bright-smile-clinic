@@ -1,59 +1,148 @@
-import { Phone, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { Phone, Calendar } from 'lucide-react';
+import { Button } from '@/components/styled/Button';
+import { Container } from '@/components/styled/Layout';
+
+const SectionWrapper = styled.section`
+  padding: ${({ theme }) => theme.spacing[24]} 0;
+  background: ${({ theme }) => theme.gradients.hero};
+  position: relative;
+  overflow: hidden;
+`;
+
+const DecorativeCircle = styled.div<{ $position: 'top-left' | 'bottom-right' }>`
+  position: absolute;
+  background: ${({ theme }) => theme.colors.primaryForeground}1a;
+  border-radius: 50%;
+  filter: blur(60px);
+  
+  ${({ $position }) => $position === 'top-left' ? `
+    top: 0;
+    left: 0;
+    width: 16rem;
+    height: 16rem;
+  ` : `
+    bottom: 0;
+    right: 0;
+    width: 24rem;
+    height: 24rem;
+  `}
+`;
+
+const Content = styled.div`
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 48rem;
+  margin: 0 auto;
+`;
+
+const Badge = styled.span`
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: ${({ theme }) => theme.colors.primaryForeground}33;
+  border-radius: ${({ theme }) => theme.radii.full};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  margin-bottom: 1.5rem;
+`;
+
+const Title = styled.h2`
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  margin-bottom: 1.5rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  }
+`;
+
+const Description = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    flex-direction: row;
+  }
+`;
+
+const TrustElements = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+`;
+
+const TrustItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${({ theme }) => theme.colors.primaryForeground}cc;
+`;
+
+const CheckIcon = styled.span`
+  font-size: 1.5rem;
+`;
 
 const CTASection = () => {
   return (
-    <section className="py-24 bg-gradient-hero relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-primary-foreground/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-foreground/10 rounded-full blur-3xl" />
+    <SectionWrapper>
+      <DecorativeCircle $position="top-left" />
+      <DecorativeCircle $position="bottom-right" />
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-3xl mx-auto">
-          <span className="inline-block px-4 py-2 bg-primary-foreground/20 rounded-full text-primary-foreground text-sm font-medium mb-6">
-            📞 התקשרו עכשיו
-          </span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-6">
-            מוכנים לחיוך חדש?
-          </h2>
-          <p className="text-xl text-primary-foreground/90 mb-10 leading-relaxed">
+      <Container>
+        <Content>
+          <Badge>📞 התקשרו עכשיו</Badge>
+          <Title>מוכנים לחיוך חדש?</Title>
+          <Description>
             צוות המומחים שלנו מחכה לכם. קבעו תור עכשיו וקבלו ייעוץ חינם לגבי הטיפול המתאים לכם.
-          </p>
+          </Description>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+972-00-000-0000">
-              <Button variant="hero" size="xl" className="w-full sm:w-auto gap-2">
-                <Phone className="w-5 h-5" />
-                00-000-0000
-              </Button>
-            </a>
-            <Link to="/contact">
-              <Button variant="heroOutline" size="xl" className="w-full sm:w-auto gap-2">
-                <Calendar className="w-5 h-5" />
-                קביעת תור אונליין
-              </Button>
-            </Link>
-          </div>
+          <ButtonGroup>
+            <Button as="a" href="tel:+972-00-000-0000" $variant="hero" $size="xl">
+              <Phone size={20} />
+              00-000-0000
+            </Button>
+            <Button as={Link} to="/contact" $variant="heroOutline" $size="xl">
+              <Calendar size={20} />
+              קביעת תור אונליין
+            </Button>
+          </ButtonGroup>
 
-          {/* Trust Elements */}
-          <div className="mt-12 flex flex-wrap justify-center gap-8">
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <span className="text-2xl">✓</span>
+          <TrustElements>
+            <TrustItem>
+              <CheckIcon>✓</CheckIcon>
               <span>ייעוץ ראשוני חינם</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <span className="text-2xl">✓</span>
+            </TrustItem>
+            <TrustItem>
+              <CheckIcon>✓</CheckIcon>
               <span>תוכניות תשלום גמישות</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <span className="text-2xl">✓</span>
+            </TrustItem>
+            <TrustItem>
+              <CheckIcon>✓</CheckIcon>
               <span>אחריות מלאה</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+            </TrustItem>
+          </TrustElements>
+        </Content>
+      </Container>
+    </SectionWrapper>
   );
 };
 
