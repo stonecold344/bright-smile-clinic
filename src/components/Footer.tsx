@@ -1,105 +1,241 @@
-import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from 'lucide-react';
+import { Container, Flex, Grid } from '@/components/styled/Layout';
+import { Text } from '@/components/styled/Typography';
+
+const FooterWrapper = styled.footer`
+  background: ${({ theme }) => theme.colors.foreground};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+`;
+
+const FooterContent = styled.div`
+  padding: ${({ theme }) => theme.spacing[16]} 0;
+`;
+
+const FooterGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
+const LogoSection = styled.div``;
+
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+`;
+
+const LogoIcon = styled.div`
+  width: 3rem;
+  height: 3rem;
+  background: ${({ theme }) => theme.gradients.hero};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+`;
+
+const LogoTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  margin: 0;
+`;
+
+const LogoSubtitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.8;
+  margin: 0;
+`;
+
+const Description = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.8;
+  line-height: 1.7;
+`;
+
+const FooterTitle = styled.h4`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  margin-bottom: 1.5rem;
+`;
+
+const FooterNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const FooterLink = styled(Link)`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.8;
+  transition: opacity ${({ theme }) => theme.transitions.normal};
+  
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const ContactItem = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.8;
+  transition: opacity ${({ theme }) => theme.transitions.normal};
+  margin-bottom: 1rem;
+  
+  svg {
+    color: ${({ theme }) => theme.colors.primary};
+    flex-shrink: 0;
+  }
+  
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const ContactInfo = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.8;
+  margin-bottom: 1rem;
+  
+  svg {
+    color: ${({ theme }) => theme.colors.primary};
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+`;
+
+const HoursText = styled.div`
+  p {
+    margin: 0;
+    line-height: 1.6;
+  }
+`;
+
+const SocialLinks = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+`;
+
+const SocialLink = styled.a`
+  width: 2.5rem;
+  height: 2.5rem;
+  background: ${({ theme }) => theme.colors.primary}33;
+  border-radius: ${({ theme }) => theme.radii.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background ${({ theme }) => theme.transitions.normal};
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary}4d;
+  }
+`;
+
+const FooterBottom = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.colors.primaryForeground}33;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  text-align: center;
+`;
+
+const Copyright = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.6;
+`;
 
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-primary-foreground">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Logo & About */}
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-hero rounded-xl flex items-center justify-center">
-                <span className="text-2xl">🦷</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold">מרפאת שיניים</h3>
-                <p className="text-sm opacity-80">חיוך בריא לכל החיים</p>
-              </div>
+    <FooterWrapper>
+      <Container>
+        <FooterContent>
+          <FooterGrid>
+            <LogoSection>
+              <Logo>
+                <LogoIcon>🦷</LogoIcon>
+                <div>
+                  <LogoTitle>מרפאת שיניים</LogoTitle>
+                  <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
+                </div>
+              </Logo>
+              <Description>
+                מרפאת שיניים מקצועית המספקת טיפול שיניים איכותי בסביבה נעימה ומרגיעה.
+                אנו מחויבים לבריאות הפה שלכם.
+              </Description>
+            </LogoSection>
+
+            <div>
+              <FooterTitle>קישורים מהירים</FooterTitle>
+              <FooterNav>
+                <FooterLink to="/">בית</FooterLink>
+                <FooterLink to="/about">אודות</FooterLink>
+                <FooterLink to="/services">שירותים</FooterLink>
+                <FooterLink to="/contact">צור קשר</FooterLink>
+              </FooterNav>
             </div>
-            <p className="text-sm opacity-80 leading-relaxed">
-              מרפאת שיניים מקצועית המספקת טיפול שיניים איכותי בסביבה נעימה ומרגיעה.
-              אנו מחויבים לבריאות הפה שלכם.
-            </p>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6">קישורים מהירים</h4>
-            <nav className="flex flex-col gap-3">
-              <Link to="/" className="text-sm opacity-80 hover:opacity-100 transition-opacity">
-                בית
-              </Link>
-              <Link to="/about" className="text-sm opacity-80 hover:opacity-100 transition-opacity">
-                אודות
-              </Link>
-              <Link to="/services" className="text-sm opacity-80 hover:opacity-100 transition-opacity">
-                שירותים
-              </Link>
-              <Link to="/contact" className="text-sm opacity-80 hover:opacity-100 transition-opacity">
-                צור קשר
-              </Link>
-            </nav>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6">פרטי התקשרות</h4>
-            <div className="flex flex-col gap-4">
-              <a href="tel:+972-00-000-0000" className="flex items-center gap-3 text-sm opacity-80 hover:opacity-100 transition-opacity">
-                <Phone className="w-5 h-5 text-primary" />
+            <div>
+              <FooterTitle>פרטי התקשרות</FooterTitle>
+              <ContactItem href="tel:+972-00-000-0000">
+                <Phone size={20} />
                 <span>00-000-0000</span>
-              </a>
-              <a href="mailto:info@dental-clinic.co.il" className="flex items-center gap-3 text-sm opacity-80 hover:opacity-100 transition-opacity">
-                <Mail className="w-5 h-5 text-primary" />
+              </ContactItem>
+              <ContactItem href="mailto:info@dental-clinic.co.il">
+                <Mail size={20} />
                 <span>info@dental-clinic.co.il</span>
-              </a>
-              <div className="flex items-center gap-3 text-sm opacity-80">
-                <MapPin className="w-5 h-5 text-primary" />
+              </ContactItem>
+              <ContactInfo>
+                <MapPin size={20} />
                 <span>רחוב הרצל 123, תל אביב</span>
-              </div>
+              </ContactInfo>
             </div>
-          </div>
 
-          {/* Hours & Social */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6">שעות פעילות</h4>
-            <div className="flex items-start gap-3 text-sm opacity-80 mb-6">
-              <Clock className="w-5 h-5 text-primary mt-0.5" />
-              <div>
-                <p>א׳-ה׳: 08:00-20:00</p>
-                <p>ו׳: 08:00-14:00</p>
-                <p>שבת: סגור</p>
-              </div>
+            <div>
+              <FooterTitle>שעות פעילות</FooterTitle>
+              <ContactInfo>
+                <Clock size={20} />
+                <HoursText>
+                  <p>א׳-ה׳: 08:00-20:00</p>
+                  <p>ו׳: 08:00-14:00</p>
+                  <p>שבת: סגור</p>
+                </HoursText>
+              </ContactInfo>
+              
+              <FooterTitle style={{ marginTop: '1.5rem' }}>עקבו אחרינו</FooterTitle>
+              <SocialLinks>
+                <SocialLink href="#" aria-label="Facebook">
+                  <Facebook size={20} />
+                </SocialLink>
+                <SocialLink href="#" aria-label="Instagram">
+                  <Instagram size={20} />
+                </SocialLink>
+              </SocialLinks>
             </div>
-            
-            <h4 className="text-lg font-semibold mb-4">עקבו אחרינו</h4>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary/30 transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary/30 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-        </div>
+          </FooterGrid>
 
-        <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
-          <p className="text-sm opacity-60">
-            © 2026 מרפאת שיניים. כל הזכויות שמורות.
-          </p>
-        </div>
-      </div>
-    </footer>
+          <FooterBottom>
+            <Copyright>© 2026 מרפאת שיניים. כל הזכויות שמורות.</Copyright>
+          </FooterBottom>
+        </FooterContent>
+      </Container>
+    </FooterWrapper>
   );
 };
 

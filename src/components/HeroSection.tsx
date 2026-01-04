@@ -1,85 +1,223 @@
-import { Link } from "react-router-dom";
-import { Phone, Calendar, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-dental.jpg";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { Phone, Calendar, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/styled/Button';
+import { Container, Badge } from '@/components/styled/Layout';
+import { Title, Text, GradientText } from '@/components/styled/Typography';
+import heroImage from '@/assets/hero-dental.jpg';
+
+const HeroWrapper = styled.section`
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+`;
+
+const HeroBackground = styled.div`
+  position: absolute;
+  inset: 0;
+`;
+
+const HeroImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const HeroOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: ${({ theme }) => theme.gradients.heroOverlay};
+`;
+
+const HeroContent = styled.div`
+  position: relative;
+  padding-top: 5rem;
+  width: 100%;
+`;
+
+const HeroInner = styled.div`
+  max-width: 42rem;
+  margin-right: auto;
+`;
+
+const AnimatedDiv = styled.div<{ $delay?: string }>`
+  animation: fadeUp 0.6s ease-out forwards;
+  animation-delay: ${({ $delay }) => $delay || '0s'};
+  opacity: 0;
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const HeroBadge = styled.span`
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: ${({ theme }) => theme.colors.primary}33;
+  backdrop-filter: blur(4px);
+  border-radius: ${({ theme }) => theme.radii.full};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  margin-bottom: 1.5rem;
+`;
+
+const HeroTitle = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  }
+`;
+
+const HeroDescription = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes.xl};
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    flex-direction: row;
+  }
+`;
+
+const TrustBadges = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 3rem;
+`;
+
+const TrustBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${({ theme }) => theme.colors.primaryForeground}cc;
+`;
+
+const TrustIcon = styled.div`
+  width: 2.5rem;
+  height: 2.5rem;
+  background: ${({ theme }) => theme.colors.primary}4d;
+  border-radius: ${({ theme }) => theme.radii.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+`;
+
+const ScrollIndicator = styled.div`
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 2s infinite;
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0) translateX(-50%);
+    }
+    50% {
+      transform: translateY(-10px) translateX(-50%);
+    }
+  }
+`;
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="מרפאת שיניים מודרנית"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-l from-foreground/80 via-foreground/60 to-foreground/40" />
-      </div>
+    <HeroWrapper>
+      <HeroBackground>
+        <HeroImage src={heroImage} alt="מרפאת שיניים מודרנית" />
+        <HeroOverlay />
+      </HeroBackground>
 
-      {/* Content */}
-      <div className="relative container mx-auto px-4 pt-20">
-        <div className="max-w-2xl mr-auto">
-          <div className="animate-fade-up">
-            <span className="inline-block px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-primary-foreground text-sm font-medium mb-6">
-              ✨ מרפאת שיניים מובילה
-            </span>
-          </div>
+      <HeroContent>
+        <Container>
+          <HeroInner>
+            <AnimatedDiv>
+              <HeroBadge>✨ מרפאת שיניים מובילה</HeroBadge>
+            </AnimatedDiv>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            חיוך בריא
-            <br />
-            <span className="text-gradient bg-gradient-to-l from-primary to-accent">לכל החיים</span>
-          </h1>
+            <AnimatedDiv $delay="0.1s">
+              <HeroTitle>
+                חיוך בריא
+                <br />
+                <GradientText>לכל החיים</GradientText>
+              </HeroTitle>
+            </AnimatedDiv>
 
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-8 leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            מרפאת שיניים מקצועית המספקת טיפולי שיניים מתקדמים בסביבה נעימה ומרגיעה.
-            צוות המומחים שלנו מחויב לבריאות הפה ולחיוך המושלם שלכם.
-          </p>
+            <AnimatedDiv $delay="0.2s">
+              <HeroDescription>
+                מרפאת שיניים מקצועית המספקת טיפולי שיניים מתקדמים בסביבה נעימה ומרגיעה.
+                צוות המומחים שלנו מחויב לבריאות הפה ולחיוך המושלם שלכם.
+              </HeroDescription>
+            </AnimatedDiv>
 
-          <div className="flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <a href="tel:+972-00-000-0000">
-              <Button variant="hero" size="xl" className="w-full sm:w-auto gap-2">
-                <Phone className="w-5 h-5" />
-                התקשרו עכשיו
-              </Button>
-            </a>
-            <Link to="/contact">
-              <Button variant="heroOutline" size="xl" className="w-full sm:w-auto gap-2">
-                <Calendar className="w-5 h-5" />
-                קביעת תור
-              </Button>
-            </Link>
-          </div>
+            <AnimatedDiv $delay="0.3s">
+              <ButtonGroup>
+                <Button as="a" href="tel:+972-00-000-0000" $variant="hero" $size="xl">
+                  <Phone size={20} />
+                  התקשרו עכשיו
+                </Button>
+                <Button as={Link} to="/contact" $variant="heroOutline" $size="xl">
+                  <Calendar size={20} />
+                  קביעת תור
+                </Button>
+              </ButtonGroup>
+            </AnimatedDiv>
 
-          {/* Trust Badges */}
-          <div className="mt-12 flex flex-wrap gap-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <div className="w-10 h-10 bg-primary/30 rounded-full flex items-center justify-center">
-                <span className="text-lg">👨‍⚕️</span>
-              </div>
-              <span className="text-sm">צוות מומחים</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <div className="w-10 h-10 bg-primary/30 rounded-full flex items-center justify-center">
-                <span className="text-lg">🏥</span>
-              </div>
-              <span className="text-sm">ציוד מתקדם</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/80">
-              <div className="w-10 h-10 bg-primary/30 rounded-full flex items-center justify-center">
-                <span className="text-lg">⭐</span>
-              </div>
-              <span className="text-sm">5 כוכבים בגוגל</span>
-            </div>
-          </div>
-        </div>
-      </div>
+            <AnimatedDiv $delay="0.4s">
+              <TrustBadges>
+                <TrustBadge>
+                  <TrustIcon>👨‍⚕️</TrustIcon>
+                  <span>צוות מומחים</span>
+                </TrustBadge>
+                <TrustBadge>
+                  <TrustIcon>🏥</TrustIcon>
+                  <span>ציוד מתקדם</span>
+                </TrustBadge>
+                <TrustBadge>
+                  <TrustIcon>⭐</TrustIcon>
+                  <span>5 כוכבים בגוגל</span>
+                </TrustBadge>
+              </TrustBadges>
+            </AnimatedDiv>
+          </HeroInner>
+        </Container>
+      </HeroContent>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ChevronDown className="w-8 h-8 text-primary-foreground/60" />
-      </div>
-    </section>
+      <ScrollIndicator>
+        <ChevronDown size={32} color="rgba(255,255,255,0.6)" />
+      </ScrollIndicator>
+    </HeroWrapper>
   );
 };
 

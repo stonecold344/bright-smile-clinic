@@ -1,132 +1,67 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CTASection from "@/components/CTASection";
-import { Check } from "lucide-react";
-import heroImage from "@/assets/hero-dental.jpg";
+import styled from 'styled-components';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import CTASection from '@/components/CTASection';
+import { Container, Badge } from '@/components/styled/Layout';
+import { Title, Text } from '@/components/styled/Typography';
+import { Check } from 'lucide-react';
+import heroImage from '@/assets/hero-dental.jpg';
 
 const services = [
-  {
-    icon: "🦷",
-    title: "טיפולי שיניים כלליים",
-    description: "טיפולים מונעים, סתימות, ניקוי שיניים מקצועי ובדיקות תקופתיות לשמירה על בריאות הפה.",
-    features: ["בדיקות תקופתיות", "ניקוי מקצועי", "סתימות לבנות", "טיפולי חניכיים"],
-  },
-  {
-    icon: "✨",
-    title: "הלבנת שיניים",
-    description: "טיפולי הלבנה מתקדמים בשיטות שונות לחיוך לבן וזוהר יותר.",
-    features: ["הלבנה במרפאה", "ערכת הלבנה ביתית", "הלבנה בלייזר", "תוצאות מהירות"],
-  },
-  {
-    icon: "🔧",
-    title: "שתלים דנטליים",
-    description: "שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים, פתרון קבוע לשיניים חסרות.",
-    features: ["שתלים מתקדמים", "תכנון מחשב", "ריפוי מהיר", "אחריות מלאה"],
-  },
-  {
-    icon: "👶",
-    title: "רפואת שיניים לילדים",
-    description: "טיפול עדין ומותאם לילדים בסביבה ידידותית ונעימה שמפחיתה חרדות.",
-    features: ["סביבה ידידותית", "טיפול עדין", "הרדמה מותאמת", "מניעה מוקדמת"],
-  },
-  {
-    icon: "😁",
-    title: "יישור שיניים",
-    description: "פתרונות אורתודנטיים מתקדמים כולל קשתיות שקופות ליישור שיניים יעיל.",
-    features: ["קשתיות שקופות", "גשרים קבועים", "ריטיינרים", "מעקב קבוע"],
-  },
-  {
-    icon: "🏆",
-    title: "אסתטיקה דנטלית",
-    description: "ציפויי חרסינה, עיצוב חיוך ושיפור מראה השיניים לחיוך מושלם.",
-    features: ["ציפויי חרסינה", "עיצוב חיוך", "סגירת רווחים", "שיקום אסתטי"],
-  },
-  {
-    icon: "🩺",
-    title: "טיפולי שורש",
-    description: "טיפולי שורש מקצועיים להצלת שיניים פגועות ושמירה על השן הטבעית.",
-    features: ["אבחון מדויק", "טיפול ללא כאב", "שימור השן", "מעקב"],
-  },
-  {
-    icon: "🚨",
-    title: "טיפולי חירום",
-    description: "זמינות לטיפולי חירום בשיניים - כאבים, שברים ומקרים דחופים.",
-    features: ["זמינות מהירה", "טיפול דחוף", "הקלה בכאב", "פתרון מיידי"],
-  },
+  { icon: '🦷', title: 'טיפולי שיניים כלליים', description: 'טיפולים מונעים, סתימות, ניקוי שיניים מקצועי.', features: ['בדיקות תקופתיות', 'ניקוי מקצועי', 'סתימות לבנות', 'טיפולי חניכיים'] },
+  { icon: '✨', title: 'הלבנת שיניים', description: 'טיפולי הלבנה מתקדמים לחיוך לבן וזוהר.', features: ['הלבנה במרפאה', 'ערכת הלבנה ביתית', 'הלבנה בלייזר', 'תוצאות מהירות'] },
+  { icon: '🔧', title: 'שתלים דנטליים', description: 'שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים.', features: ['שתלים מתקדמים', 'תכנון מחשב', 'ריפוי מהיר', 'אחריות מלאה'] },
+  { icon: '👶', title: 'רפואת שיניים לילדים', description: 'טיפול עדין ומותאם לילדים.', features: ['סביבה ידידותית', 'טיפול עדין', 'הרדמה מותאמת', 'מניעה מוקדמת'] },
+  { icon: '😁', title: 'יישור שיניים', description: 'פתרונות אורתודנטיים מתקדמים.', features: ['קשתיות שקופות', 'גשרים קבועים', 'ריטיינרים', 'מעקב קבוע'] },
+  { icon: '🏆', title: 'אסתטיקה דנטלית', description: 'ציפויי חרסינה, עיצוב חיוך.', features: ['ציפויי חרסינה', 'עיצוב חיוך', 'סגירת רווחים', 'שיקום אסתטי'] },
 ];
 
-const Services = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        {/* Hero Section */}
-        <section className="relative pt-32 pb-24 overflow-hidden">
-          <div className="absolute inset-0">
-            <img
-              src={heroImage}
-              alt="שירותי מרפאה"
-              className="w-full h-full object-cover opacity-20"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
-          </div>
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center max-w-3xl mx-auto">
-              <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-                השירותים שלנו
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-                טיפולי שיניים מקצועיים
-              </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                אנו מציעים מגוון רחב של טיפולי שיניים מתקדמים לכל המשפחה בטכנולוגיות החדשניות ביותר
-              </p>
-            </div>
-          </div>
-        </section>
+const HeroSection = styled.section`position: relative; padding-top: 8rem; padding-bottom: 6rem; overflow: hidden;`;
+const HeroBg = styled.div`position: absolute; inset: 0;`;
+const HeroImageStyled = styled.img`width: 100%; height: 100%; object-fit: cover; opacity: 0.2;`;
+const HeroOverlay = styled.div`position: absolute; inset: 0; background: linear-gradient(to bottom, ${({ theme }) => theme.colors.background}, ${({ theme }) => theme.colors.background}e6, ${({ theme }) => theme.colors.background});`;
+const HeroContent = styled.div`position: relative; z-index: 10; text-align: center; max-width: 48rem; margin: 0 auto;`;
+const ServicesWrapper = styled.section`padding: ${({ theme }) => theme.spacing[24]} 0; background: ${({ theme }) => theme.colors.secondary}4d;`;
+const ServicesGrid = styled.div`display: grid; grid-template-columns: 1fr; gap: 2rem; @media (min-width: ${({ theme }) => theme.breakpoints.md}) { grid-template-columns: repeat(2, 1fr); }`;
+const ServiceCard = styled.div`background: ${({ theme }) => theme.colors.card}; border-radius: ${({ theme }) => theme.radii['2xl']}; padding: ${({ theme }) => theme.spacing[8]}; box-shadow: ${({ theme }) => theme.shadows.soft}; transition: all ${({ theme }) => theme.transitions.normal}; &:hover { box-shadow: ${({ theme }) => theme.shadows.elevated}; }`;
+const ServiceInner = styled.div`display: flex; align-items: flex-start; gap: 1.5rem;`;
+const ServiceIcon = styled.div`width: 4rem; height: 4rem; background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii['2xl']}; display: flex; align-items: center; justify-content: center; font-size: 1.875rem; flex-shrink: 0;`;
+const ServiceContent = styled.div`flex: 1;`;
+const ServiceTitle = styled.h3`font-size: ${({ theme }) => theme.fontSizes.xl}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.foreground}; margin-bottom: 0.75rem;`;
+const ServiceDescription = styled.p`color: ${({ theme }) => theme.colors.mutedForeground}; line-height: 1.7; margin-bottom: 1rem;`;
+const FeaturesList = styled.ul`display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;`;
+const FeatureItem = styled.li`display: flex; align-items: center; gap: 0.5rem; font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.foreground}; svg { color: ${({ theme }) => theme.colors.primary}; flex-shrink: 0; }`;
 
-        {/* Services Grid */}
-        <section className="py-24 bg-secondary/30">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {services.map((service, index) => (
-                <div
-                  key={index}
-                  className="bg-card rounded-2xl p-8 shadow-soft hover:shadow-elevated transition-all duration-300"
-                >
-                  <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center text-3xl shrink-0">
-                      {service.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-foreground mb-3">
-                        {service.title}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed mb-4">
-                        {service.description}
-                      </p>
-                      <ul className="grid grid-cols-2 gap-2">
-                        {service.features.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm text-foreground">
-                            <Check className="w-4 h-4 text-primary" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
-  );
-};
+const Services = () => (
+  <div>
+    <Header />
+    <main>
+      <HeroSection>
+        <HeroBg><HeroImageStyled src={heroImage} alt="שירותי מרפאה" /><HeroOverlay /></HeroBg>
+        <Container><HeroContent><Badge>השירותים שלנו</Badge><Title $size="xl" style={{ marginTop: '1rem' }}>טיפולי שיניים מקצועיים</Title><Text $color="muted" $size="lg">מגוון רחב של טיפולי שיניים מתקדמים</Text></HeroContent></Container>
+      </HeroSection>
+      <ServicesWrapper>
+        <Container>
+          <ServicesGrid>
+            {services.map((service, i) => (
+              <ServiceCard key={i}>
+                <ServiceInner>
+                  <ServiceIcon>{service.icon}</ServiceIcon>
+                  <ServiceContent>
+                    <ServiceTitle>{service.title}</ServiceTitle>
+                    <ServiceDescription>{service.description}</ServiceDescription>
+                    <FeaturesList>{service.features.map((f, j) => (<FeatureItem key={j}><Check size={16} />{f}</FeatureItem>))}</FeaturesList>
+                  </ServiceContent>
+                </ServiceInner>
+              </ServiceCard>
+            ))}
+          </ServicesGrid>
+        </Container>
+      </ServicesWrapper>
+      <CTASection />
+    </main>
+    <Footer />
+  </div>
+);
 
 export default Services;
