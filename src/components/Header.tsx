@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Menu, X } from 'lucide-react';
+import { Phone, Menu, X, Smile } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Flex } from '@/components/styled/Layout';
 
@@ -152,7 +152,7 @@ const Header = () => {
       <Container>
         <HeaderInner>
           <Logo to="/">
-            <LogoIcon>🦷</LogoIcon>
+            <LogoIcon><Smile size={28} color="white" /></LogoIcon>
             <LogoText>
               <LogoTitle>מרפאת שיניים</LogoTitle>
               <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>

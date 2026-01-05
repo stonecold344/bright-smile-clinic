@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ArrowLeft, Award, Clock, Users } from 'lucide-react';
+import { ArrowLeft, Award, Clock, Users, Star } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
@@ -140,7 +140,7 @@ const AboutPreview = () => {
             
             <FloatingCard>
               <FloatingCardInner>
-                <FloatingCardIcon>⭐</FloatingCardIcon>
+                <FloatingCardIcon><Star size={24} color="white" /></FloatingCardIcon>
                 <div>
                   <FloatingCardValue>4.9/5</FloatingCardValue>
                   <FloatingCardLabel>דירוג גוגל</FloatingCardLabel>

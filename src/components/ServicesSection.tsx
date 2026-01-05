@@ -1,38 +1,44 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Smile, Sparkles, Wrench, Baby, Laugh, Trophy, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Section, Badge, Card } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 
-const services = [
+interface ServiceItem {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+const services: ServiceItem[] = [
   {
-    icon: '🦷',
+    icon: Smile,
     title: 'טיפולי שיניים כלליים',
     description: 'טיפולים מונעים, סתימות, ניקוי שיניים מקצועי ובדיקות תקופתיות.',
   },
   {
-    icon: '✨',
+    icon: Sparkles,
     title: 'הלבנת שיניים',
     description: 'טיפולי הלבנה מתקדמים לחיוך לבן וזוהר יותר.',
   },
   {
-    icon: '🔧',
+    icon: Wrench,
     title: 'שתלים דנטליים',
     description: 'שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים.',
   },
   {
-    icon: '👶',
+    icon: Baby,
     title: 'רפואת שיניים לילדים',
     description: 'טיפול עדין ומותאם לילדים בסביבה ידידותית ונעימה.',
   },
   {
-    icon: '😁',
+    icon: Laugh,
     title: 'יישור שיניים',
     description: 'פתרונות אורתודנטיים מתקדמים כולל קשתיות שקופות.',
   },
   {
-    icon: '🏆',
+    icon: Trophy,
     title: 'אסתטיקה דנטלית',
     description: 'ציפויי חרסינה, עיצוב חיוך ושיפור מראה השיניים.',
   },
@@ -127,7 +133,7 @@ const ServicesSection = () => {
         <ServicesGrid>
           {services.map((service, index) => (
             <ServiceCard key={index}>
-              <ServiceIcon>{service.icon}</ServiceIcon>
+              <ServiceIcon><service.icon size={32} color="white" /></ServiceIcon>
               <ServiceTitle>{service.title}</ServiceTitle>
               <ServiceDescription>{service.description}</ServiceDescription>
             </ServiceCard>
