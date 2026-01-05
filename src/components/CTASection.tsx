@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Calendar } from 'lucide-react';
+import { Phone, Calendar, PhoneCall, Check } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 
@@ -97,8 +97,14 @@ const TrustItem = styled.div`
   color: ${({ theme }) => theme.colors.primaryForeground}cc;
 `;
 
-const CheckIcon = styled.span`
-  font-size: 1.5rem;
+const CheckIcon = styled.div`
+  width: 1.5rem;
+  height: 1.5rem;
+  background: ${({ theme }) => theme.colors.primaryForeground}33;
+  border-radius: ${({ theme }) => theme.radii.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const CTASection = () => {
@@ -109,7 +115,7 @@ const CTASection = () => {
 
       <Container>
         <Content>
-          <Badge>📞 התקשרו עכשיו</Badge>
+          <Badge><PhoneCall size={16} /> התקשרו עכשיו</Badge>
           <Title>מוכנים לחיוך חדש?</Title>
           <Description>
             צוות המומחים שלנו מחכה לכם. קבעו תור עכשיו וקבלו ייעוץ חינם לגבי הטיפול המתאים לכם.
@@ -128,15 +134,15 @@ const CTASection = () => {
 
           <TrustElements>
             <TrustItem>
-              <CheckIcon>✓</CheckIcon>
+              <CheckIcon><Check size={12} /></CheckIcon>
               <span>ייעוץ ראשוני חינם</span>
             </TrustItem>
             <TrustItem>
-              <CheckIcon>✓</CheckIcon>
+              <CheckIcon><Check size={12} /></CheckIcon>
               <span>תוכניות תשלום גמישות</span>
             </TrustItem>
             <TrustItem>
-              <CheckIcon>✓</CheckIcon>
+              <CheckIcon><Check size={12} /></CheckIcon>
               <span>אחריות מלאה</span>
             </TrustItem>
           </TrustElements>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Calendar, ChevronDown } from 'lucide-react';
+import { Phone, Calendar, ChevronDown, Sparkles, Stethoscope, Building2, Star } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
@@ -163,7 +163,7 @@ const HeroSection = () => {
         <Container>
           <HeroInner>
             <AnimatedDiv>
-              <HeroBadge>✨ מרפאת שיניים מובילה</HeroBadge>
+              <HeroBadge><Sparkles size={16} /> מרפאת שיניים מובילה</HeroBadge>
             </AnimatedDiv>
 
             <AnimatedDiv $delay="0.1s">
@@ -197,15 +197,15 @@ const HeroSection = () => {
             <AnimatedDiv $delay="0.4s">
               <TrustBadges>
                 <TrustBadge>
-                  <TrustIcon>👨‍⚕️</TrustIcon>
+                  <TrustIcon><Stethoscope size={18} color="white" /></TrustIcon>
                   <span>צוות מומחים</span>
                 </TrustBadge>
                 <TrustBadge>
-                  <TrustIcon>🏥</TrustIcon>
+                  <TrustIcon><Building2 size={18} color="white" /></TrustIcon>
                   <span>ציוד מתקדם</span>
                 </TrustBadge>
                 <TrustBadge>
-                  <TrustIcon>⭐</TrustIcon>
+                  <TrustIcon><Star size={18} color="white" /></TrustIcon>
                   <span>5 כוכבים בגוגל</span>
                 </TrustBadge>
               </TrustBadges>
