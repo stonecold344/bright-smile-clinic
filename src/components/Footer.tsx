@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from 'lucide-react';
-import { Container, Flex, Grid } from '@/components/styled/Layout';
+import { Phone, Mail, MapPin, Clock, Facebook, Instagram, Smile } from 'lucide-react';
+import { Container } from '@/components/styled/Layout';
 import { Text } from '@/components/styled/Typography';
 
 const FooterWrapper = styled.footer`
@@ -169,7 +169,7 @@ const Footer = () => {
           <FooterGrid>
             <LogoSection>
               <Logo>
-                <LogoIcon>🦷</LogoIcon>
+                <LogoIcon><Smile size={28} color="white" /></LogoIcon>
                 <div>
                   <LogoTitle>מרפאת שיניים</LogoTitle>
                   <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>

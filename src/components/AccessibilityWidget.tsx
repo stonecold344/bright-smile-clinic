@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { 
   Accessibility, 
   Eye, 
-  Type, 
   MousePointer, 
   Minus, 
   Plus, 
@@ -17,9 +16,9 @@ import {
 const WidgetButton = styled.button<{ $isOpen: boolean }>`
   position: fixed;
   bottom: 2rem;
-  left: 2rem;
-  width: 3.5rem;
-  height: 3.5rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: ${({ theme }) => theme.radii.full};
   background: ${({ theme }) => theme.gradients.hero};
   color: ${({ theme }) => theme.colors.primaryForeground};
@@ -29,6 +28,11 @@ const WidgetButton = styled.button<{ $isOpen: boolean }>`
   box-shadow: ${({ theme }) => theme.shadows.card};
   z-index: 9999;
   transition: all ${({ theme }) => theme.transitions.normal};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
   
   &:hover {
     transform: scale(1.1);
@@ -43,9 +47,11 @@ const WidgetButton = styled.button<{ $isOpen: boolean }>`
 
 const Panel = styled.div<{ $isOpen: boolean }>`
   position: fixed;
-  bottom: 6rem;
-  left: 2rem;
-  width: 320px;
+  bottom: 5.5rem;
+  right: 1rem;
+  left: 1rem;
+  max-width: 320px;
+  margin-right: auto;
   max-height: calc(100vh - 8rem);
   overflow-y: auto;
   background: ${({ theme }) => theme.colors.card};
@@ -56,9 +62,11 @@ const Panel = styled.div<{ $isOpen: boolean }>`
   opacity: ${({ $isOpen }) => $isOpen ? 1 : 0};
   visibility: ${({ $isOpen }) => $isOpen ? 'visible' : 'hidden'};
   transition: all ${({ theme }) => theme.transitions.normal};
-    left: 1rem;
-    right: 1rem;
-    width: auto;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    left: auto;
+    right: 2rem;
+    bottom: 6rem;
   }
 `;
 
@@ -246,44 +254,37 @@ const AccessibilityWidget = () => {
     return saved ? JSON.parse(saved) : defaultSettings;
   });
 
-  // Apply settings to document
   useEffect(() => {
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
     
     const root = document.documentElement;
     
-    // Font size
     root.style.fontSize = `${settings.fontSize}%`;
     
-    // High contrast
     if (settings.highContrast) {
       root.classList.add('high-contrast');
     } else {
       root.classList.remove('high-contrast');
     }
     
-    // Highlight links
     if (settings.highlightLinks) {
       root.classList.add('highlight-links');
     } else {
       root.classList.remove('highlight-links');
     }
     
-    // Big cursor
     if (settings.bigCursor) {
       root.classList.add('big-cursor');
     } else {
       root.classList.remove('big-cursor');
     }
     
-    // Pause animations
     if (settings.pauseAnimations) {
       root.classList.add('pause-animations');
     } else {
       root.classList.remove('pause-animations');
     }
     
-    // Grayscale
     if (settings.grayscale) {
       root.classList.add('grayscale');
     } else {
