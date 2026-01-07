@@ -21,11 +21,12 @@ const Header = styled.div`
 `;
 
 const BookingContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: grid;
     grid-template-columns: 1fr 1fr;
   }
 `;
@@ -33,8 +34,12 @@ const BookingContainer = styled.div`
 const CalendarSection = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
-  padding: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[4]};
   box-shadow: ${({ theme }) => theme.shadows.card};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: ${({ theme }) => theme.spacing[6]};
+  }
 `;
 
 const CalendarHeader = styled.div`
@@ -83,26 +88,52 @@ const NavButton = styled.button`
 const WeekDays = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.125rem;
+  margin-bottom: 0.25rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
 `;
 
 const WeekDay = styled.div`
   text-align: center;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.mutedForeground};
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    padding: 0.5rem 0;
+  }
 `;
 
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
+  gap: 0.125rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    gap: 0.25rem;
+  }
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
   width: 100%;
+  height: 2rem;
+  min-width: 0;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    height: 2.5rem;
+    border-radius: ${({ theme }) => theme.radii.md};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
   height: 2.5rem;
   min-width: 0;
   border-radius: ${({ theme }) => theme.radii.md};
@@ -144,8 +175,13 @@ const TimeTitle = styled.h4`
 
 const TimeSlotsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: repeat(6, 1fr);
@@ -207,8 +243,40 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 const FormSection = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
-  padding: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[4]};
   box-shadow: ${({ theme }) => theme.shadows.card};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: ${({ theme }) => theme.spacing[6]};
+  }
+`;
+
+const EmptyStateMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[8]} ${({ theme }) => theme.spacing[4]};
+  text-align: center;
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  
+  svg {
+    color: ${({ theme }) => theme.colors.primary};
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+`;
+
+const EmptyStateTitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin-bottom: 0.5rem;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: 1.6;
 `;
 
 const FormTitle = styled.h3`
@@ -579,16 +647,24 @@ const AppointmentBooking = () => {
           </CalendarSection>
 
           <FormSection>
-            <FormTitle>פרטי הלקוח</FormTitle>
-            
-            {selectedDate && selectedTime && (
-              <SelectedInfo>
-                <SelectedInfoTitle>התור שנבחר:</SelectedInfoTitle>
-                <SelectedInfoText>
-                  {format(selectedDate, 'EEEE, d בMMMM yyyy', { locale: he })} בשעה {selectedTime}
-                </SelectedInfoText>
-              </SelectedInfo>
-            )}
+            {!selectedDate || !selectedTime ? (
+              <EmptyStateMessage>
+                <Calendar size={48} />
+                <EmptyStateTitle>בחרו תאריך ושעה</EmptyStateTitle>
+                <EmptyStateText>
+                  בחרו תאריך מהלוח שמאלה ולאחר מכן בחרו שעה מתוך השעות הפנויות כדי להמשיך בקביעת התור
+                </EmptyStateText>
+              </EmptyStateMessage>
+            ) : (
+              <>
+                <FormTitle>פרטי הלקוח</FormTitle>
+                
+                <SelectedInfo>
+                  <SelectedInfoTitle>התור שנבחר:</SelectedInfoTitle>
+                  <SelectedInfoText>
+                    {format(selectedDate, 'EEEE, d בMMMM yyyy', { locale: he })} בשעה {selectedTime}
+                  </SelectedInfoText>
+                </SelectedInfo>
 
             <form onSubmit={handleSubmit}>
               <FormGroup>
@@ -658,6 +734,8 @@ const AppointmentBooking = () => {
                 )}
               </Button>
             </form>
+              </>
+            )}
           </FormSection>
         </BookingContainer>
       </Container>
