@@ -8,11 +8,13 @@ import About from "./pages/About";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import AccessibilityWidget from "./components/AccessibilityWidget";
 
 const App = () => (
   <ThemeProvider theme={theme}>
     <GlobalStyles />
     <Sonner />
+    <AccessibilityWidget />
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />

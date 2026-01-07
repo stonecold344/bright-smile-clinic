@@ -98,12 +98,15 @@ const WeekDay = styled.div`
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
+  gap: 0.25rem;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
-  aspect-ratio: 1;
-  border-radius: ${({ theme }) => theme.radii.lg};
+  width: 100%;
+  height: 2.5rem;
+  min-width: 0;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   transition: all ${({ theme }) => theme.transitions.fast};
   
