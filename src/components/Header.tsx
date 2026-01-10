@@ -142,6 +142,7 @@ const Header = () => {
     { name: 'בית', path: '/' },
     { name: 'אודות', path: '/about' },
     { name: 'שירותים', path: '/services' },
+    { name: 'קביעת תור', path: '/appointments' },
     { name: 'צור קשר', path: '/contact' },
   ];
 
