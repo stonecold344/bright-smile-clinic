@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { format, addDays, isSameDay, startOfToday, getDay } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
@@ -20,53 +20,88 @@ const Header = styled.div`
   margin: 0 auto ${({ theme }) => theme.spacing[12]};
 `;
 
-const BookingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-`;
-
-const CalendarSection = styled.div`
+const BookingCard = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
-  padding: ${({ theme }) => theme.spacing[4]};
   box-shadow: ${({ theme }) => theme.shadows.card};
+  overflow: hidden;
+`;
+
+const BookingGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    padding: ${({ theme }) => theme.spacing[6]};
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 300px 1fr 320px;
   }
 `;
 
-const CalendarHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+const BookingColumn = styled.div<{ $withBorder?: boolean }>`
+  padding: ${({ theme }) => theme.spacing[6]};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
+  }
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    border-top: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
+  }
 `;
 
-const CalendarTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.foreground};
+const ColumnHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const ColumnIcon = styled.div`
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  background: ${({ theme }) => theme.colors.primaryLight};
+  color: ${({ theme }) => theme.colors.primary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ColumnTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+`;
+
+const ColumnSubtitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin-top: 0.125rem;
 `;
 
 const CalendarNav = styled.div`
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
+const MonthLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.foreground};
+`;
+
+const NavButtons = styled.div`
+  display: flex;
+  gap: 0.25rem;
 `;
 
 const NavButton = styled.button`
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: ${({ theme }) => theme.radii.lg};
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${({ theme }) => theme.radii.md};
   background: ${({ theme }) => theme.colors.secondary};
   color: ${({ theme }) => theme.colors.foreground};
   display: flex;
@@ -74,13 +109,13 @@ const NavButton = styled.button`
   justify-content: center;
   transition: all ${({ theme }) => theme.transitions.fast};
   
-  &:hover {
+  &:hover:not(:disabled) {
     background: ${({ theme }) => theme.colors.primary};
     color: ${({ theme }) => theme.colors.primaryForeground};
   }
   
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 `;
@@ -89,12 +124,7 @@ const WeekDays = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
-  margin-bottom: 0.25rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
-  }
+  margin-bottom: 0.375rem;
 `;
 
 const WeekDay = styled.div`
@@ -103,39 +133,17 @@ const WeekDay = styled.div`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.mutedForeground};
   padding: 0.25rem 0;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    font-size: ${({ theme }) => theme.fontSizes.sm};
-    padding: 0.5rem 0;
-  }
 `;
 
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    gap: 0.25rem;
-  }
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
+  aspect-ratio: 1;
   width: 100%;
-  height: 2rem;
-  min-width: 0;
-  border-radius: ${({ theme }) => theme.radii.sm};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  transition: all ${({ theme }) => theme.transitions.fast};
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    height: 2.5rem;
-    border-radius: ${({ theme }) => theme.radii.md};
-    font-size: ${({ theme }) => theme.fontSizes.sm};
-  }
-  height: 2.5rem;
-  min-width: 0;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -144,59 +152,58 @@ const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $is
   background: ${({ $isSelected, $isToday, theme }) => 
     $isSelected ? theme.gradients.hero : 
     $isToday ? theme.colors.primaryLight : 
-    theme.colors.secondary};
+    'transparent'};
   
-  color: ${({ $isSelected, theme }) => 
-    $isSelected ? theme.colors.primaryForeground : theme.colors.foreground};
+  color: ${({ $isSelected, $isDisabled, theme }) => 
+    $isSelected ? theme.colors.primaryForeground : 
+    $isDisabled ? theme.colors.mutedForeground :
+    theme.colors.foreground};
   
-  opacity: ${({ $isDisabled }) => $isDisabled ? 0.3 : 1};
+  opacity: ${({ $isDisabled }) => $isDisabled ? 0.4 : 1};
   cursor: ${({ $isDisabled }) => $isDisabled ? 'not-allowed' : 'pointer'};
   
   &:hover:not(:disabled) {
     background: ${({ $isSelected, theme }) => 
-      $isSelected ? theme.gradients.hero : theme.colors.primary};
-    color: ${({ theme }) => theme.colors.primaryForeground};
+      $isSelected ? theme.gradients.hero : theme.colors.secondary};
   }
 `;
 
-const TimeSection = styled.div`
-  margin-top: 2rem;
-`;
-
-const TimeTitle = styled.h4`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.foreground};
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const TimeSlotsGrid = styled.div`
+const TimeSlotsContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.375rem;
+  gap: 0.5rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-left: 0.5rem;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+  &::-webkit-scrollbar {
+    width: 4px;
   }
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: repeat(6, 1fr);
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.secondary};
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.primary};
+    border-radius: 2px;
   }
 `;
 
 const TimeSlot = styled.button<{ $isSelected?: boolean; $isBooked?: boolean }>`
-  padding: 0.75rem 0.5rem;
-  border-radius: ${({ theme }) => theme.radii.lg};
+  padding: 0.625rem 0.5rem;
+  border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   transition: all ${({ theme }) => theme.transitions.fast};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   
   background: ${({ $isSelected, $isBooked, theme }) => 
-    $isBooked ? theme.colors.destructive + '20' :
+    $isBooked ? theme.colors.destructive + '15' :
     $isSelected ? theme.gradients.hero : 
     theme.colors.secondary};
   
@@ -206,6 +213,7 @@ const TimeSlot = styled.button<{ $isSelected?: boolean; $isBooked?: boolean }>`
     theme.colors.foreground};
   
   cursor: ${({ $isBooked }) => $isBooked ? 'not-allowed' : 'pointer'};
+  text-decoration: ${({ $isBooked }) => $isBooked ? 'line-through' : 'none'};
   
   &:hover:not(:disabled) {
     ${({ $isBooked, $isSelected, theme }) => !$isBooked && `
@@ -215,79 +223,63 @@ const TimeSlot = styled.button<{ $isSelected?: boolean; $isBooked?: boolean }>`
   }
 `;
 
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  padding: 1.5rem;
+`;
+
+const EmptyStateIcon = styled.div`
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: ${({ theme }) => theme.radii.xl};
+  background: ${({ theme }) => theme.colors.secondary};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: 1.5;
+`;
+
 const Legend = styled.div`
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-top: 1rem;
-  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const LegendItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
+  gap: 0.375rem;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.mutedForeground};
 `;
 
 const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: ${({ theme }) => theme.radii.full};
   background: ${({ $variant, theme }) => 
     $variant === 'available' ? theme.colors.secondary :
-    $variant === 'booked' ? theme.colors.destructive + '40' :
+    $variant === 'booked' ? theme.colors.destructive + '60' :
     theme.colors.primary};
 `;
 
-const FormSection = styled.div`
-  background: ${({ theme }) => theme.colors.card};
-  border-radius: ${({ theme }) => theme.radii['2xl']};
-  padding: ${({ theme }) => theme.spacing[4]};
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    padding: ${({ theme }) => theme.spacing[6]};
-  }
-`;
-
-const EmptyStateMessage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing[8]} ${({ theme }) => theme.spacing[4]};
-  text-align: center;
-  color: ${({ theme }) => theme.colors.mutedForeground};
-  
-  svg {
-    color: ${({ theme }) => theme.colors.primary};
-    margin-bottom: 1rem;
-    opacity: 0.7;
-  }
-`;
-
-const EmptyStateTitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.foreground};
-  margin-bottom: 0.5rem;
-`;
-
-const EmptyStateText = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  line-height: 1.6;
-`;
-
-const FormTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.foreground};
-  margin-bottom: 1.5rem;
-`;
-
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 `;
 
 const Label = styled.label`
@@ -297,15 +289,15 @@ const Label = styled.label`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.foreground};
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.875rem;
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
-  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
   transition: all ${({ theme }) => theme.transitions.fast};
@@ -313,7 +305,7 @@ const Input = styled.input`
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}33;
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
   }
   
   &::placeholder {
@@ -323,20 +315,20 @@ const Input = styled.input`
 
 const Textarea = styled.textarea`
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.875rem;
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
-  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
-  min-height: 80px;
+  min-height: 60px;
   resize: vertical;
   transition: all ${({ theme }) => theme.transitions.fast};
   
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}33;
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
   }
   
   &::placeholder {
@@ -344,24 +336,23 @@ const Textarea = styled.textarea`
   }
 `;
 
-const SelectedInfo = styled.div`
-  background: ${({ theme }) => theme.colors.primaryLight};
+const SelectedAppointment = styled.div`
+  background: ${({ theme }) => theme.gradients.hero};
   border-radius: ${({ theme }) => theme.radii.lg};
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0.875rem;
+  margin-bottom: 1.25rem;
+  color: ${({ theme }) => theme.colors.primaryForeground};
 `;
 
-const SelectedInfoTitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.primary};
+const SelectedLabel = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  opacity: 0.9;
   margin-bottom: 0.25rem;
 `;
 
-const SelectedInfoText = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
+const SelectedValue = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.foreground};
 `;
 
 // Generate time slots from 9:00 to 17:00 every 15 minutes
@@ -502,7 +493,7 @@ const AppointmentBooking = () => {
         console.log('WhatsApp notification skipped:', whatsappError);
       }
 
-      toast.success('התור נקבע בהצלחה! תקבל הודעת אישור בוואטסאפ');
+      toast.success('התור נקבע בהצלחה!');
       
       // Reset form
       setSelectedDate(null);
@@ -531,213 +522,241 @@ const AppointmentBooking = () => {
             קבעו תור עכשיו
           </Title>
           <Text $color="muted" $size="lg">
-            בחרו תאריך ושעה נוחים לכם מתוך התורים הפנויים
+            בחרו תאריך ושעה נוחים לכם
           </Text>
         </Header>
 
-        <BookingContainer>
-          <CalendarSection>
-            <CalendarHeader>
-              <CalendarTitle>
-                <Calendar size={24} />
-                {format(weekStart, 'MMMM yyyy', { locale: he })}
-              </CalendarTitle>
+        <BookingCard>
+          <BookingGrid>
+            {/* Calendar Column */}
+            <BookingColumn>
+              <ColumnHeader>
+                <ColumnIcon>
+                  <Calendar size={20} />
+                </ColumnIcon>
+                <div>
+                  <ColumnTitle>בחר תאריך</ColumnTitle>
+                  <ColumnSubtitle>א׳ - ה׳</ColumnSubtitle>
+                </div>
+              </ColumnHeader>
+              
               <CalendarNav>
-                <NavButton 
-                  onClick={() => setWeekStart(addDays(weekStart, -7))}
-                  disabled={isSameDay(weekStart, today)}
-                >
-                  <ChevronRight size={20} />
-                </NavButton>
-                <NavButton onClick={() => setWeekStart(addDays(weekStart, 7))}>
-                  <ChevronLeft size={20} />
-                </NavButton>
+                <MonthLabel>{format(weekStart, 'MMMM yyyy', { locale: he })}</MonthLabel>
+                <NavButtons>
+                  <NavButton 
+                    onClick={() => setWeekStart(addDays(weekStart, -7))}
+                    disabled={isSameDay(weekStart, today)}
+                  >
+                    <ChevronRight size={16} />
+                  </NavButton>
+                  <NavButton onClick={() => setWeekStart(addDays(weekStart, 7))}>
+                    <ChevronLeft size={16} />
+                  </NavButton>
+                </NavButtons>
               </CalendarNav>
-            </CalendarHeader>
 
-            <WeekDays>
-              {hebrewDays.map(day => (
-                <WeekDay key={day}>{day}</WeekDay>
-              ))}
-            </WeekDays>
+              <WeekDays>
+                {hebrewDays.map(day => (
+                  <WeekDay key={day}>{day}</WeekDay>
+                ))}
+              </WeekDays>
 
-            <DaysGrid>
-              {days.slice(0, 7).map((date) => {
-                const isWorking = isWorkingDay(date);
-                const isPast = date < today;
-                return (
-                  <DayButton
-                    key={date.toISOString()}
-                    $isSelected={selectedDate ? isSameDay(date, selectedDate) : false}
-                    $isToday={isSameDay(date, today)}
-                    $isDisabled={!isWorking || isPast}
-                    disabled={!isWorking || isPast}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null);
-                    }}
-                  >
-                    {format(date, 'd')}
-                  </DayButton>
-                );
-              })}
-            </DaysGrid>
+              <DaysGrid>
+                {days.slice(0, 7).map((date) => {
+                  const isWorking = isWorkingDay(date);
+                  const isPast = date < today;
+                  return (
+                    <DayButton
+                      key={date.toISOString()}
+                      $isSelected={selectedDate ? isSameDay(date, selectedDate) : false}
+                      $isToday={isSameDay(date, today)}
+                      $isDisabled={!isWorking || isPast}
+                      disabled={!isWorking || isPast}
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedTime(null);
+                      }}
+                    >
+                      {format(date, 'd')}
+                    </DayButton>
+                  );
+                })}
+              </DaysGrid>
 
-            <DaysGrid style={{ marginTop: '0.5rem' }}>
-              {days.slice(7, 14).map((date) => {
-                const isWorking = isWorkingDay(date);
-                const isPast = date < today;
-                return (
-                  <DayButton
-                    key={date.toISOString()}
-                    $isSelected={selectedDate ? isSameDay(date, selectedDate) : false}
-                    $isToday={isSameDay(date, today)}
-                    $isDisabled={!isWorking || isPast}
-                    disabled={!isWorking || isPast}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null);
-                    }}
-                  >
-                    {format(date, 'd')}
-                  </DayButton>
-                );
-              })}
-            </DaysGrid>
+              <DaysGrid style={{ marginTop: '0.125rem' }}>
+                {days.slice(7, 14).map((date) => {
+                  const isWorking = isWorkingDay(date);
+                  const isPast = date < today;
+                  return (
+                    <DayButton
+                      key={date.toISOString()}
+                      $isSelected={selectedDate ? isSameDay(date, selectedDate) : false}
+                      $isToday={isSameDay(date, today)}
+                      $isDisabled={!isWorking || isPast}
+                      disabled={!isWorking || isPast}
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedTime(null);
+                      }}
+                    >
+                      {format(date, 'd')}
+                    </DayButton>
+                  );
+                })}
+              </DaysGrid>
+            </BookingColumn>
 
-            {selectedDate && (
-              <TimeSection>
-                <TimeTitle>
+            {/* Time Slots Column */}
+            <BookingColumn $withBorder>
+              <ColumnHeader>
+                <ColumnIcon>
                   <Clock size={20} />
-                  בחר שעה - {format(selectedDate, 'EEEE, d בMMMM', { locale: he })}
-                </TimeTitle>
-                <TimeSlotsGrid>
-                  {timeSlots.map(time => {
-                    const isBooked = isTimeBooked(selectedDate, time);
-                    return (
-                      <TimeSlot
-                        key={time}
-                        $isSelected={selectedTime === time}
-                        $isBooked={isBooked}
-                        disabled={isBooked}
-                        onClick={() => !isBooked && setSelectedTime(time)}
-                      >
-                        {isBooked ? <X size={14} /> : null}
-                        {time}
-                      </TimeSlot>
-                    );
-                  })}
-                </TimeSlotsGrid>
-                <Legend>
-                  <LegendItem>
-                    <LegendDot $variant="available" />
-                    <span>פנוי</span>
-                  </LegendItem>
-                  <LegendItem>
-                    <LegendDot $variant="booked" />
-                    <span>תפוס</span>
-                  </LegendItem>
-                  <LegendItem>
-                    <LegendDot $variant="selected" />
-                    <span>נבחר</span>
-                  </LegendItem>
-                </Legend>
-              </TimeSection>
-            )}
-          </CalendarSection>
+                </ColumnIcon>
+                <div>
+                  <ColumnTitle>בחר שעה</ColumnTitle>
+                  <ColumnSubtitle>
+                    {selectedDate ? format(selectedDate, 'd בMMMM', { locale: he }) : '09:00 - 17:00'}
+                  </ColumnSubtitle>
+                </div>
+              </ColumnHeader>
 
-          <FormSection>
-            {!selectedDate || !selectedTime ? (
-              <EmptyStateMessage>
-                <Calendar size={48} />
-                <EmptyStateTitle>בחרו תאריך ושעה</EmptyStateTitle>
-                <EmptyStateText>
-                  בחרו תאריך מהלוח שמאלה ולאחר מכן בחרו שעה מתוך השעות הפנויות כדי להמשיך בקביעת התור
-                </EmptyStateText>
-              </EmptyStateMessage>
-            ) : (
-              <>
-                <FormTitle>פרטי הלקוח</FormTitle>
-                
-                <SelectedInfo>
-                  <SelectedInfoTitle>התור שנבחר:</SelectedInfoTitle>
-                  <SelectedInfoText>
-                    {format(selectedDate, 'EEEE, d בMMMM yyyy', { locale: he })} בשעה {selectedTime}
-                  </SelectedInfoText>
-                </SelectedInfo>
+              {selectedDate ? (
+                <>
+                  <TimeSlotsContainer>
+                    {timeSlots.map(time => {
+                      const isBooked = isTimeBooked(selectedDate, time);
+                      return (
+                        <TimeSlot
+                          key={time}
+                          $isSelected={selectedTime === time}
+                          $isBooked={isBooked}
+                          disabled={isBooked}
+                          onClick={() => !isBooked && setSelectedTime(time)}
+                        >
+                          {time}
+                        </TimeSlot>
+                      );
+                    })}
+                  </TimeSlotsContainer>
+                  <Legend>
+                    <LegendItem>
+                      <LegendDot $variant="available" />
+                      <span>פנוי</span>
+                    </LegendItem>
+                    <LegendItem>
+                      <LegendDot $variant="booked" />
+                      <span>תפוס</span>
+                    </LegendItem>
+                    <LegendItem>
+                      <LegendDot $variant="selected" />
+                      <span>נבחר</span>
+                    </LegendItem>
+                  </Legend>
+                </>
+              ) : (
+                <EmptyState>
+                  <EmptyStateIcon>
+                    <CalendarDays size={24} />
+                  </EmptyStateIcon>
+                  <EmptyStateText>
+                    בחרו תאריך מהלוח כדי לראות<br />את השעות הפנויות
+                  </EmptyStateText>
+                </EmptyState>
+              )}
+            </BookingColumn>
 
-            <form onSubmit={handleSubmit}>
-              <FormGroup>
-                <Label>
-                  <User size={16} />
-                  שם מלא *
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="הכנס שם מלא"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </FormGroup>
+            {/* Form Column */}
+            <BookingColumn $withBorder>
+              <ColumnHeader>
+                <ColumnIcon>
+                  <User size={20} />
+                </ColumnIcon>
+                <div>
+                  <ColumnTitle>פרטים אישיים</ColumnTitle>
+                  <ColumnSubtitle>מלאו את הפרטים</ColumnSubtitle>
+                </div>
+              </ColumnHeader>
 
-              <FormGroup>
-                <Label>
-                  <Phone size={16} />
-                  טלפון *
-                </Label>
-                <Input
-                  type="tel"
-                  placeholder="05X-XXX-XXXX"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
-                  dir="ltr"
-                />
-              </FormGroup>
+              {selectedDate && selectedTime && (
+                <SelectedAppointment>
+                  <SelectedLabel>התור שנבחר:</SelectedLabel>
+                  <SelectedValue>
+                    {format(selectedDate, 'EEEE, d בMMMM', { locale: he })} | {selectedTime}
+                  </SelectedValue>
+                </SelectedAppointment>
+              )}
 
-              <FormGroup>
-                <Label>
-                  <Mail size={16} />
-                  אימייל (אופציונלי)
-                </Label>
-                <Input
-                  type="email"
-                  placeholder="example@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  dir="ltr"
-                />
-              </FormGroup>
+              <form onSubmit={handleSubmit}>
+                <FormGroup>
+                  <Label>
+                    <User size={14} />
+                    שם מלא *
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="הכנס שם מלא"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </FormGroup>
 
-              <FormGroup>
-                <Label>הערות (אופציונלי)</Label>
-                <Textarea
-                  placeholder="הערות נוספות לתור..."
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                />
-              </FormGroup>
+                <FormGroup>
+                  <Label>
+                    <Phone size={14} />
+                    טלפון *
+                  </Label>
+                  <Input
+                    type="tel"
+                    placeholder="05X-XXX-XXXX"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    required
+                    dir="ltr"
+                  />
+                </FormGroup>
 
-              <Button 
-                type="submit" 
-                $variant="heroPrimary" 
-                $size="xl" 
-                $fullWidth
-                disabled={!selectedDate || !selectedTime || isLoading}
-              >
-                {isLoading ? 'שולח...' : (
-                  <>
-                    <Check size={20} />
-                    אישור קביעת תור
-                  </>
-                )}
-              </Button>
-            </form>
-              </>
-            )}
-          </FormSection>
-        </BookingContainer>
+                <FormGroup>
+                  <Label>
+                    <Mail size={14} />
+                    אימייל
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="example@email.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    dir="ltr"
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>הערות</Label>
+                  <Textarea
+                    placeholder="הערות נוספות..."
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  />
+                </FormGroup>
+
+                <Button 
+                  type="submit" 
+                  $variant="heroPrimary" 
+                  $size="lg" 
+                  $fullWidth
+                  disabled={!selectedDate || !selectedTime || isLoading}
+                >
+                  {isLoading ? 'שולח...' : (
+                    <>
+                      <Check size={18} />
+                      אישור קביעת תור
+                    </>
+                  )}
+                </Button>
+              </form>
+            </BookingColumn>
+          </BookingGrid>
+        </BookingCard>
       </Container>
     </SectionWrapper>
   );
