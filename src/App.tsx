@@ -6,6 +6,7 @@ import { GlobalStyles } from '@/styles/GlobalStyles';
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Services from "./pages/Services";
+import Appointments from "./pages/Appointments";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AccessibilityWidget from "./components/AccessibilityWidget";
@@ -20,6 +21,7 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/appointments" element={<Appointments />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
