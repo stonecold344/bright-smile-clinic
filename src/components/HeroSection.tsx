@@ -40,7 +40,8 @@ const HeroContent = styled.div`
 
 const HeroInner = styled.div`
   max-width: 42rem;
-  margin-right: auto;
+  margin: 0 auto;
+  text-align: center;
 `;
 
 const AnimatedDiv = styled.div<{ $delay?: string }>`
@@ -103,6 +104,7 @@ const ButtonGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  justify-content: center;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     flex-direction: row;
@@ -114,6 +116,7 @@ const TrustBadges = styled.div`
   flex-wrap: wrap;
   gap: 1.5rem;
   margin-top: 3rem;
+  justify-content: center;
 `;
 
 const TrustBadge = styled.div`
