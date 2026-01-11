@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import { Link } from 'react-router-dom';
 
 type ButtonVariant = 'default' | 'hero' | 'heroPrimary' | 'heroOutline' | 'call' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'default' | 'lg' | 'xl';
@@ -109,34 +110,7 @@ const variantStyles = {
   `,
 };
 
-export const Button = styled.button<ButtonProps>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  transition: all ${({ theme }) => theme.transitions.normal};
-  cursor: pointer;
-  border: none;
-  
-  ${({ $size = 'default' }) => sizeStyles[$size]}
-  ${({ $variant = 'default' }) => variantStyles[$variant]}
-  ${({ $fullWidth }) => $fullWidth && css`width: 100%;`}
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  
-  svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-`;
-
-export const ButtonLink = styled.a<ButtonProps>`
+const baseButtonStyles = css<ButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -156,4 +130,22 @@ export const ButtonLink = styled.a<ButtonProps>`
     width: 1.25rem;
     height: 1.25rem;
   }
+`;
+
+export const Button = styled.button<ButtonProps>`
+  ${baseButtonStyles}
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+`;
+
+export const ButtonLink = styled.a<ButtonProps>`
+  ${baseButtonStyles}
+`;
+
+export const ButtonRouterLink = styled(Link)<ButtonProps>`
+  ${baseButtonStyles}
 `;
