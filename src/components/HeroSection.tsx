@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Phone, Calendar, ChevronDown, Sparkles, Stethoscope, Building2, Star } from 'lucide-react';
-import { Button } from '@/components/styled/Button';
+import { Button, ButtonLink, ButtonRouterLink } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
 import heroImage from '@/assets/hero-dental.jpg';
@@ -186,14 +185,14 @@ const HeroSection = () => {
 
             <AnimatedDiv $delay="0.3s">
               <ButtonGroup>
-                <Button as="a" href="tel:+972-00-000-0000" $variant="hero" $size="xl">
+                <ButtonLink href="tel:+972-00-000-0000" $variant="hero" $size="xl">
                   <Phone size={20} />
                   התקשרו עכשיו
-                </Button>
-                <Button as={Link} to="/appointments" $variant="heroOutline" $size="xl">
+                </ButtonLink>
+                <ButtonRouterLink to="/appointments" $variant="heroOutline" $size="xl">
                   <Calendar size={20} />
                   קביעת תור
-                </Button>
+                </ButtonRouterLink>
               </ButtonGroup>
             </AnimatedDiv>
 
