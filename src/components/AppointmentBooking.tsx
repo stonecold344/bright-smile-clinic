@@ -389,14 +389,11 @@ const AppointmentBooking = () => {
     notes: ''
   });
 
-  // Fetch booked appointments
+  // Fetch booked appointments using security definer function (no PII exposed)
   useEffect(() => {
     const fetchAppointments = async () => {
       const { data, error } = await supabase
-        .from('appointments')
-        .select('appointment_date, appointment_time')
-        .eq('status', 'pending')
-        .gte('appointment_date', format(weekStart, 'yyyy-MM-dd'));
+        .rpc('get_booked_slots', { check_date: format(weekStart, 'yyyy-MM-dd') });
       
       if (error) {
         console.error('Error fetching appointments:', error);
@@ -408,13 +405,13 @@ const AppointmentBooking = () => {
 
     fetchAppointments();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates - will trigger refetch
     const channel = supabase
       .channel('appointments-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'appointments'
         },
