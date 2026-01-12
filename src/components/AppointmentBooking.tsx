@@ -8,7 +8,25 @@ import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
+// Validation schema for appointment form
+const appointmentSchema = z.object({
+  client_name: z.string()
+    .min(2, 'שם חייב להכיל לפחות 2 תווים')
+    .max(100, 'שם ארוך מדי')
+    .regex(/^[\p{L}\s'-]+$/u, 'שם יכול להכיל רק אותיות ורווחים'),
+  client_phone: z.string()
+    .regex(/^0[0-9]{8,9}$/, 'מספר טלפון לא תקין (לדוגמה: 0501234567)'),
+  client_email: z.string()
+    .email('כתובת אימייל לא תקינה')
+    .max(255, 'אימייל ארוך מדי')
+    .optional()
+    .or(z.literal('')),
+  notes: z.string()
+    .max(500, 'ההערות ארוכות מדי (מקסימום 500 תווים)')
+    .optional()
+});
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
   background: ${({ theme }) => theme.colors.background};
@@ -457,38 +475,53 @@ const AppointmentBooking = () => {
       return;
     }
 
-    if (!formData.name || !formData.phone) {
-      toast.error('יש למלא שם וטלפון');
+    // Validate form data with Zod schema
+    const validationResult = appointmentSchema.safeParse({
+      client_name: formData.name.trim(),
+      client_phone: formData.phone.trim(),
+      client_email: formData.email.trim() || undefined,
+      notes: formData.notes.trim() || undefined
+    });
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
+    const validatedData = validationResult.data;
     setIsLoading(true);
 
     try {
       const { error } = await supabase.from('appointments').insert({
-        client_name: formData.name,
-        client_phone: formData.phone,
-        client_email: formData.email || null,
+        client_name: validatedData.client_name,
+        client_phone: validatedData.client_phone,
+        client_email: validatedData.client_email || null,
         appointment_date: format(selectedDate, 'yyyy-MM-dd'),
         appointment_time: selectedTime + ':00',
-        notes: formData.notes || null
+        notes: validatedData.notes || null
       });
 
-      if (error) throw error;
-
-      // Send WhatsApp notification
-      try {
-        await supabase.functions.invoke('send-whatsapp', {
-          body: {
-            phone: formData.phone,
-            name: formData.name,
-            date: format(selectedDate, 'dd/MM/yyyy'),
-            time: selectedTime
-          }
-        });
-      } catch (whatsappError) {
-        console.log('WhatsApp notification skipped:', whatsappError);
+      if (error) {
+        if (error.message.includes('rate_limit')) {
+          toast.error('יותר מדי בקשות. נסה שוב מאוחר יותר');
+        } else {
+          throw error;
+        }
+        return;
       }
+
+      // Send WhatsApp notification (fire and forget, don't block on errors)
+      supabase.functions.invoke('send-whatsapp', {
+        body: {
+          phone: validatedData.client_phone,
+          name: validatedData.client_name,
+          date: format(selectedDate, 'dd/MM/yyyy'),
+          time: selectedTime
+        }
+      }).catch(() => {
+        // Silently ignore WhatsApp errors - appointment was already created
+      });
 
       toast.success('התור נקבע בהצלחה!');
       
@@ -497,7 +530,6 @@ const AppointmentBooking = () => {
       setSelectedTime(null);
       setFormData({ name: '', phone: '', email: '', notes: '' });
     } catch (error) {
-      console.error('Error booking appointment:', error);
       toast.error('אירעה שגיאה בקביעת התור');
     } finally {
       setIsLoading(false);
