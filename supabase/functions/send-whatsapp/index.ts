@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +13,29 @@ interface WhatsAppRequest {
   time: string;
 }
 
+// Input validation
+const validateInput = (data: WhatsAppRequest): string | null => {
+  if (!data.phone || typeof data.phone !== 'string') {
+    return 'Invalid phone number';
+  }
+  if (!data.name || typeof data.name !== 'string' || data.name.length > 100) {
+    return 'Invalid name';
+  }
+  if (!data.date || typeof data.date !== 'string') {
+    return 'Invalid date';
+  }
+  if (!data.time || typeof data.time !== 'string') {
+    return 'Invalid time';
+  }
+  // Validate phone format (Israeli phone numbers)
+  const phoneRegex = /^0[0-9]{8,9}$/;
+  const cleanPhone = data.phone.replace(/\D/g, '');
+  if (!phoneRegex.test(cleanPhone) && !/^972[0-9]{8,9}$/.test(cleanPhone)) {
+    return 'Invalid phone format';
+  }
+  return null;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -19,10 +43,34 @@ serve(async (req) => {
   }
 
   try {
-    const { phone, name, date, time }: WhatsAppRequest = await req.json();
+    // Verify the request has proper authorization
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
 
-    console.log(`Sending WhatsApp notification to ${phone}`);
-    console.log(`Appointment for ${name} on ${date} at ${time}`);
+    // Create Supabase client to verify the appointment exists
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const requestData: WhatsAppRequest = await req.json();
+    
+    // Validate input data
+    const validationError = validateInput(requestData);
+    if (validationError) {
+      return new Response(
+        JSON.stringify({ success: false, error: validationError }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    const { phone, name, date, time } = requestData;
 
     // Clean phone number - remove non-digits and add country code if needed
     let cleanPhone = phone.replace(/\D/g, '');
@@ -32,8 +80,11 @@ serve(async (req) => {
       cleanPhone = '972' + cleanPhone;
     }
 
+    // Sanitize name for message (remove any potential injection characters)
+    const sanitizedName = name.replace(/[<>\"\'&]/g, '').substring(0, 50);
+
     // Create WhatsApp message
-    const message = `שלום ${name}! 🦷
+    const message = `שלום ${sanitizedName}! 🦷
 
 התור שלך במרפאת השיניים אושר:
 📅 תאריך: ${date}
@@ -49,38 +100,6 @@ serve(async (req) => {
     // a provider like Twilio, MessageBird, or Meta's WhatsApp Business API
     // This is a placeholder for the actual implementation
     
-    // Option 1: Using WhatsApp Business API (requires setup)
-    // const WHATSAPP_API_KEY = Deno.env.get('WHATSAPP_API_KEY');
-    // const WHATSAPP_PHONE_ID = Deno.env.get('WHATSAPP_PHONE_ID');
-    
-    // if (WHATSAPP_API_KEY && WHATSAPP_PHONE_ID) {
-    //   const response = await fetch(
-    //     `https://graph.facebook.com/v17.0/${WHATSAPP_PHONE_ID}/messages`,
-    //     {
-    //       method: 'POST',
-    //       headers: {
-    //         'Authorization': `Bearer ${WHATSAPP_API_KEY}`,
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify({
-    //         messaging_product: 'whatsapp',
-    //         to: cleanPhone,
-    //         type: 'text',
-    //         text: { body: message }
-    //       }),
-    //     }
-    //   );
-    //   
-    //   if (!response.ok) {
-    //     throw new Error(`WhatsApp API error: ${response.status}`);
-    //   }
-    // }
-
-    // For now, log the message that would be sent
-    console.log('WhatsApp message that would be sent:');
-    console.log(`To: ${cleanPhone}`);
-    console.log(`Message: ${message}`);
-
     // Generate WhatsApp click-to-chat URL (can be used for manual follow-up)
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
@@ -98,12 +117,10 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error sending WhatsApp notification:', error);
-    
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Internal server error'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
