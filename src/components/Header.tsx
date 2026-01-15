@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Menu, X, Smile } from 'lucide-react';
+import { Phone, Menu, X, Smile, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
-import { Container, Flex } from '@/components/styled/Layout';
+import { Container } from '@/components/styled/Layout';
+import ServicesDropdown from '@/components/ServicesDropdown';
+import { useTreatments } from '@/hooks/useTreatments';
 
 const HeaderWrapper = styled.header`
   position: fixed;
@@ -134,19 +136,63 @@ const MobileNavLink = styled(Link)<{ $active?: boolean }>`
   transition: color ${({ theme }) => theme.transitions.normal};
 `;
 
+const MobileSubMenu = styled.div`
+  padding-right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const MobileSubMenuItem = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  padding: 0.5rem 0;
+  transition: color ${({ theme }) => theme.transitions.normal};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const MobileDropdownTrigger = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  padding: 0.5rem 0;
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
+  background: transparent;
+  width: 100%;
+  text-align: right;
+
+  svg {
+    transition: transform ${({ theme }) => theme.transitions.normal};
+  }
+
+  &[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+`;
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const location = useLocation();
+  const { data: treatments = [] } = useTreatments();
 
   const navLinks = [
     { name: 'בית', path: '/' },
     { name: 'אודות', path: '/about' },
-    { name: 'שירותים', path: '/services' },
     { name: 'קביעת תור', path: '/appointments' },
     { name: 'צור קשר', path: '/contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const isServicesActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
 
   return (
     <HeaderWrapper>
@@ -161,11 +207,11 @@ const Header = () => {
           </Logo>
 
           <Nav>
-            {navLinks.map((link) => (
-              <NavLink key={link.path} to={link.path} $active={isActive(link.path)}>
-                {link.name}
-              </NavLink>
-            ))}
+            <NavLink to="/" $active={isActive('/')}>בית</NavLink>
+            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
+            <ServicesDropdown />
+            <NavLink to="/appointments" $active={isActive('/appointments')}>קביעת תור</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
@@ -185,16 +231,49 @@ const Header = () => {
         <MobileNav>
           <Container>
             <MobileNavInner>
-              {navLinks.map((link) => (
-                <MobileNavLink
-                  key={link.path}
-                  to={link.path}
-                  $active={isActive(link.path)}
-                  onClick={() => setIsMenuOpen(false)}
+              <MobileNavLink to="/" $active={isActive('/')} onClick={() => setIsMenuOpen(false)}>
+                בית
+              </MobileNavLink>
+              <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
+                אודות
+              </MobileNavLink>
+              
+              {/* Services dropdown for mobile */}
+              <div>
+                <MobileDropdownTrigger 
+                  $active={isServicesActive}
+                  onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
+                  aria-expanded={isMobileServicesOpen}
                 >
-                  {link.name}
-                </MobileNavLink>
-              ))}
+                  שירותים
+                  <ChevronDown size={18} />
+                </MobileDropdownTrigger>
+                {isMobileServicesOpen && (
+                  <MobileSubMenu>
+                    {treatments.map((treatment) => (
+                      <MobileSubMenuItem
+                        key={treatment.id}
+                        to={`/treatment/${treatment.slug}`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span>{treatment.icon}</span>
+                        {treatment.title}
+                      </MobileSubMenuItem>
+                    ))}
+                    <MobileSubMenuItem to="/services" onClick={() => setIsMenuOpen(false)}>
+                      לכל השירותים ←
+                    </MobileSubMenuItem>
+                  </MobileSubMenu>
+                )}
+              </div>
+              
+              <MobileNavLink to="/appointments" $active={isActive('/appointments')} onClick={() => setIsMenuOpen(false)}>
+                קביעת תור
+              </MobileNavLink>
+              <MobileNavLink to="/contact" $active={isActive('/contact')} onClick={() => setIsMenuOpen(false)}>
+                צור קשר
+              </MobileNavLink>
+              
               <Button as="a" href="tel:+972-00-000-0000" $variant="call" $size="lg" $fullWidth style={{ marginTop: '1rem' }}>
                 <Phone size={20} />
                 קביעת תור
