@@ -1,0 +1,161 @@
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+import { ChevronDown } from 'lucide-react';
+import { useTreatments } from '@/hooks/useTreatments';
+
+const DropdownContainer = styled.div`
+  position: relative;
+`;
+
+const DropdownTrigger = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
+  transition: color ${({ theme }) => theme.transitions.normal};
+  padding-bottom: 0.25rem;
+  border-bottom: ${({ $active, theme }) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  svg {
+    transition: transform ${({ theme }) => theme.transitions.normal};
+  }
+
+  &[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+`;
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  background: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  box-shadow: ${({ theme }) => theme.shadows.elevated};
+  padding: 0.5rem;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+
+  @keyframes fadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateX(-50%) translateY(-8px);
+    }
+    to { 
+      opacity: 1; 
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+`;
+
+const MenuItem = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  color: ${({ theme }) => theme.colors.foreground};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  transition: background ${({ theme }) => theme.transitions.normal};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.secondary}80;
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const MenuIcon = styled.span`
+  font-size: 1.25rem;
+`;
+
+const AllServicesLink = styled(Link)`
+  display: block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.primary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  transition: opacity ${({ theme }) => theme.transitions.normal};
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+interface ServicesDropdownProps {
+  onNavigate?: () => void;
+}
+
+const ServicesDropdown = ({ onNavigate }: ServicesDropdownProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const { data: treatments = [] } = useTreatments();
+
+  const isActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleItemClick = () => {
+    setIsOpen(false);
+    onNavigate?.();
+  };
+
+  return (
+    <DropdownContainer ref={containerRef}>
+      <DropdownTrigger
+        $active={isActive}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+      >
+        שירותים
+        <ChevronDown size={16} />
+      </DropdownTrigger>
+
+      {isOpen && (
+        <DropdownMenu role="menu">
+          {treatments.map((treatment) => (
+            <MenuItem
+              key={treatment.id}
+              to={`/treatment/${treatment.slug}`}
+              onClick={handleItemClick}
+              role="menuitem"
+            >
+              <MenuIcon>{treatment.icon}</MenuIcon>
+              {treatment.title}
+            </MenuItem>
+          ))}
+          <AllServicesLink to="/services" onClick={handleItemClick}>
+            לכל השירותים ←
+          </AllServicesLink>
+        </DropdownMenu>
+      )}
+    </DropdownContainer>
+  );
+};
+
+export default ServicesDropdown;

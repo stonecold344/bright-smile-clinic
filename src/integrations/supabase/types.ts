@@ -53,6 +53,54 @@ export type Database = {
         }
         Relationships: []
       }
+      treatments: {
+        Row: {
+          benefits: string[] | null
+          created_at: string
+          duration: string | null
+          features: string[]
+          full_description: string | null
+          icon: string
+          id: string
+          price_range: string | null
+          process_steps: string[] | null
+          short_description: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string
+          duration?: string | null
+          features?: string[]
+          full_description?: string | null
+          icon: string
+          id?: string
+          price_range?: string | null
+          process_steps?: string[] | null
+          short_description: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string
+          duration?: string | null
+          features?: string[]
+          full_description?: string | null
+          icon?: string
+          id?: string
+          price_range?: string | null
+          process_steps?: string[] | null
+          short_description?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
