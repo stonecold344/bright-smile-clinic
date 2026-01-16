@@ -32,9 +32,16 @@ const ContactItemValue = styled.p`color: ${({ theme }) => theme.colors.mutedFore
 const QuickCallCTA = styled.div`background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii['2xl']}; padding: 2rem; text-align: center;`;
 const QuickCallTitle = styled.h3`font-size: ${({ theme }) => theme.fontSizes['2xl']}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.primaryForeground}; margin-bottom: 1rem;`;
 const QuickCallText = styled.p`color: ${({ theme }) => theme.colors.primaryForeground}e6; margin-bottom: 1.5rem;`;
-const MapSection = styled.section`height: 24rem; background: ${({ theme }) => theme.colors.muted}; display: flex; align-items: center; justify-content: center;`;
-const MapPlaceholder = styled.div`text-align: center;`;
-const MapIcon = styled.div`color: ${({ theme }) => theme.colors.mutedForeground}; margin: 0 auto 1rem;`;
+const MapSection = styled.section`
+  height: 24rem;
+  background: ${({ theme }) => theme.colors.muted};
+  
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+`;
 
 const Contact = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
@@ -74,7 +81,15 @@ const Contact = () => {
             </ContactGrid>
           </Container>
         </ContactSection>
-        <MapSection><MapPlaceholder><MapIcon><MapPin size={64} /></MapIcon><Text $color="muted" $size="lg">רחוב הרצל 123, תל אביב</Text></MapPlaceholder></MapSection>
+        <MapSection>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3380.7891849856787!2d34.77086681517441!3d32.0853999810127!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151d4b7cfe79f833%3A0x9c42e6b30eab68c5!2sHerzl%20St%2C%20Tel%20Aviv-Yafo!5e0!3m2!1sen!2sil!4v1647872000000!5m2!1sen!2sil"
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="מיקום המרפאה"
+          />
+        </MapSection>
       </main>
       <Footer />
     </div>

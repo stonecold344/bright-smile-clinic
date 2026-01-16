@@ -12,6 +12,7 @@ import Appointments from "./pages/Appointments";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AccessibilityWidget from "./components/AccessibilityWidget";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <Sonner />
       <AccessibilityWidget />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />

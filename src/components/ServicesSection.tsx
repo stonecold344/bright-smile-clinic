@@ -1,48 +1,24 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ArrowLeft, Smile, Sparkles, Wrench, Baby, Laugh, Trophy, LucideIcon } from 'lucide-react';
+import { ArrowLeft, Stethoscope, Sparkles, CircleDot, Baby, AlignCenter, Smile, LucideIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
-import { Container, Section, Badge, Card } from '@/components/styled/Layout';
+import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
+import { useTreatments } from '@/hooks/useTreatments';
 
-interface ServiceItem {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-}
+const iconMap: Record<string, LucideIcon> = {
+  'general-dentistry': Stethoscope,
+  'teeth-whitening': Sparkles,
+  'dental-implants': CircleDot,
+  'pediatric-dentistry': Baby,
+  'orthodontics': AlignCenter,
+  'cosmetic-dentistry': Smile,
+};
 
-const services: ServiceItem[] = [
-  {
-    icon: Smile,
-    title: 'טיפולי שיניים כלליים',
-    description: 'טיפולים מונעים, סתימות, ניקוי שיניים מקצועי ובדיקות תקופתיות.',
-  },
-  {
-    icon: Sparkles,
-    title: 'הלבנת שיניים',
-    description: 'טיפולי הלבנה מתקדמים לחיוך לבן וזוהר יותר.',
-  },
-  {
-    icon: Wrench,
-    title: 'שתלים דנטליים',
-    description: 'שתלי שיניים איכותיים עם אחוזי הצלחה גבוהים.',
-  },
-  {
-    icon: Baby,
-    title: 'רפואת שיניים לילדים',
-    description: 'טיפול עדין ומותאם לילדים בסביבה ידידותית ונעימה.',
-  },
-  {
-    icon: Laugh,
-    title: 'יישור שיניים',
-    description: 'פתרונות אורתודנטיים מתקדמים כולל קשתיות שקופות.',
-  },
-  {
-    icon: Trophy,
-    title: 'אסתטיקה דנטלית',
-    description: 'ציפויי חרסינה, עיצוב חיוך ושיפור מראה השיניים.',
-  },
-];
+const getIcon = (slug: string) => {
+  const IconComponent = iconMap[slug] || Stethoscope;
+  return <IconComponent size={32} color="white" />;
+};
 
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
@@ -69,12 +45,14 @@ const ServicesGrid = styled.div`
   }
 `;
 
-const ServiceCard = styled.div`
+const ServiceCard = styled(Link)`
+  display: block;
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   padding: ${({ theme }) => theme.spacing[8]};
   box-shadow: ${({ theme }) => theme.shadows.soft};
   transition: all ${({ theme }) => theme.transitions.normal};
+  cursor: pointer;
   
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.elevated};
@@ -116,7 +94,16 @@ const CTAWrapper = styled.div`
   margin-top: 3rem;
 `;
 
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+`;
+
 const ServicesSection = () => {
+  const { data: treatments = [], isLoading } = useTreatments();
+
   return (
     <SectionWrapper>
       <Container>
@@ -130,15 +117,21 @@ const ServicesSection = () => {
           </Text>
         </Header>
 
-        <ServicesGrid>
-          {services.map((service, index) => (
-            <ServiceCard key={index}>
-              <ServiceIcon><service.icon size={32} color="white" /></ServiceIcon>
-              <ServiceTitle>{service.title}</ServiceTitle>
-              <ServiceDescription>{service.description}</ServiceDescription>
-            </ServiceCard>
-          ))}
-        </ServicesGrid>
+        {isLoading ? (
+          <LoadingWrapper>
+            <Loader2 size={48} className="animate-spin" style={{ color: 'hsl(var(--primary))' }} />
+          </LoadingWrapper>
+        ) : (
+          <ServicesGrid>
+            {treatments.map((treatment) => (
+              <ServiceCard key={treatment.id} to={`/treatment/${treatment.slug}`}>
+                <ServiceIcon>{getIcon(treatment.slug)}</ServiceIcon>
+                <ServiceTitle>{treatment.title}</ServiceTitle>
+                <ServiceDescription>{treatment.short_description}</ServiceDescription>
+              </ServiceCard>
+            ))}
+          </ServicesGrid>
+        )}
 
         <CTAWrapper>
           <Button as={Link} to="/services" $variant="heroPrimary" $size="lg">
