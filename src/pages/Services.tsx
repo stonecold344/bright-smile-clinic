@@ -5,10 +5,23 @@ import Footer from '@/components/Footer';
 import CTASection from '@/components/CTASection';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Stethoscope, Sparkles, CircleDot, Baby, AlignCenter, Smile, LucideIcon } from 'lucide-react';
 import { useTreatments } from '@/hooks/useTreatments';
 import heroImage from '@/assets/hero-dental.jpg';
 
+const iconMap: Record<string, LucideIcon> = {
+  'general-dentistry': Stethoscope,
+  'teeth-whitening': Sparkles,
+  'dental-implants': CircleDot,
+  'pediatric-dentistry': Baby,
+  'orthodontics': AlignCenter,
+  'cosmetic-dentistry': Smile,
+};
+
+const getIcon = (slug: string) => {
+  const IconComponent = iconMap[slug] || Stethoscope;
+  return <IconComponent size={28} color="white" />;
+};
 const HeroSection = styled.section`position: relative; padding-top: 8rem; padding-bottom: 6rem; overflow: hidden;`;
 const HeroBg = styled.div`position: absolute; inset: 0;`;
 const HeroImageStyled = styled.img`width: 100%; height: 100%; object-fit: cover; opacity: 0.2;`;
@@ -48,7 +61,7 @@ const Services = () => {
                 {treatments.map((treatment) => (
                   <ServiceCard key={treatment.id} to={`/treatment/${treatment.slug}`}>
                     <ServiceInner>
-                      <ServiceIcon>{treatment.icon}</ServiceIcon>
+                      <ServiceIcon>{getIcon(treatment.slug)}</ServiceIcon>
                       <ServiceContent>
                         <ServiceTitle>{treatment.title}</ServiceTitle>
                         <ServiceDescription>{treatment.short_description}</ServiceDescription>

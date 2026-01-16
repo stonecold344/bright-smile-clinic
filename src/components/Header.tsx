@@ -208,9 +208,9 @@ const Header = () => {
 
           <Nav>
             <NavLink to="/" $active={isActive('/')}>בית</NavLink>
-            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
             <ServicesDropdown />
             <NavLink to="/appointments" $active={isActive('/appointments')}>קביעת תור</NavLink>
+            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
             <NavLink to="/contact" $active={isActive('/contact')}>צור קשר</NavLink>
           </Nav>
 
@@ -234,9 +234,6 @@ const Header = () => {
               <MobileNavLink to="/" $active={isActive('/')} onClick={() => setIsMenuOpen(false)}>
                 בית
               </MobileNavLink>
-              <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
-                אודות
-              </MobileNavLink>
               
               {/* Services dropdown for mobile */}
               <div>
@@ -256,7 +253,6 @@ const Header = () => {
                         to={`/treatment/${treatment.slug}`}
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <span>{treatment.icon}</span>
                         {treatment.title}
                       </MobileSubMenuItem>
                     ))}
@@ -269,6 +265,9 @@ const Header = () => {
               
               <MobileNavLink to="/appointments" $active={isActive('/appointments')} onClick={() => setIsMenuOpen(false)}>
                 קביעת תור
+              </MobileNavLink>
+              <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
+                אודות
               </MobileNavLink>
               <MobileNavLink to="/contact" $active={isActive('/contact')} onClick={() => setIsMenuOpen(false)}>
                 צור קשר
