@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          content: string
+          created_at: string
+          id: string
+          is_visible: boolean
+          name: string
+          rating: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name: string
+          rating: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name?: string
+          rating?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       treatments: {
         Row: {
           benefits: string[] | null
