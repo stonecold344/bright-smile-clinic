@@ -10,6 +10,12 @@ import Services from "./pages/Services";
 import TreatmentPage from "./pages/TreatmentPage";
 import Appointments from "./pages/Appointments";
 import Contact from "./pages/Contact";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/admin/Dashboard";
+import AdminOverview from "./pages/admin/Overview";
+import AdminAppointments from "./pages/admin/Appointments";
+import AdminTreatments from "./pages/admin/Treatments";
+import AdminTestimonials from "./pages/admin/Testimonials";
 import NotFound from "./pages/NotFound";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import ScrollToTop from "./components/ScrollToTop";
@@ -31,6 +37,13 @@ const App = () => (
           <Route path="/treatment/:slug" element={<TreatmentPage />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<Dashboard />}>
+            <Route index element={<AdminOverview />} />
+            <Route path="appointments" element={<AdminAppointments />} />
+            <Route path="treatments" element={<AdminTreatments />} />
+            <Route path="testimonials" element={<AdminTestimonials />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
