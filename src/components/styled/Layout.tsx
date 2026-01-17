@@ -86,10 +86,10 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
     bottom: 0.35rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 40px;
+    width: 70px;
     height: 2px;
     border-radius: 1px;
-    background: ${({ theme }) => theme.colors.primary};
+    background: linear-gradient(90deg, transparent, ${({ theme }) => theme.colors.primary}, transparent);
   }
   
   ${({ $variant, theme }) => {
