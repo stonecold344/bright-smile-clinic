@@ -652,29 +652,32 @@ const AppointmentBooking = () => {
               {selectedDate ? (
                 <>
                   <TimeSlotsContainer>
-                    {timeSlots.map(time => {
-                      const isBooked = isTimeBooked(selectedDate, time);
-                      return (
+                    {timeSlots
+                      .filter(time => !isTimeBooked(selectedDate, time))
+                      .map(time => (
                         <TimeSlot
                           key={time}
                           $isSelected={selectedTime === time}
-                          $isBooked={isBooked}
-                          disabled={isBooked}
-                          onClick={() => !isBooked && setSelectedTime(time)}
+                          onClick={() => setSelectedTime(time)}
                         >
                           {time}
                         </TimeSlot>
-                      );
-                    })}
+                      ))}
+                    {timeSlots.filter(time => !isTimeBooked(selectedDate, time)).length === 0 && (
+                      <EmptyState style={{ gridColumn: '1 / -1' }}>
+                        <EmptyStateIcon>
+                          <X size={24} />
+                        </EmptyStateIcon>
+                        <EmptyStateText>
+                          אין שעות פנויות ביום זה<br />נסו לבחור תאריך אחר
+                        </EmptyStateText>
+                      </EmptyState>
+                    )}
                   </TimeSlotsContainer>
                   <Legend>
                     <LegendItem>
                       <LegendDot $variant="available" />
                       <span>פנוי</span>
-                    </LegendItem>
-                    <LegendItem>
-                      <LegendDot $variant="booked" />
-                      <span>תפוס</span>
                     </LegendItem>
                     <LegendItem>
                       <LegendDot $variant="selected" />
