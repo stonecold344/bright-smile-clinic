@@ -97,9 +97,11 @@ const HeroTitle = styled.h1`
 `;
 const HeroDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
   line-height: 1.7;
   margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: ${({ theme }) => theme.fontSizes.xl};
