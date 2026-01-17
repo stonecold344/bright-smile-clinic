@@ -35,7 +35,7 @@ const HeroContent = styled.div`
   width: 100%;
 `;
 const HeroInner = styled.div`
-  max-width: 42rem;
+  max-width: 56rem;
   margin: 0 auto;
   text-align: center;
 `;
@@ -81,28 +81,28 @@ const HeroBadge = styled.span`
   margin-bottom: 1.5rem;
 `;
 const HeroTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.primaryForeground};
   line-height: 1.2;
-  margin-bottom: 1rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  }
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  }
-`;
-const HeroDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  color: ${({ theme }) => theme.colors.primaryForeground}e6;
-  line-height: 1.6;
   margin-bottom: 1.5rem;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes.lg};
+    font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  }
+`;
+const HeroDescription = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes.xl};
   }
 `;
 const ButtonGroup = styled.div`
@@ -120,31 +120,26 @@ const ButtonGroup = styled.div`
 const TrustBadges = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
   justify-content: center;
 `;
 const TrustBadge = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground}cc;
+  gap: 0.75rem;
+  color: ${({ theme }) => theme.colors.primaryForeground}cc;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
 `;
 const TrustIcon = styled.div`
-  width: 2.5rem;
-  height: 2.5rem;
-  background: ${({
-  theme
-}) => theme.colors.primary}4d;
-  border-radius: ${({
-  theme
-}) => theme.radii.full};
+  width: 3rem;
+  height: 3rem;
+  background: ${({ theme }) => theme.colors.primary}4d;
+  border-radius: ${({ theme }) => theme.radii.full};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
 `;
 const ScrollIndicator = styled.div`
   position: absolute;
