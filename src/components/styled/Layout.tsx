@@ -72,10 +72,12 @@ export const Card = styled.div<{ $hover?: boolean }>`
 
 export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
   display: inline-block;
-  padding: 0.5rem 1rem;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  padding: 0.625rem 1.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  letter-spacing: 0.025em;
   border-radius: ${({ theme }) => theme.radii.full};
+  text-transform: uppercase;
   
   ${({ $variant, theme }) => {
     switch ($variant) {
@@ -83,11 +85,14 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
         return `
           background: ${theme.colors.primaryForeground}33;
           color: ${theme.colors.primaryForeground};
+          border: 1px solid ${theme.colors.primaryForeground}44;
         `;
       default:
         return `
-          background: ${theme.colors.primary}1a;
+          background: linear-gradient(135deg, ${theme.colors.primary}22, ${theme.colors.secondary}33);
           color: ${theme.colors.primary};
+          border: 1px solid ${theme.colors.primary}33;
+          box-shadow: 0 2px 8px ${theme.colors.primary}15;
         `;
     }
   }}
