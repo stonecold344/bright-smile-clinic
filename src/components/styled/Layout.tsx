@@ -86,7 +86,7 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
     bottom: 0.35rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 70px;
+    width: 100px;
     height: 2px;
     border-radius: 1px;
     background: linear-gradient(90deg, transparent, ${({ theme }) => theme.colors.primary}, transparent);
