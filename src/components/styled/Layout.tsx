@@ -86,9 +86,10 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
     bottom: 0.35rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
+    width: 40px;
     height: 2px;
     border-radius: 1px;
+    background: ${({ theme }) => theme.colors.primary};
   }
   
   ${({ $variant, theme }) => {
@@ -109,10 +110,6 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
           color: ${theme.colors.primary};
           border: 1px solid ${theme.colors.primary}33;
           box-shadow: 0 2px 8px ${theme.colors.primary}15;
-          
-          &::after {
-            background: linear-gradient(90deg, transparent, ${theme.colors.primary}, transparent);
-          }
         `;
     }
   }}
