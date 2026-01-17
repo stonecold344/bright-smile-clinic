@@ -131,6 +131,7 @@ const AboutPreview = () => {
   return (
     <SectionWrapper>
       <Container>
+        <Badge style={{ display: 'block', textAlign: 'center', marginBottom: '2rem' }}>אודותינו</Badge>
         <Grid>
           <ImageWrapper>
             <ImageContainer>
@@ -150,8 +151,7 @@ const AboutPreview = () => {
           </ImageWrapper>
 
           <ContentWrapper>
-            <Badge>אודותינו</Badge>
-            <Title $size="lg" style={{ marginTop: '1rem' }}>
+            <Title $size="lg" style={{ marginTop: '0' }}>
               מרפאת שיניים מובילה
               <br />
               <span style={{ color: 'hsl(174, 62%, 45%)' }}>עם צוות מומחים</span>
