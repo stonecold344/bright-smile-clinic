@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Phone, Calendar, ChevronDown, Sparkles, Stethoscope, Building2, Star } from 'lucide-react';
+import { Phone, Calendar, Sparkles, Stethoscope, Building2, Star } from 'lucide-react';
 import { Button, ButtonLink, ButtonRouterLink } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
@@ -81,30 +81,54 @@ const HeroBadge = styled.span`
   margin-bottom: 1.5rem;
 `;
 const HeroTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-size: ${({
+  theme
+}) => theme.fontSizes['4xl']};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.bold};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground};
   line-height: 1.2;
   margin-bottom: 1.5rem;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes['5xl']};
   }
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
-    font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.lg}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes['6xl']};
   }
 `;
 const HeroDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primaryForeground};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  font-size: ${({
+  theme
+}) => theme.fontSizes.lg};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.medium};
   line-height: 1.7;
   margin-bottom: 2rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes.xl};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes.xl};
   }
 `;
 const ButtonGroup = styled.div`
@@ -130,14 +154,22 @@ const TrustBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: ${({ theme }) => theme.colors.primaryForeground}cc;
-  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground}cc;
+  font-size: ${({
+  theme
+}) => theme.fontSizes.lg};
 `;
 const TrustIcon = styled.div`
   width: 3rem;
   height: 3rem;
-  background: ${({ theme }) => theme.colors.primary}4d;
-  border-radius: ${({ theme }) => theme.radii.full};
+  background: ${({
+  theme
+}) => theme.colors.primary}4d;
+  border-radius: ${({
+  theme
+}) => theme.radii.full};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,14 +262,14 @@ const HeroSection = () => {
         </Container>
       </HeroContent>
 
-      <ScrollIndicator
-        onClick={() => {
-          const heroHeight = document.querySelector('section')?.offsetHeight || window.innerHeight * 0.7;
-          window.scrollTo({ top: heroHeight, behavior: 'smooth' });
-        }}
-        aria-label="גלול למטה"
-      >
-        <ChevronDown size={32} color="rgba(255,255,255,0.6)" />
+      <ScrollIndicator onClick={() => {
+      const heroHeight = document.querySelector('section')?.offsetHeight || window.innerHeight * 0.7;
+      window.scrollTo({
+        top: heroHeight,
+        behavior: 'smooth'
+      });
+    }} aria-label="גלול למטה">
+        
       </ScrollIndicator>
     </HeroWrapper>;
 };
