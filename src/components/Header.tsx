@@ -22,7 +22,7 @@ const HeaderInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 5rem;
+  height: 5.5rem;
 `;
 
 const Logo = styled(Link)`
@@ -32,14 +32,14 @@ const Logo = styled(Link)`
 `;
 
 const LogoIcon = styled.div`
-  width: 3rem;
-  height: 3rem;
+  width: 3.5rem;
+  height: 3.5rem;
   background: ${({ theme }) => theme.gradients.hero};
   border-radius: ${({ theme }) => theme.radii.xl};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
 `;
 
 const LogoText = styled.div`
@@ -51,14 +51,14 @@ const LogoText = styled.div`
 `;
 
 const LogoTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.foreground};
   margin: 0;
 `;
 
 const LogoSubtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.mutedForeground};
   margin: 0;
 `;
@@ -199,7 +199,7 @@ const Header = () => {
       <Container>
         <HeaderInner>
           <Logo to="/">
-            <LogoIcon><Smile size={28} color="white" /></LogoIcon>
+            <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
               <LogoTitle>מרפאת שיניים</LogoTitle>
               <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>

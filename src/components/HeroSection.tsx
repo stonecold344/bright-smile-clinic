@@ -6,7 +6,7 @@ import { Title, Text, GradientText } from '@/components/styled/Typography';
 import heroImage from '@/assets/hero-dental.jpg';
 const HeroWrapper = styled.section`
   position: relative;
-  min-height: 100vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,7 +30,8 @@ const HeroOverlay = styled.div`
 `;
 const HeroContent = styled.div`
   position: relative;
-  padding-top: 5rem;
+  padding-top: 6rem;
+  padding-bottom: 2rem;
   width: 100%;
 `;
 const HeroInner = styled.div`
@@ -80,50 +81,28 @@ const HeroBadge = styled.span`
   margin-bottom: 1.5rem;
 `;
 const HeroTitle = styled.h1`
-  font-size: ${({
-  theme
-}) => theme.fontSizes['4xl']};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground};
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primaryForeground};
   line-height: 1.2;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes['5xl']};
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['4xl']};
   }
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.lg}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes['6xl']};
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes['5xl']};
   }
 `;
 const HeroDescription = styled.p`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground}e6;
-  line-height: 1.7;
-  margin-bottom: 2rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes.xl};
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes.lg};
   }
 `;
 const ButtonGroup = styled.div`
@@ -141,8 +120,8 @@ const ButtonGroup = styled.div`
 const TrustBadges = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-top: 3rem;
+  gap: 1rem;
+  margin-top: 2rem;
   justify-content: center;
 `;
 const TrustBadge = styled.div`
