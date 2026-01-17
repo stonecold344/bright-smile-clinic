@@ -258,13 +258,48 @@ const AccessibilityWidget = () => {
   // Detect if button is over a dark background
   useEffect(() => {
     const checkBackground = () => {
-      const buttonBottom = window.innerHeight - 32; // 2rem from bottom
-      const buttonRight = window.innerWidth - 32; // 2rem from right
-      const element = document.elementFromPoint(buttonRight - 28, buttonBottom - 28);
+      // Get the button position
+      const buttonBottom = window.innerHeight - 48; // approximate center of button
+      const buttonRight = window.innerWidth - 48;
+      
+      // Temporarily hide the widget to check element behind it
+      const widgetButtons = document.querySelectorAll('[aria-label="פתח תפריט נגישות"]');
+      widgetButtons.forEach(btn => {
+        (btn as HTMLElement).style.visibility = 'hidden';
+      });
+      
+      const element = document.elementFromPoint(buttonRight, buttonBottom);
+      
+      // Restore visibility
+      widgetButtons.forEach(btn => {
+        (btn as HTMLElement).style.visibility = 'visible';
+      });
       
       if (element) {
-        const computedStyle = window.getComputedStyle(element);
-        const bgColor = computedStyle.backgroundColor;
+        // Walk up the DOM tree to find a background color
+        let currentElement: Element | null = element;
+        let bgColor = 'rgba(0, 0, 0, 0)';
+        
+        while (currentElement && currentElement !== document.body) {
+          const computedStyle = window.getComputedStyle(currentElement);
+          const bg = computedStyle.backgroundColor;
+          
+          // Check if background is not transparent
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            bgColor = bg;
+            break;
+          }
+          
+          // Also check for background-image (gradients, images)
+          const bgImage = computedStyle.backgroundImage;
+          if (bgImage && bgImage !== 'none') {
+            // If there's a background image or gradient, assume dark
+            setIsOnDarkBackground(true);
+            return;
+          }
+          
+          currentElement = currentElement.parentElement;
+        }
         
         // Parse RGB values
         const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -273,15 +308,21 @@ const AccessibilityWidget = () => {
           // Calculate luminance - lower values = darker background
           const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
           setIsOnDarkBackground(luminance < 0.5);
+        } else {
+          // Default to light background if can't detect
+          setIsOnDarkBackground(false);
         }
       }
     };
 
-    checkBackground();
+    // Initial check with a small delay to ensure DOM is ready
+    const initialTimeout = setTimeout(checkBackground, 100);
+    
     window.addEventListener('scroll', checkBackground);
     window.addEventListener('resize', checkBackground);
     
     return () => {
+      clearTimeout(initialTimeout);
       window.removeEventListener('scroll', checkBackground);
       window.removeEventListener('resize', checkBackground);
     };

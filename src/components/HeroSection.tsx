@@ -143,12 +143,21 @@ const TrustIcon = styled.div`
   justify-content: center;
   font-size: 1.25rem;
 `;
-const ScrollIndicator = styled.div`
+const ScrollIndicator = styled.button`
   position: absolute;
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   animation: bounce 2s infinite;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: opacity 0.3s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
   
   @keyframes bounce {
     0%, 100% {
@@ -221,7 +230,13 @@ const HeroSection = () => {
         </Container>
       </HeroContent>
 
-      <ScrollIndicator>
+      <ScrollIndicator
+        onClick={() => {
+          const heroHeight = document.querySelector('section')?.offsetHeight || window.innerHeight * 0.7;
+          window.scrollTo({ top: heroHeight, behavior: 'smooth' });
+        }}
+        aria-label="גלול למטה"
+      >
         <ChevronDown size={32} color="rgba(255,255,255,0.6)" />
       </ScrollIndicator>
     </HeroWrapper>;
