@@ -4,7 +4,6 @@ import { Button, ButtonLink, ButtonRouterLink } from '@/components/styled/Button
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
 import heroImage from '@/assets/hero-dental.jpg';
-
 const HeroWrapper = styled.section`
   position: relative;
   min-height: 100vh;
@@ -13,39 +12,39 @@ const HeroWrapper = styled.section`
   justify-content: center;
   overflow: hidden;
 `;
-
 const HeroBackground = styled.div`
   position: absolute;
   inset: 0;
 `;
-
 const HeroImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
-
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: ${({ theme }) => theme.gradients.heroOverlay};
+  background: ${({
+  theme
+}) => theme.gradients.heroOverlay};
 `;
-
 const HeroContent = styled.div`
   position: relative;
   padding-top: 5rem;
   width: 100%;
 `;
-
 const HeroInner = styled.div`
   max-width: 42rem;
   margin: 0 auto;
   text-align: center;
 `;
-
-const AnimatedDiv = styled.div<{ $delay?: string }>`
+const AnimatedDiv = styled.div<{
+  $delay?: string;
+}>`
   animation: fadeUp 0.6s ease-out forwards;
-  animation-delay: ${({ $delay }) => $delay || '0s'};
+  animation-delay: ${({
+  $delay
+}) => $delay || '0s'};
   opacity: 0;
   
   @keyframes fadeUp {
@@ -59,57 +58,86 @@ const AnimatedDiv = styled.div<{ $delay?: string }>`
     }
   }
 `;
-
 const HeroBadge = styled.span`
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: ${({ theme }) => theme.colors.primary}33;
+  background: ${({
+  theme
+}) => theme.colors.primary}33;
   backdrop-filter: blur(4px);
-  border-radius: ${({ theme }) => theme.radii.full};
-  color: ${({ theme }) => theme.colors.primaryForeground};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  border-radius: ${({
+  theme
+}) => theme.radii.full};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground};
+  font-size: ${({
+  theme
+}) => theme.fontSizes.sm};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.medium};
   margin-bottom: 1.5rem;
 `;
-
 const HeroTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-size: ${({
+  theme
+}) => theme.fontSizes['4xl']};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.bold};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground};
   line-height: 1.2;
   margin-bottom: 1.5rem;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes['5xl']};
   }
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
-    font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.lg}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes['6xl']};
   }
 `;
-
 const HeroDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primaryForeground}e6;
+  font-size: ${({
+  theme
+}) => theme.fontSizes.lg};
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground}e6;
   line-height: 1.7;
   margin-bottom: 2rem;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes.xl};
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
+    font-size: ${({
+  theme
+}) => theme.fontSizes.xl};
   }
 `;
-
 const ButtonGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
   justify-content: center;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.sm}) {
     flex-direction: row;
   }
 `;
-
 const TrustBadges = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -117,25 +145,28 @@ const TrustBadges = styled.div`
   margin-top: 3rem;
   justify-content: center;
 `;
-
 const TrustBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${({ theme }) => theme.colors.primaryForeground}cc;
+  color: ${({
+  theme
+}) => theme.colors.primaryForeground}cc;
 `;
-
 const TrustIcon = styled.div`
   width: 2.5rem;
   height: 2.5rem;
-  background: ${({ theme }) => theme.colors.primary}4d;
-  border-radius: ${({ theme }) => theme.radii.full};
+  background: ${({
+  theme
+}) => theme.colors.primary}4d;
+  border-radius: ${({
+  theme
+}) => theme.radii.full};
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.125rem;
 `;
-
 const ScrollIndicator = styled.div`
   position: absolute;
   bottom: 2rem;
@@ -152,10 +183,8 @@ const ScrollIndicator = styled.div`
     }
   }
 `;
-
 const HeroSection = () => {
-  return (
-    <HeroWrapper>
+  return <HeroWrapper>
       <HeroBackground>
         <HeroImage src={heroImage} alt="מרפאת שיניים מודרנית" />
         <HeroOverlay />
@@ -165,7 +194,7 @@ const HeroSection = () => {
         <Container>
           <HeroInner>
             <AnimatedDiv>
-              <HeroBadge><Sparkles size={16} /> מרפאת שיניים מובילה</HeroBadge>
+              
             </AnimatedDiv>
 
             <AnimatedDiv $delay="0.1s">
@@ -219,8 +248,6 @@ const HeroSection = () => {
       <ScrollIndicator>
         <ChevronDown size={32} color="rgba(255,255,255,0.6)" />
       </ScrollIndicator>
-    </HeroWrapper>
-  );
+    </HeroWrapper>;
 };
-
 export default HeroSection;
