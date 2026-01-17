@@ -78,6 +78,18 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
   letter-spacing: 0.025em;
   border-radius: ${({ theme }) => theme.radii.full};
   text-transform: uppercase;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0.35rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    border-radius: 1px;
+  }
   
   ${({ $variant, theme }) => {
     switch ($variant) {
@@ -86,6 +98,10 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
           background: ${theme.colors.primaryForeground}33;
           color: ${theme.colors.primaryForeground};
           border: 1px solid ${theme.colors.primaryForeground}44;
+          
+          &::after {
+            background: ${theme.colors.primaryForeground};
+          }
         `;
       default:
         return `
@@ -93,6 +109,10 @@ export const Badge = styled.span<{ $variant?: 'primary' | 'secondary' }>`
           color: ${theme.colors.primary};
           border: 1px solid ${theme.colors.primary}33;
           box-shadow: 0 2px 8px ${theme.colors.primary}15;
+          
+          &::after {
+            background: linear-gradient(90deg, transparent, ${theme.colors.primary}, transparent);
+          }
         `;
     }
   }}
