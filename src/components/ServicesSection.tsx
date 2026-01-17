@@ -35,6 +35,7 @@ const ServicesGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
+  grid-auto-rows: 1fr;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);
@@ -46,7 +47,10 @@ const ServicesGrid = styled.div`
 `;
 
 const ServiceCard = styled(Link)`
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 220px;
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   padding: ${({ theme }) => theme.spacing[8]};
