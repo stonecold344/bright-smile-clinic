@@ -177,10 +177,12 @@ const AboutPreview = () => {
               ))}
             </StatsGrid>
 
-            <Button as={Link} to="/about" $variant="heroPrimary" $size="lg">
-              קראו עוד
-              <ArrowLeft size={20} />
-            </Button>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Button as={Link} to="/about" $variant="heroPrimary" $size="lg">
+                קראו על הצוות שלנו
+                <ArrowLeft size={20} />
+              </Button>
+            </div>
           </ContentWrapper>
         </Grid>
       </Container>
