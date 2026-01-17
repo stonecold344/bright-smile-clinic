@@ -20,14 +20,15 @@ const WidgetButton = styled.button<{ $isOpen: boolean; $isOnDark: boolean }>`
   width: 3rem;
   height: 3rem;
   border-radius: ${({ theme }) => theme.radii.full};
-  background: ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primaryForeground : theme.gradients.hero};
-  color: ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primary : theme.colors.primaryForeground};
+  background: ${({ $isOnDark, theme }) => $isOnDark ? '#ffffff' : theme.colors.primary};
+  color: ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primary : '#ffffff'};
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: ${({ theme }) => theme.shadows.card};
   z-index: 9999;
   transition: all ${({ theme }) => theme.transitions.normal};
+  border: 2px solid ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primary : 'transparent'};
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     width: 3.5rem;
