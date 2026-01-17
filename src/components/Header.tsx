@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Phone, Menu, X, Smile, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/styled/Button';
+import { Calendar, Menu, X, Smile, ChevronDown } from 'lucide-react';
+import { Button, ButtonRouterLink } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import ServicesDropdown from '@/components/ServicesDropdown';
 import { useTreatments } from '@/hooks/useTreatments';
@@ -215,10 +215,10 @@ const Header = () => {
           </Nav>
 
           <CTAWrapper>
-            <Button as="a" href="tel:+972-00-000-0000" $variant="call" $size="lg">
-              <Phone size={20} />
+            <ButtonRouterLink to="/appointments" $variant="call" $size="lg">
+              <Calendar size={20} />
               קביעת תור
-            </Button>
+            </ButtonRouterLink>
           </CTAWrapper>
 
           <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
@@ -273,10 +273,10 @@ const Header = () => {
                 צור קשר
               </MobileNavLink>
               
-              <Button as="a" href="tel:+972-00-000-0000" $variant="call" $size="lg" $fullWidth style={{ marginTop: '1rem' }}>
-                <Phone size={20} />
+              <ButtonRouterLink to="/appointments" $variant="call" $size="lg" $fullWidth style={{ marginTop: '1rem' }} onClick={() => setIsMenuOpen(false)}>
+                <Calendar size={20} />
                 קביעת תור
-              </Button>
+              </ButtonRouterLink>
             </MobileNavInner>
           </Container>
         </MobileNav>

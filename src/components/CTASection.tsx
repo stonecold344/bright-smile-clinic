@@ -126,7 +126,7 @@ const CTASection = () => {
               <Phone size={20} />
               00-000-0000
             </Button>
-            <Button as={Link} to="/contact" $variant="heroOutline" $size="xl">
+            <Button as={Link} to="/appointments" $variant="heroOutline" $size="xl">
               <Calendar size={20} />
               קביעת תור אונליין
             </Button>

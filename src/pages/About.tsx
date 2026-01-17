@@ -4,9 +4,36 @@ import Footer from '@/components/Footer';
 import CTASection from '@/components/CTASection';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Award, Users, Clock, Heart, Shield, Target } from 'lucide-react';
+import { Award, Users, Clock, Heart, Shield, Target, Stethoscope, GraduationCap } from 'lucide-react';
 import teamImage from '@/assets/dental-team.jpg';
 import heroImage from '@/assets/hero-dental.jpg';
+
+const teamMembers = [
+  {
+    name: 'ד״ר יוסף כהן',
+    role: 'רופא שיניים ראשי',
+    specialization: 'התמחות באורתודנטיה',
+    experience: '15 שנות ניסיון',
+  },
+  {
+    name: 'ד״ר מיכל לוי',
+    role: 'רופאת שיניים',
+    specialization: 'התמחות בהשתלות',
+    experience: '12 שנות ניסיון',
+  },
+  {
+    name: 'ד״ר דוד ישראלי',
+    role: 'רופא שיניים',
+    specialization: 'התמחות באנדודונטיה',
+    experience: '10 שנות ניסיון',
+  },
+  {
+    name: 'ד״ר שרה אברהם',
+    role: 'רופאת שיניים',
+    specialization: 'התמחות בפריודונטיה',
+    experience: '8 שנות ניסיון',
+  },
+];
 
 const values = [
   { icon: Heart, title: 'אכפתיות', description: 'אנו מתייחסים לכל מטופל כאל משפחה ומספקים טיפול אישי ואכפתי.' },
@@ -42,6 +69,16 @@ const ValueIcon = styled.div`width: 4rem; height: 4rem; background: ${({ theme }
 const ValueTitle = styled.h3`font-size: ${({ theme }) => theme.fontSizes.xl}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.foreground}; margin-bottom: 0.75rem;`;
 const ValueDescription = styled.p`color: ${({ theme }) => theme.colors.mutedForeground}; line-height: 1.7;`;
 
+const TeamSection = styled.section`padding: ${({ theme }) => theme.spacing[24]} 0; background: ${({ theme }) => theme.colors.background};`;
+const TeamHeader = styled.div`text-align: center; max-width: 42rem; margin: 0 auto ${({ theme }) => theme.spacing[16]};`;
+const TeamGrid = styled.div`display: grid; grid-template-columns: 1fr; gap: 2rem; @media (min-width: ${({ theme }) => theme.breakpoints.sm}) { grid-template-columns: repeat(2, 1fr); } @media (min-width: ${({ theme }) => theme.breakpoints.lg}) { grid-template-columns: repeat(4, 1fr); }`;
+const TeamCard = styled.div`text-align: center; padding: ${({ theme }) => theme.spacing[6]}; background: ${({ theme }) => theme.colors.card}; border-radius: ${({ theme }) => theme.radii['2xl']}; box-shadow: ${({ theme }) => theme.shadows.soft}; transition: all ${({ theme }) => theme.transitions.normal}; &:hover { box-shadow: ${({ theme }) => theme.shadows.elevated}; transform: translateY(-4px); }`;
+const TeamAvatar = styled.div`width: 5rem; height: 5rem; background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii.full}; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; svg { color: ${({ theme }) => theme.colors.primaryForeground}; }`;
+const TeamName = styled.h3`font-size: ${({ theme }) => theme.fontSizes.lg}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.foreground}; margin-bottom: 0.25rem;`;
+const TeamRole = styled.p`font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.primary}; font-weight: ${({ theme }) => theme.fontWeights.medium}; margin-bottom: 0.75rem;`;
+const TeamInfo = styled.div`display: flex; flex-direction: column; gap: 0.25rem;`;
+const TeamInfoItem = styled.span`font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.mutedForeground}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;`;
+
 const About = () => (
   <div>
     <Header />
@@ -62,6 +99,28 @@ const About = () => (
           </AboutGrid>
         </Container>
       </AboutSection>
+      <TeamSection>
+        <Container>
+          <TeamHeader>
+            <Badge>הצוות שלנו</Badge>
+            <Title $size="lg" style={{ marginTop: '1rem' }}>הכירו את הרופאים</Title>
+            <Text $color="muted" style={{ marginTop: '0.5rem' }}>צוות מומחים מנוסה ומסור לבריאות הפה שלכם</Text>
+          </TeamHeader>
+          <TeamGrid>
+            {teamMembers.map((member, i) => (
+              <TeamCard key={i}>
+                <TeamAvatar><Stethoscope size={32} /></TeamAvatar>
+                <TeamName>{member.name}</TeamName>
+                <TeamRole>{member.role}</TeamRole>
+                <TeamInfo>
+                  <TeamInfoItem><GraduationCap size={14} />{member.specialization}</TeamInfoItem>
+                  <TeamInfoItem><Clock size={14} />{member.experience}</TeamInfoItem>
+                </TeamInfo>
+              </TeamCard>
+            ))}
+          </TeamGrid>
+        </Container>
+      </TeamSection>
       <ValuesSection>
         <Container>
           <ValuesHeader><Badge>הערכים שלנו</Badge><Title $size="lg" style={{ marginTop: '1rem' }}>מה מנחה אותנו</Title></ValuesHeader>

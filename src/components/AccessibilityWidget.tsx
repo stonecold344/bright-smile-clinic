@@ -13,15 +13,15 @@ import {
   Contrast
 } from 'lucide-react';
 
-const WidgetButton = styled.button<{ $isOpen: boolean }>`
+const WidgetButton = styled.button<{ $isOpen: boolean; $isOnDark: boolean }>`
   position: fixed;
   bottom: 2rem;
   right: 2rem;
   width: 3rem;
   height: 3rem;
   border-radius: ${({ theme }) => theme.radii.full};
-  background: ${({ theme }) => theme.gradients.hero};
-  color: ${({ theme }) => theme.colors.primaryForeground};
+  background: ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primaryForeground : theme.gradients.hero};
+  color: ${({ $isOnDark, theme }) => $isOnDark ? theme.colors.primary : theme.colors.primaryForeground};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,10 +249,43 @@ const defaultSettings: AccessibilitySettings = {
 
 const AccessibilityWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOnDarkBackground, setIsOnDarkBackground] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
     const saved = localStorage.getItem('accessibility-settings');
     return saved ? JSON.parse(saved) : defaultSettings;
   });
+
+  // Detect if button is over a dark background
+  useEffect(() => {
+    const checkBackground = () => {
+      const buttonBottom = window.innerHeight - 32; // 2rem from bottom
+      const buttonRight = window.innerWidth - 32; // 2rem from right
+      const element = document.elementFromPoint(buttonRight - 28, buttonBottom - 28);
+      
+      if (element) {
+        const computedStyle = window.getComputedStyle(element);
+        const bgColor = computedStyle.backgroundColor;
+        
+        // Parse RGB values
+        const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (match) {
+          const [, r, g, b] = match.map(Number);
+          // Calculate luminance - lower values = darker background
+          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+          setIsOnDarkBackground(luminance < 0.5);
+        }
+      }
+    };
+
+    checkBackground();
+    window.addEventListener('scroll', checkBackground);
+    window.addEventListener('resize', checkBackground);
+    
+    return () => {
+      window.removeEventListener('scroll', checkBackground);
+      window.removeEventListener('resize', checkBackground);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
@@ -319,6 +352,7 @@ const AccessibilityWidget = () => {
     <>
       <WidgetButton
         $isOpen={isOpen}
+        $isOnDark={isOnDarkBackground}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="פתח תפריט נגישות"
         aria-expanded={isOpen}
