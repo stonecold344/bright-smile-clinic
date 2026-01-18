@@ -171,6 +171,7 @@ const Content = styled.p<{ $showReadMore?: boolean }>`
   -webkit-line-clamp: ${({ $showReadMore }) => $showReadMore ? 3 : 4};
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: clip;
   margin: 0;
 `;
 
