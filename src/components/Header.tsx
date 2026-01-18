@@ -267,7 +267,9 @@ const Header = () => {
   // Track scroll position for color transition
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      // Transition when scrolling past the hero section (70vh - header height)
+      const heroHeight = window.innerHeight * 0.7 - 88; // 70vh minus header
+      setIsScrolled(window.scrollY > heroHeight);
     };
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Check initial position
