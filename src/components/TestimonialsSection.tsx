@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { Star, Quote, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
@@ -172,26 +172,20 @@ const Content = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+  flex: 1;
 `;
 
-const ReadMoreButton = styled.button`
-  background: ${({ theme }) => theme.colors.primary}15;
-  border: 1px solid ${({ theme }) => theme.colors.primary}40;
+const ReadMoreText = styled.span`
   color: ${({ theme }) => theme.colors.primary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: ${({ theme }) => theme.radii.full};
   font-weight: 600;
-  flex-shrink: 0;
   cursor: pointer;
-  transition: all 0.2s;
+  margin-right: 0.25rem;
   
   &:hover {
-    background: ${({ theme }) => theme.colors.primary};
-    color: white;
+    text-decoration: underline;
   }
 `;
+
 
 const Author = styled.div`
   display: flex;
@@ -398,39 +392,54 @@ const ModalQuoteIcon = styled.div`
   color: hsl(var(--primary) / 0.15);
 `;
 
-const MAX_CONTENT_LENGTH = 80;
-
 interface TestimonialCardComponentProps {
   testimonial: Testimonial;
   onOpenModal: (testimonial: Testimonial) => void;
-  isContentLong: boolean;
 }
 
-const TestimonialCardComponent = ({ testimonial, onOpenModal, isContentLong }: TestimonialCardComponentProps) => (
-  <TestimonialCard onClick={() => onOpenModal(testimonial)}>
-    <CardContent>
-      <QuoteIcon>
-        <Quote size={32} />
-      </QuoteIcon>
-      <Stars>
-        {Array.from({ length: testimonial.rating }).map((_, i) => (
-          <Star key={i} size={18} />
-        ))}
-      </Stars>
-      <ContentWrapper>
-        <Content>{testimonial.content}</Content>
-        {isContentLong && <ReadMoreButton>קרא עוד</ReadMoreButton>}
-      </ContentWrapper>
-    </CardContent>
-    <Author>
-      <Avatar>{testimonial.name.charAt(0)}</Avatar>
-      <AuthorInfo>
-        <AuthorName>{testimonial.name}</AuthorName>
-        {testimonial.title && <AuthorTitle>{testimonial.title}</AuthorTitle>}
-      </AuthorInfo>
-    </Author>
-  </TestimonialCard>
-);
+const TestimonialCardComponent = ({ testimonial, onOpenModal }: TestimonialCardComponentProps) => {
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    const checkTruncation = () => {
+      if (contentRef.current) {
+        setIsTruncated(contentRef.current.scrollHeight > contentRef.current.clientHeight);
+      }
+    };
+    checkTruncation();
+    window.addEventListener('resize', checkTruncation);
+    return () => window.removeEventListener('resize', checkTruncation);
+  }, [testimonial.content]);
+
+  return (
+    <TestimonialCard onClick={() => onOpenModal(testimonial)}>
+      <CardContent>
+        <QuoteIcon>
+          <Quote size={32} />
+        </QuoteIcon>
+        <Stars>
+          {Array.from({ length: testimonial.rating }).map((_, i) => (
+            <Star key={i} size={18} />
+          ))}
+        </Stars>
+        <ContentWrapper>
+          <Content ref={contentRef}>
+            {testimonial.content}
+            {isTruncated && <ReadMoreText>... קרא עוד</ReadMoreText>}
+          </Content>
+        </ContentWrapper>
+      </CardContent>
+      <Author>
+        <Avatar>{testimonial.name.charAt(0)}</Avatar>
+        <AuthorInfo>
+          <AuthorName>{testimonial.name}</AuthorName>
+          {testimonial.title && <AuthorTitle>{testimonial.title}</AuthorTitle>}
+        </AuthorInfo>
+      </Author>
+    </TestimonialCard>
+  );
+};
 
 const TestimonialsSection = () => {
   const { data: testimonials = [], isLoading } = useTestimonials();
@@ -445,7 +454,7 @@ const TestimonialsSection = () => {
     [Autoplay({ delay: 4000, stopOnInteraction: true })]
   );
 
-  const isContentLong = (content: string) => content.length > MAX_CONTENT_LENGTH;
+  
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -534,7 +543,6 @@ const TestimonialsSection = () => {
                     key={testimonial.id}
                     testimonial={testimonial}
                     onOpenModal={handleOpenModal}
-                    isContentLong={isContentLong(testimonial.content)}
                   />
                 ))}
               </TestimonialsGrid>
@@ -548,7 +556,6 @@ const TestimonialsSection = () => {
                         <TestimonialCardComponent
                           testimonial={testimonial}
                           onOpenModal={handleOpenModal}
-                          isContentLong={isContentLong(testimonial.content)}
                         />
                       </CarouselSlide>
                     ))}
