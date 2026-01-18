@@ -49,25 +49,27 @@ const LogoText = styled.div`
   display: block;
 `;
 const LogoTitle = styled.h1`
-  font-size: ${({
-  theme
-}) => theme.fontSizes['2xl']};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
-  color: ${({
-  theme
-}) => theme.colors.foreground};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primary};
   margin: 0;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+    color: ${({ theme }) => theme.colors.foreground};
+  }
 `;
 const LogoSubtitle = styled.p`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.sm};
-  color: ${({
-  theme
-}) => theme.colors.mutedForeground};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.primary};
   margin: 0;
+  display: none;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    display: block;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    color: ${({ theme }) => theme.colors.mutedForeground};
+  }
 `;
 const Nav = styled.nav`
   display: none;
