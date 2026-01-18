@@ -6,7 +6,7 @@ import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const contactInfo = [
@@ -76,7 +76,7 @@ const Contact = () => {
               <div>
                 <ContactInfoTitle>פרטי התקשרות</ContactInfoTitle>
                 <ContactItems>{contactInfo.map((item, i) => (<ContactItem key={i} href={item.link}><ContactIconWrapper><item.icon size={24} /></ContactIconWrapper><ContactItemContent><ContactItemTitle>{item.title}</ContactItemTitle><ContactItemValue>{item.value}</ContactItemValue></ContactItemContent></ContactItem>))}</ContactItems>
-                <QuickCallCTA><QuickCallTitle>מעדיפים לדבר?</QuickCallTitle><QuickCallText>שלחו לנו הודעה בוואטסאפ</QuickCallText><Button as="a" href="https://wa.me/97200000000" target="_blank" $variant="hero" $size="xl"><MessageCircle size={20} />WhatsApp</Button></QuickCallCTA>
+                <QuickCallCTA><QuickCallTitle>מעדיפים לדבר?</QuickCallTitle><QuickCallText>התקשרו אלינו עכשיו</QuickCallText><Button as="a" href="tel:+972-00-000-0000" $variant="hero" $size="xl"><Phone size={20} />00-000-0000</Button></QuickCallCTA>
               </div>
             </ContactGrid>
           </Container>
