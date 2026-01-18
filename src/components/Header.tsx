@@ -75,22 +75,23 @@ const LogoText = styled.div`
     display: block;
   }
 `;
-const LogoTitle = styled.h1`
+const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: white;
+  color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.primary : 'white'};
   margin: 0;
+  transition: color 0.3s ease;
 `;
-const LogoSubtitle = styled.p`
+const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: white;
+  color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.mutedForeground : 'white'};
   margin: 0;
   display: none;
+  transition: color 0.3s ease;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     display: block;
     font-size: ${({ theme }) => theme.fontSizes.sm};
-    color: ${({ theme }) => theme.colors.mutedForeground};
   }
 `;
 const Nav = styled.nav`
@@ -257,10 +258,21 @@ const MobileDropdownTrigger = styled.button<{
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const {
     data: treatments = []
   } = useTreatments();
+
+  // Track scroll position for color transition
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -295,8 +307,8 @@ const Header = () => {
           <Logo to="/">
             <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
-              <LogoTitle>מרפאת שיניים</LogoTitle>
-              <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
+              <LogoTitle $scrolled={isScrolled}>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle $scrolled={isScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
           
