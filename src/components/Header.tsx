@@ -267,13 +267,14 @@ const Header = () => {
   // Detect if header is over a dark background
   useEffect(() => {
     const checkBackground = () => {
-      // Get position at center of header
+      // Get position at center of header where logo text is
       const headerY = 44; // center of header (88px / 2)
-      const headerX = 150; // approximate position of logo text
+      const headerX = window.innerWidth / 2; // center of screen for better detection
       
       // Hide header temporarily to check element behind it
       const headerEl = document.querySelector('header');
       if (headerEl) {
+        (headerEl as HTMLElement).style.pointerEvents = 'none';
         (headerEl as HTMLElement).style.visibility = 'hidden';
       }
       
@@ -282,40 +283,50 @@ const Header = () => {
       // Restore visibility
       if (headerEl) {
         (headerEl as HTMLElement).style.visibility = 'visible';
+        (headerEl as HTMLElement).style.pointerEvents = '';
       }
       
       if (element) {
         let currentElement: Element | null = element;
-        let bgColor = 'rgba(0, 0, 0, 0)';
+        let foundDarkBackground = false;
         
         while (currentElement && currentElement !== document.body) {
           const computedStyle = window.getComputedStyle(currentElement);
-          const bg = computedStyle.backgroundColor;
           
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            bgColor = bg;
+          // Check for background-image first (gradients, images = dark)
+          const bgImage = computedStyle.backgroundImage;
+          if (bgImage && bgImage !== 'none') {
+            foundDarkBackground = true;
             break;
           }
           
-          // Check for background-image (gradients, images)
-          const bgImage = computedStyle.backgroundImage;
-          if (bgImage && bgImage !== 'none') {
-            setIsScrolled(false); // Dark background = white text
-            return;
+          // Check background color
+          const bg = computedStyle.backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (match) {
+              const [, r, g, b] = match.map(Number);
+              const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+              foundDarkBackground = luminance < 0.5;
+            }
+            break;
           }
           
           currentElement = currentElement.parentElement;
         }
         
-        // Parse RGB values
-        const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-        if (match) {
-          const [, r, g, b] = match.map(Number);
-          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          setIsScrolled(luminance >= 0.5); // Light background = primary text
-        } else {
-          setIsScrolled(false);
+        // If no background found, check body
+        if (!currentElement || currentElement === document.body) {
+          const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+          const match = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          if (match) {
+            const [, r, g, b] = match.map(Number);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            foundDarkBackground = luminance < 0.5;
+          }
         }
+        
+        setIsScrolled(!foundDarkBackground); // Light background = primary text (scrolled state)
       }
     };
 
