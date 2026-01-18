@@ -143,6 +143,16 @@ const ButtonGroup = styled.div`
     flex-direction: row;
   }
 `;
+
+const CallButtonWrapper = styled.div`
+  display: block;
+  
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
+    display: none;
+  }
+`;
 const TrustBadges = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -232,10 +242,12 @@ const HeroSection = () => {
 
             <AnimatedDiv $delay="0.3s">
               <ButtonGroup>
-                <ButtonLink href="tel:+972-00-000-0000" $variant="hero" $size="xl">
-                  <Phone size={20} />
-                  התקשרו עכשיו
-                </ButtonLink>
+                <CallButtonWrapper>
+                  <ButtonLink href="tel:+972-00-000-0000" $variant="hero" $size="xl">
+                    <Phone size={20} />
+                    התקשרו עכשיו
+                  </ButtonLink>
+                </CallButtonWrapper>
                 <ButtonRouterLink to="/appointments" $variant="heroOutline" $size="xl">
                   <Calendar size={20} />
                   קביעת תור
