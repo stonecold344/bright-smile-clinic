@@ -414,7 +414,9 @@ const AppointmentBooking = () => {
         .rpc('get_booked_slots', { check_date: format(weekStart, 'yyyy-MM-dd') });
       
       if (error) {
-        console.error('Error fetching appointments:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error fetching appointments:', error);
+        }
         return;
       }
       

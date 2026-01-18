@@ -52,11 +52,10 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client to verify the appointment exists
+    // Create Supabase client with service role to verify the appointment exists
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
     const requestData: WhatsAppRequest = await req.json();
@@ -71,6 +70,47 @@ serve(async (req) => {
     }
 
     const { phone, name, date, time } = requestData;
+
+    // Convert date format from DD/MM/YYYY to YYYY-MM-DD for database query
+    const convertDateFormat = (dateStr: string): string => {
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      return dateStr; // Return as-is if already in correct format
+    };
+
+    // Clean phone for comparison
+    let phoneForQuery = phone.replace(/\D/g, '');
+    if (phoneForQuery.startsWith('972')) {
+      phoneForQuery = '0' + phoneForQuery.slice(3);
+    }
+
+    // Verify the appointment exists in the database
+    const dbDate = convertDateFormat(date);
+    const { data: appointment, error: appointmentError } = await supabaseClient
+      .from('appointments')
+      .select('id, client_phone, client_name, status')
+      .eq('client_phone', phoneForQuery)
+      .eq('appointment_date', dbDate)
+      .eq('appointment_time', time + ':00')
+      .maybeSingle();
+
+    if (appointmentError) {
+      console.error('Database error:', appointmentError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to verify appointment' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    if (!appointment) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Appointment not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
+    }
 
     // Clean phone number - remove non-digits and add country code if needed
     let cleanPhone = phone.replace(/\D/g, '');
