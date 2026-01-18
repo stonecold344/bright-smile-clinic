@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes, css } from 'styled-components';
-import { Star, Quote, Loader2, X } from 'lucide-react';
+import { Star, Quote, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { useTestimonials, Testimonial } from '@/hooks/useTestimonials';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
@@ -16,17 +18,101 @@ const Header = styled.div`
   margin: 0 auto ${({ theme }) => theme.spacing[16]};
 `;
 
+// Desktop Grid
 const TestimonialsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  display: none;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
+// Mobile Carousel
+const CarouselWrapper = styled.div`
+  display: block;
+  position: relative;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
+`;
+
+const CarouselViewport = styled.div`
+  overflow: hidden;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+`;
+
+const CarouselContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const CarouselSlide = styled.div`
+  flex: 0 0 85%;
+  min-width: 0;
+  padding-left: 0.5rem;
+  
+  &:first-child {
+    padding-left: 0;
+  }
+`;
+
+const CarouselNav = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+`;
+
+const NavButton = styled.button<{ $disabled?: boolean }>`
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.primary};
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: ${({ $disabled }) => $disabled ? 0.5 : 1};
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    background: ${({ theme }) => theme.colors.primary}dd;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const CarouselDots = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const Dot = styled.button<{ $active: boolean }>`
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: none;
+  background: ${({ theme, $active }) => $active ? theme.colors.primary : theme.colors.border};
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary}80;
   }
 `;
 
@@ -40,6 +126,7 @@ const TestimonialCard = styled.div`
   display: flex;
   flex-direction: column;
   height: 320px;
+  cursor: pointer;
   
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.elevated};
@@ -91,21 +178,12 @@ const Content = styled.p`
   margin: 0;
 `;
 
-const ReadMore = styled.button`
-  background: none;
-  border: none;
+const ReadMore = styled.span`
   color: ${({ theme }) => theme.colors.primary};
   font-size: ${({ theme }) => theme.fontSizes.sm};
-  cursor: pointer;
-  padding: 0;
   margin-top: 0.5rem;
   font-weight: 500;
-  transition: opacity 0.2s;
   flex-shrink: 0;
-  
-  &:hover {
-    opacity: 0.8;
-  }
 `;
 
 const Author = styled.div`
@@ -296,7 +374,7 @@ const ModalStars = styled.div`
   }
 `;
 
-const ModalContent = styled.p`
+const ModalContentText = styled.p`
   color: hsl(var(--foreground));
   line-height: 1.8;
   font-size: 1rem;
@@ -313,12 +391,74 @@ const ModalQuoteIcon = styled.div`
 
 const MAX_CONTENT_LENGTH = 100;
 
+interface TestimonialCardComponentProps {
+  testimonial: Testimonial;
+  onOpenModal: (testimonial: Testimonial) => void;
+  isContentLong: boolean;
+}
+
+const TestimonialCardComponent = ({ testimonial, onOpenModal, isContentLong }: TestimonialCardComponentProps) => (
+  <TestimonialCard onClick={() => onOpenModal(testimonial)}>
+    <CardContent>
+      <QuoteIcon>
+        <Quote size={32} />
+      </QuoteIcon>
+      <Stars>
+        {Array.from({ length: testimonial.rating }).map((_, i) => (
+          <Star key={i} size={18} />
+        ))}
+      </Stars>
+      <ContentWrapper>
+        <Content>{testimonial.content}</Content>
+        {isContentLong && <ReadMore>קרא עוד...</ReadMore>}
+      </ContentWrapper>
+    </CardContent>
+    <Author>
+      <Avatar>{testimonial.name.charAt(0)}</Avatar>
+      <AuthorInfo>
+        <AuthorName>{testimonial.name}</AuthorName>
+        {testimonial.title && <AuthorTitle>{testimonial.title}</AuthorTitle>}
+      </AuthorInfo>
+    </Author>
+  </TestimonialCard>
+);
+
 const TestimonialsSection = () => {
   const { data: testimonials = [], isLoading } = useTestimonials();
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, direction: 'rtl', align: 'start' },
+    [Autoplay({ delay: 4000, stopOnInteraction: true })]
+  );
 
   const isContentLong = (content: string) => content.length > MAX_CONTENT_LENGTH;
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi]);
 
   const handleCloseModal = () => {
     setIsClosing(true);
@@ -356,6 +496,8 @@ const TestimonialsSection = () => {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [selectedTestimonial]);
 
+  const displayedTestimonials = testimonials.slice(0, 4);
+
   return (
     <>
       <SectionWrapper>
@@ -375,37 +517,55 @@ const TestimonialsSection = () => {
               <Loader2 size={48} className="animate-spin" style={{ color: 'hsl(var(--primary))' }} />
             </LoadingWrapper>
           ) : (
-            <TestimonialsGrid>
-              {testimonials.slice(0, 4).map((testimonial) => (
-                <TestimonialCard key={testimonial.id}>
-                  <CardContent>
-                    <QuoteIcon>
-                      <Quote size={32} />
-                    </QuoteIcon>
-                    <Stars>
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <Star key={i} size={18} />
-                      ))}
-                    </Stars>
-                    <ContentWrapper>
-                      <Content>{testimonial.content}</Content>
-                      {isContentLong(testimonial.content) && (
-                        <ReadMore onClick={() => handleOpenModal(testimonial)}>
-                          קרא עוד...
-                        </ReadMore>
-                      )}
-                    </ContentWrapper>
-                  </CardContent>
-                  <Author>
-                    <Avatar>{testimonial.name.charAt(0)}</Avatar>
-                    <AuthorInfo>
-                      <AuthorName>{testimonial.name}</AuthorName>
-                      {testimonial.title && <AuthorTitle>{testimonial.title}</AuthorTitle>}
-                    </AuthorInfo>
-                  </Author>
-                </TestimonialCard>
-              ))}
-            </TestimonialsGrid>
+            <>
+              {/* Desktop Grid */}
+              <TestimonialsGrid>
+                {displayedTestimonials.map((testimonial) => (
+                  <TestimonialCardComponent
+                    key={testimonial.id}
+                    testimonial={testimonial}
+                    onOpenModal={handleOpenModal}
+                    isContentLong={isContentLong(testimonial.content)}
+                  />
+                ))}
+              </TestimonialsGrid>
+
+              {/* Mobile Carousel */}
+              <CarouselWrapper>
+                <CarouselViewport ref={emblaRef}>
+                  <CarouselContainer>
+                    {displayedTestimonials.map((testimonial) => (
+                      <CarouselSlide key={testimonial.id}>
+                        <TestimonialCardComponent
+                          testimonial={testimonial}
+                          onOpenModal={handleOpenModal}
+                          isContentLong={isContentLong(testimonial.content)}
+                        />
+                      </CarouselSlide>
+                    ))}
+                  </CarouselContainer>
+                </CarouselViewport>
+                
+                <CarouselNav>
+                  <NavButton onClick={scrollNext} aria-label="הבא">
+                    <ChevronRight size={20} />
+                  </NavButton>
+                  <CarouselDots>
+                    {displayedTestimonials.map((_, index) => (
+                      <Dot
+                        key={index}
+                        $active={index === selectedIndex}
+                        onClick={() => scrollTo(index)}
+                        aria-label={`עבור להמלצה ${index + 1}`}
+                      />
+                    ))}
+                  </CarouselDots>
+                  <NavButton onClick={scrollPrev} aria-label="הקודם">
+                    <ChevronLeft size={20} />
+                  </NavButton>
+                </CarouselNav>
+              </CarouselWrapper>
+            </>
           )}
         </Container>
       </SectionWrapper>
@@ -434,7 +594,7 @@ const TestimonialsSection = () => {
                 <Star key={i} size={20} />
               ))}
             </ModalStars>
-            <ModalContent>{selectedTestimonial.content}</ModalContent>
+            <ModalContentText>{selectedTestimonial.content}</ModalContentText>
           </ModalContainer>
         </>
       )}
