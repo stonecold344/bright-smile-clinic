@@ -138,9 +138,13 @@ const CheckIcon = styled.div`
   border-radius: ${({
   theme
 }) => theme.radii.full};
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+  }
 `;
 const CTASection = () => {
   return <SectionWrapper>
