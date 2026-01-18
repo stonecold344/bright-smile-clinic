@@ -124,13 +124,9 @@ const CTAWrapper = styled.div`
 const MobileMenuButton = styled.button`
   display: flex;
   padding: 0.5rem;
-  color: ${({
-  theme
-}) => theme.colors.foreground};
+  color: ${({ theme }) => theme.colors.primary};
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: none;
   }
 `;
