@@ -46,13 +46,7 @@ const LogoIcon = styled.div`
   font-size: 1.75rem;
 `;
 const LogoText = styled.div`
-  display: none;
-  
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.sm}) {
-    display: block;
-  }
+  display: block;
 `;
 const LogoTitle = styled.h1`
   font-size: ${({
