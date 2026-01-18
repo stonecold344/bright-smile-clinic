@@ -317,7 +317,9 @@ const Header = () => {
                   </MobileSubMenu>}
               </div>
               
-              
+              <MobileNavLink to="/appointments" $active={isActive('/appointments')} onClick={() => setIsMenuOpen(false)}>
+                קביעת תור
+              </MobileNavLink>
               <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
                 אודות
               </MobileNavLink>
