@@ -264,16 +264,70 @@ const Header = () => {
     data: treatments = []
   } = useTreatments();
 
-  // Track scroll position for color transition
+  // Detect if header is over a dark background
   useEffect(() => {
-    const handleScroll = () => {
-      // Transition when scrolling past the hero section (70vh - header height)
-      const heroHeight = window.innerHeight * 0.7 - 88; // 70vh minus header
-      setIsScrolled(window.scrollY > heroHeight);
+    const checkBackground = () => {
+      // Get position at center of header
+      const headerY = 44; // center of header (88px / 2)
+      const headerX = 150; // approximate position of logo text
+      
+      // Hide header temporarily to check element behind it
+      const headerEl = document.querySelector('header');
+      if (headerEl) {
+        (headerEl as HTMLElement).style.visibility = 'hidden';
+      }
+      
+      const element = document.elementFromPoint(headerX, headerY);
+      
+      // Restore visibility
+      if (headerEl) {
+        (headerEl as HTMLElement).style.visibility = 'visible';
+      }
+      
+      if (element) {
+        let currentElement: Element | null = element;
+        let bgColor = 'rgba(0, 0, 0, 0)';
+        
+        while (currentElement && currentElement !== document.body) {
+          const computedStyle = window.getComputedStyle(currentElement);
+          const bg = computedStyle.backgroundColor;
+          
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            bgColor = bg;
+            break;
+          }
+          
+          // Check for background-image (gradients, images)
+          const bgImage = computedStyle.backgroundImage;
+          if (bgImage && bgImage !== 'none') {
+            setIsScrolled(false); // Dark background = white text
+            return;
+          }
+          
+          currentElement = currentElement.parentElement;
+        }
+        
+        // Parse RGB values
+        const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (match) {
+          const [, r, g, b] = match.map(Number);
+          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+          setIsScrolled(luminance >= 0.5); // Light background = primary text
+        } else {
+          setIsScrolled(false);
+        }
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check initial position
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    const initialTimeout = setTimeout(checkBackground, 100);
+    window.addEventListener('scroll', checkBackground);
+    window.addEventListener('resize', checkBackground);
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      window.removeEventListener('scroll', checkBackground);
+      window.removeEventListener('resize', checkBackground);
+    };
   }, []);
 
   // Lock body scroll when mobile menu is open
