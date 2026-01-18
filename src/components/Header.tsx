@@ -266,80 +266,90 @@ const Header = () => {
 
   // Detect if header is over a dark background
   useEffect(() => {
-    let rafId: number;
+    let rafId = 0;
     let lastResult: boolean | null = null;
-    
+
     const checkBackground = () => {
-      // Cancel any pending animation frame
       if (rafId) cancelAnimationFrame(rafId);
-      
+
       rafId = requestAnimationFrame(() => {
-        // Get position at center of header where logo text is
+        // Sample the content *behind* the fixed header, without mutating DOM styles.
         const headerY = 44; // center of header (88px / 2)
-        const headerX = window.innerWidth / 2; // center of screen for better detection
-        
-        // Hide header temporarily to check element behind it
-        const headerEl = document.querySelector('header');
-        if (headerEl) {
-          (headerEl as HTMLElement).style.pointerEvents = 'none';
-          (headerEl as HTMLElement).style.visibility = 'hidden';
-        }
-        
-        const element = document.elementFromPoint(headerX, headerY);
-        
-        // Restore visibility immediately
-        if (headerEl) {
-          (headerEl as HTMLElement).style.visibility = 'visible';
-          (headerEl as HTMLElement).style.pointerEvents = '';
-        }
-        
-        if (element) {
-          let currentElement: Element | null = element;
-          let foundDarkBackground = false;
-          
-          // Walk up DOM tree to find background
-          while (currentElement && currentElement !== document.body) {
-            const computedStyle = window.getComputedStyle(currentElement);
-            
-            // Check for background-image first (gradients, images = dark)
-            const bgImage = computedStyle.backgroundImage;
-            if (bgImage && bgImage !== 'none') {
-              foundDarkBackground = true;
-              break;
-            }
-            
-            // Check background color
-            const bg = computedStyle.backgroundColor;
-            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-              const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-              if (match) {
-                const [, r, g, b] = match.map(Number);
-                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                foundDarkBackground = luminance < 0.5;
-              }
-              break;
-            }
-            
-            currentElement = currentElement.parentElement;
+        const headerX = window.innerWidth / 2;
+
+        const headerEl = document.querySelector('header') as HTMLElement | null;
+        const stack = document.elementsFromPoint(headerX, headerY);
+        const element = headerEl
+          ? (stack.find(el => !headerEl.contains(el)) as Element | undefined)
+          : stack[0];
+
+        if (!element) return;
+
+        // If we're over an actual image/video/canvas, assume "dark" for readability.
+        if (
+          element instanceof HTMLImageElement ||
+          element instanceof HTMLVideoElement ||
+          element instanceof HTMLCanvasElement
+        ) {
+          const newResult = false; // dark background => use white text
+          if (lastResult !== newResult) {
+            lastResult = newResult;
+            setIsScrolled(newResult);
           }
-          
-          // If no background found, check body
-          if (!currentElement || currentElement === document.body) {
-            const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-            const match = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          return;
+        }
+
+        let currentElement: Element | null = element;
+        let foundDarkBackground: boolean | null = null;
+
+        while (currentElement && currentElement !== document.body) {
+          const computedStyle = window.getComputedStyle(currentElement);
+
+          // Gradients / background images
+          const bgImage = computedStyle.backgroundImage;
+          if (bgImage && bgImage !== 'none') {
+            foundDarkBackground = true;
+            break;
+          }
+
+          // Solid background color
+          const bg = computedStyle.backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
             if (match) {
               const [, r, g, b] = match.map(Number);
               const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-              foundDarkBackground = luminance < 0.5;
+
+              // Hysteresis to avoid toggling near the threshold
+              if (luminance >= 0.6) foundDarkBackground = false;
+              else if (luminance <= 0.4) foundDarkBackground = true;
+              else foundDarkBackground = lastResult === null ? luminance < 0.5 : !lastResult;
+            } else {
+              foundDarkBackground = false;
             }
+            break;
           }
-          
-          const newResult = !foundDarkBackground;
-          // Only update state if result changed to prevent flickering
-          if (lastResult !== newResult) {
-            lastResult = newResult;
-            setIsScrolled(newResult); // Light background = primary text (scrolled state)
+
+          currentElement = currentElement.parentElement;
+        }
+
+        // Fallback: body background
+        if (foundDarkBackground === null) {
+          const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+          const match = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          if (match) {
+            const [, r, g, b] = match.map(Number);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            foundDarkBackground = luminance < 0.5;
+          } else {
+            foundDarkBackground = false;
           }
+        }
+
+        const newResult = !foundDarkBackground; // light => primary text
+        if (lastResult !== newResult) {
+          lastResult = newResult;
+          setIsScrolled(newResult);
         }
       });
     };
@@ -347,7 +357,7 @@ const Header = () => {
     const initialTimeout = setTimeout(checkBackground, 150);
     window.addEventListener('scroll', checkBackground, { passive: true });
     window.addEventListener('resize', checkBackground);
-    
+
     return () => {
       clearTimeout(initialTimeout);
       if (rafId) cancelAnimationFrame(rafId);
@@ -356,6 +366,7 @@ const Header = () => {
     };
   }, []);
 
+  // Lock body scroll when mobile menu is open
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
