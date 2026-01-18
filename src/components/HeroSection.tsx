@@ -154,9 +154,7 @@ const TrustBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground}cc;
+  color: white;
   font-size: ${({
   theme
 }) => theme.fontSizes.lg};
