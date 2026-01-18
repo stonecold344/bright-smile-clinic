@@ -160,6 +160,9 @@ const TrustBadge = styled.div`
   font-size: ${({
   theme
 }) => theme.fontSizes.lg};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.bold};
 `;
 const TrustIcon = styled.div`
   width: 3rem;
