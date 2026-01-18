@@ -25,11 +25,34 @@ const HeaderInner = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 5.5rem;
+  position: relative;
 `;
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    position: static;
+  }
+`;
+const MobileCenterTitle = styled.div`
+  display: none;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    h1 {
+      font-size: ${({ theme }) => theme.fontSizes.lg};
+      font-weight: ${({ theme }) => theme.fontWeights.bold};
+      color: ${({ theme }) => theme.colors.primary};
+      margin: 0;
+      white-space: nowrap;
+    }
+  }
 `;
 const LogoIcon = styled.div`
   width: 3.5rem;
@@ -46,18 +69,17 @@ const LogoIcon = styled.div`
   font-size: 1.75rem;
 `;
 const LogoText = styled.div`
-  display: block;
+  display: none;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: block;
+  }
 `;
 const LogoTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.foreground};
   margin: 0;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    font-size: ${({ theme }) => theme.fontSizes['2xl']};
-    color: ${({ theme }) => theme.colors.foreground};
-  }
 `;
 const LogoSubtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.xs};
@@ -264,6 +286,10 @@ const Header = () => {
               <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
+          
+          <MobileCenterTitle>
+            <h1>מרפאת שיניים</h1>
+          </MobileCenterTitle>
 
           <Nav>
             <NavLink to="/" $active={isActive('/')}>בית</NavLink>
