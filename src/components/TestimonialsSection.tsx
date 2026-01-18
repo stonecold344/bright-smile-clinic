@@ -178,12 +178,23 @@ const Content = styled.p`
   margin: 0;
 `;
 
-const ReadMore = styled.span`
+const ReadMoreButton = styled.button`
+  background: ${({ theme }) => theme.colors.primary}15;
+  border: 1px solid ${({ theme }) => theme.colors.primary}40;
   color: ${({ theme }) => theme.colors.primary};
   font-size: ${({ theme }) => theme.fontSizes.sm};
-  margin-top: 0.5rem;
-  font-weight: 500;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-weight: 600;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary};
+    color: white;
+  }
 `;
 
 const Author = styled.div`
@@ -281,8 +292,8 @@ const scaleOut = keyframes`
 const ModalOverlay = styled.div<{ $isClosing: boolean }>`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
   z-index: 1000;
   cursor: pointer;
   animation: ${({ $isClosing }) => $isClosing ? css`${fadeOut} 0.2s ease-out forwards` : css`${fadeIn} 0.2s ease-out forwards`};
@@ -293,7 +304,7 @@ const ModalContainer = styled.div<{ $isClosing: boolean }>`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: hsl(var(--card));
+  background: #ffffff;
   border-radius: 1rem;
   padding: 2rem;
   max-width: 500px;
@@ -301,7 +312,7 @@ const ModalContainer = styled.div<{ $isClosing: boolean }>`
   max-height: 80vh;
   overflow-y: auto;
   z-index: 1001;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   animation: ${({ $isClosing }) => $isClosing ? css`${scaleOut} 0.2s ease-out forwards` : css`${scaleIn} 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards`};
 `;
 
@@ -410,7 +421,7 @@ const TestimonialCardComponent = ({ testimonial, onOpenModal, isContentLong }: T
       </Stars>
       <ContentWrapper>
         <Content>{testimonial.content}</Content>
-        {isContentLong && <ReadMore>קרא עוד...</ReadMore>}
+        {isContentLong && <ReadMoreButton>קרא עוד</ReadMoreButton>}
       </ContentWrapper>
     </CardContent>
     <Author>
