@@ -25,11 +25,22 @@ const HeaderInner = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 5.5rem;
+  position: relative;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    justify-content: flex-end;
+  }
 `;
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 `;
 const LogoIcon = styled.div`
   width: 3.5rem;
