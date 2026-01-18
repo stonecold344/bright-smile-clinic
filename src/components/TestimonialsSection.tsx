@@ -163,23 +163,27 @@ const ContentWrapper = styled.div`
   flex-direction: column;
 `;
 
-const Content = styled.p`
+const Content = styled.p<{ $showReadMore?: boolean }>`
   color: ${({ theme }) => theme.colors.foreground};
   line-height: 1.7;
   font-size: ${({ theme }) => theme.fontSizes.base};
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: ${({ $showReadMore }) => $showReadMore ? 3 : 4};
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
-  flex: 1;
+`;
+
+const ReadMoreWrapper = styled.div`
+  color: ${({ theme }) => theme.colors.foreground};
+  line-height: 1.7;
+  font-size: ${({ theme }) => theme.fontSizes.base};
 `;
 
 const ReadMoreText = styled.span`
   color: ${({ theme }) => theme.colors.primary};
   font-weight: 600;
   cursor: pointer;
-  margin-right: 0.25rem;
   
   &:hover {
     text-decoration: underline;
@@ -397,6 +401,11 @@ interface TestimonialCardComponentProps {
   onOpenModal: (testimonial: Testimonial) => void;
 }
 
+// Helper function to strip trailing punctuation
+const stripTrailingPunctuation = (text: string): string => {
+  return text.replace(/[.,!?;:،؛؟]+$/, '');
+};
+
 const TestimonialCardComponent = ({ testimonial, onOpenModal }: TestimonialCardComponentProps) => {
   const contentRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -412,6 +421,8 @@ const TestimonialCardComponent = ({ testimonial, onOpenModal }: TestimonialCardC
     return () => window.removeEventListener('resize', checkTruncation);
   }, [testimonial.content]);
 
+  const displayContent = isTruncated ? stripTrailingPunctuation(testimonial.content) : testimonial.content;
+
   return (
     <TestimonialCard onClick={() => onOpenModal(testimonial)}>
       <CardContent>
@@ -424,10 +435,14 @@ const TestimonialCardComponent = ({ testimonial, onOpenModal }: TestimonialCardC
           ))}
         </Stars>
         <ContentWrapper>
-          <Content ref={contentRef}>
-            {testimonial.content}
-            {isTruncated && <ReadMoreText>... קרא עוד</ReadMoreText>}
+          <Content ref={contentRef} $showReadMore={isTruncated}>
+            {displayContent}
           </Content>
+          {isTruncated && (
+            <ReadMoreWrapper>
+              ... <ReadMoreText>קרא עוד</ReadMoreText>
+            </ReadMoreWrapper>
+          )}
         </ContentWrapper>
       </CardContent>
       <Author>
