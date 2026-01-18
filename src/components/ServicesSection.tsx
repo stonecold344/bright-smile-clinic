@@ -127,7 +127,7 @@ const ServicesSection = () => {
           </LoadingWrapper>
         ) : (
           <ServicesGrid>
-            {treatments.map((treatment) => (
+            {treatments.slice(0, 3).map((treatment) => (
               <ServiceCard key={treatment.id} to={`/treatment/${treatment.slug}`}>
                 <ServiceIcon>{getIcon(treatment.slug)}</ServiceIcon>
                 <ServiceTitle>{treatment.title}</ServiceTitle>
