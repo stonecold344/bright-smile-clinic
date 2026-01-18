@@ -167,12 +167,9 @@ const Content = styled.p<{ $showReadMore?: boolean }>`
   color: ${({ theme }) => theme.colors.foreground};
   line-height: 1.7;
   font-size: ${({ theme }) => theme.fontSizes.base};
-  display: -webkit-box;
-  -webkit-line-clamp: ${({ $showReadMore }) => $showReadMore ? 3 : 4};
-  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: clip;
   margin: 0;
+  max-height: ${({ $showReadMore }) => $showReadMore ? '5.1em' : '6.8em'}; /* 3 or 4 lines at 1.7 line-height */
 `;
 
 const ReadMoreWrapper = styled.div`
