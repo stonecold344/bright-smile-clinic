@@ -47,6 +47,11 @@ const LogoIcon = styled.div`
 `;
 const LogoText = styled.div`
   display: block;
+  text-align: center;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    text-align: right;
+  }
 `;
 const LogoTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.lg};
