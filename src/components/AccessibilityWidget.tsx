@@ -258,76 +258,104 @@ const AccessibilityWidget = () => {
 
   // Detect if button is over a dark background
   useEffect(() => {
+    let rafId = 0;
+    let lastDark: boolean | null = null;
+
     const checkBackground = () => {
-      // Get the button position
-      const buttonBottom = window.innerHeight - 48; // approximate center of button
-      const buttonRight = window.innerWidth - 48;
-      
-      // Temporarily hide the widget to check element behind it
-      const widgetButtons = document.querySelectorAll('[aria-label="פתח תפריט נגישות"]');
-      widgetButtons.forEach(btn => {
-        (btn as HTMLElement).style.visibility = 'hidden';
-      });
-      
-      const element = document.elementFromPoint(buttonRight, buttonBottom);
-      
-      // Restore visibility
-      widgetButtons.forEach(btn => {
-        (btn as HTMLElement).style.visibility = 'visible';
-      });
-      
-      if (element) {
-        // Walk up the DOM tree to find a background color
+      if (rafId) cancelAnimationFrame(rafId);
+
+      rafId = requestAnimationFrame(() => {
+        const buttonEl = document.querySelector(
+          '[aria-label="פתח תפריט נגישות"]'
+        ) as HTMLElement | null;
+
+        if (!buttonEl) return;
+
+        const rect = buttonEl.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        const stack = document.elementsFromPoint(x, y);
+        const element = stack.find(
+          el => el !== buttonEl && !buttonEl.contains(el)
+        ) as Element | undefined;
+
+        if (!element) {
+          if (lastDark !== false) {
+            lastDark = false;
+            setIsOnDarkBackground(false);
+          }
+          return;
+        }
+
+        // If we're over an actual image/video/canvas, assume dark for visibility.
+        if (
+          element instanceof HTMLImageElement ||
+          element instanceof HTMLVideoElement ||
+          element instanceof HTMLCanvasElement
+        ) {
+          if (lastDark !== true) {
+            lastDark = true;
+            setIsOnDarkBackground(true);
+          }
+          return;
+        }
+
         let currentElement: Element | null = element;
-        let bgColor = 'rgba(0, 0, 0, 0)';
-        
+        let isDark: boolean | null = null;
+
         while (currentElement && currentElement !== document.body) {
           const computedStyle = window.getComputedStyle(currentElement);
-          const bg = computedStyle.backgroundColor;
-          
-          // Check if background is not transparent
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            bgColor = bg;
-            break;
-          }
-          
-          // Also check for background-image (gradients, images)
+
           const bgImage = computedStyle.backgroundImage;
           if (bgImage && bgImage !== 'none') {
-            // If there's a background image or gradient, assume dark
-            setIsOnDarkBackground(true);
-            return;
+            isDark = true;
+            break;
           }
-          
+
+          const bg = computedStyle.backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (match) {
+              const [, r, g, b] = match.map(Number);
+              const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+              // Hysteresis to avoid toggling near the threshold
+              if (luminance >= 0.6) isDark = false;
+              else if (luminance <= 0.4) isDark = true;
+              else isDark = lastDark ?? luminance < 0.5;
+            } else {
+              isDark = false;
+            }
+            break;
+          }
+
           currentElement = currentElement.parentElement;
         }
-        
-        // Parse RGB values
-        const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-        if (match) {
-          const [, r, g, b] = match.map(Number);
-          // Calculate luminance - lower values = darker background
-          const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          setIsOnDarkBackground(luminance < 0.5);
-        } else {
-          // Default to light background if can't detect
-          setIsOnDarkBackground(false);
+
+        if (isDark === null) {
+          isDark = false;
         }
-      }
+
+        if (lastDark !== isDark) {
+          lastDark = isDark;
+          setIsOnDarkBackground(isDark);
+        }
+      });
     };
 
-    // Initial check with a small delay to ensure DOM is ready
-    const initialTimeout = setTimeout(checkBackground, 100);
-    
-    window.addEventListener('scroll', checkBackground);
+    const initialTimeout = setTimeout(checkBackground, 150);
+    window.addEventListener('scroll', checkBackground, { passive: true });
     window.addEventListener('resize', checkBackground);
-    
+
     return () => {
       clearTimeout(initialTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', checkBackground);
       window.removeEventListener('resize', checkBackground);
     };
   }, []);
+
 
   useEffect(() => {
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
