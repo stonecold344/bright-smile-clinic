@@ -23,25 +23,13 @@ const HeaderWrapper = styled.header`
 const HeaderInner = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   height: 5.5rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    justify-content: space-between;
-  }
 `;
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    position: static;
-    transform: none;
-  }
 `;
 const LogoIcon = styled.div`
   width: 3.5rem;
@@ -137,12 +125,9 @@ const MobileMenuButton = styled.button`
   display: flex;
   padding: 0.5rem;
   color: ${({ theme }) => theme.colors.primary};
-  position: absolute;
-  left: 1rem;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: none;
-    position: static;
   }
 `;
 const MobileNav = styled.nav`
