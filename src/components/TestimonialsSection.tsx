@@ -45,23 +45,17 @@ const CarouselWrapper = styled.div`
 
 const CarouselViewport = styled.div`
   overflow: hidden;
-  margin: 0 -1rem;
-  padding: 0 1rem;
 `;
 
 const CarouselContainer = styled.div`
   display: flex;
-  gap: 1rem;
 `;
 
 const CarouselSlide = styled.div`
-  flex: 0 0 85%;
+  flex: 0 0 100%;
   min-width: 0;
-  padding-left: 0.5rem;
-  
-  &:first-child {
-    padding-left: 0;
-  }
+  display: flex;
+  justify-content: center;
 `;
 
 const CarouselNav = styled.div`
@@ -126,6 +120,8 @@ const TestimonialCard = styled.div`
   display: flex;
   flex-direction: column;
   height: 320px;
+  width: 100%;
+  max-width: 300px;
   cursor: pointer;
   
   &:hover {
@@ -223,22 +219,24 @@ const Avatar = styled.div`
 
 const AuthorInfo = styled.div`
   min-width: 0;
+  height: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `;
 
 const AuthorName = styled.h4`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.foreground};
   margin: 0;
+  line-height: 1.2;
 `;
 
 const AuthorTitle = styled.p`
   color: ${({ theme }) => theme.colors.mutedForeground};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   margin: 0;
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    display: none;
-  }
+  line-height: 1.2;
 `;
 
 const LoadingWrapper = styled.div`
@@ -400,7 +398,7 @@ const ModalQuoteIcon = styled.div`
   color: hsl(var(--primary) / 0.15);
 `;
 
-const MAX_CONTENT_LENGTH = 100;
+const MAX_CONTENT_LENGTH = 80;
 
 interface TestimonialCardComponentProps {
   testimonial: Testimonial;
