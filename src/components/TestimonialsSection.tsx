@@ -1,15 +1,9 @@
-import { useState } from 'react';
-import styled from 'styled-components';
-import { Star, Quote, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import styled, { keyframes, css } from 'styled-components';
+import { Star, Quote, Loader2, X } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { useTestimonials, Testimonial } from '@/hooks/useTestimonials';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
@@ -45,7 +39,7 @@ const TestimonialCard = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 280px;
+  height: 320px;
   
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.elevated};
@@ -53,8 +47,11 @@ const TestimonialCard = styled.div`
   }
 `;
 
-const CardTop = styled.div`
+const CardContent = styled.div`
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const QuoteIcon = styled.div`
@@ -68,6 +65,7 @@ const Stars = styled.div`
   display: flex;
   gap: 0.25rem;
   margin-bottom: 1rem;
+  flex-shrink: 0;
   
   svg {
     color: #fbbf24;
@@ -75,15 +73,22 @@ const Stars = styled.div`
   }
 `;
 
+const ContentWrapper = styled.div`
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+`;
+
 const Content = styled.p`
   color: ${({ theme }) => theme.colors.foreground};
   line-height: 1.7;
-  margin-bottom: 1rem;
   font-size: ${({ theme }) => theme.fontSizes.base};
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin: 0;
 `;
 
 const ReadMore = styled.button`
@@ -93,10 +98,13 @@ const ReadMore = styled.button`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   cursor: pointer;
   padding: 0;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
   
   &:hover {
-    text-decoration: underline;
+    opacity: 0.8;
   }
 `;
 
@@ -104,9 +112,10 @@ const Author = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
+  margin-top: auto;
+  flex-shrink: 0;
 `;
 
 const Avatar = styled.div`
@@ -123,7 +132,9 @@ const Avatar = styled.div`
   flex-shrink: 0;
 `;
 
-const AuthorInfo = styled.div``;
+const AuthorInfo = styled.div`
+  min-width: 0;
+`;
 
 const AuthorName = styled.h4`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
@@ -135,6 +146,10 @@ const AuthorTitle = styled.p`
   color: ${({ theme }) => theme.colors.mutedForeground};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   margin: 0;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
 `;
 
 const LoadingWrapper = styled.div`
@@ -144,11 +159,130 @@ const LoadingWrapper = styled.div`
   min-height: 200px;
 `;
 
-const ModalContent = styled.p`
+// Modal animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+`;
+
+const scaleIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+`;
+
+const scaleOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+`;
+
+const ModalOverlay = styled.div<{ $isClosing: boolean }>`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  cursor: pointer;
+  animation: ${({ $isClosing }) => $isClosing ? css`${fadeOut} 0.2s ease-out forwards` : css`${fadeIn} 0.2s ease-out forwards`};
+`;
+
+const ModalContainer = styled.div<{ $isClosing: boolean }>`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: hsl(var(--card));
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 500px;
+  width: calc(100% - 2rem);
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: ${({ $isClosing }) => $isClosing ? css`${scaleOut} 0.2s ease-out forwards` : css`${scaleIn} 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards`};
+`;
+
+const ModalCloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: hsl(var(--muted));
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  color: hsl(var(--muted-foreground));
+  
+  &:hover {
+    background: hsl(var(--muted-foreground) / 0.2);
+    transform: scale(1.1);
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+`;
+
+const ModalAvatar = styled.div`
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+`;
+
+const ModalAuthorInfo = styled.div``;
+
+const ModalAuthorName = styled.h3`
+  font-weight: 600;
   color: hsl(var(--foreground));
-  line-height: 1.8;
-  font-size: 1rem;
-  white-space: pre-wrap;
+  margin: 0;
+  font-size: 1.125rem;
+`;
+
+const ModalAuthorTitle = styled.p`
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  margin: 0;
 `;
 
 const ModalStars = styled.div`
@@ -162,36 +296,65 @@ const ModalStars = styled.div`
   }
 `;
 
-const ModalAuthor = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid hsl(var(--border));
+const ModalContent = styled.p`
+  color: hsl(var(--foreground));
+  line-height: 1.8;
+  font-size: 1rem;
+  white-space: pre-wrap;
+  margin: 0;
 `;
 
-const ModalAvatar = styled.div`
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 1.125rem;
-  flex-shrink: 0;
+const ModalQuoteIcon = styled.div`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: hsl(var(--primary) / 0.15);
 `;
 
-const MAX_CONTENT_LENGTH = 120;
+const MAX_CONTENT_LENGTH = 100;
 
 const TestimonialsSection = () => {
   const { data: testimonials = [], isLoading } = useTestimonials();
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   const isContentLong = (content: string) => content.length > MAX_CONTENT_LENGTH;
+
+  const handleCloseModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setSelectedTestimonial(null);
+      setIsClosing(false);
+    }, 200);
+  };
+
+  const handleOpenModal = (testimonial: Testimonial) => {
+    setSelectedTestimonial(testimonial);
+    setIsClosing(false);
+  };
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedTestimonial) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedTestimonial]);
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedTestimonial) {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedTestimonial]);
 
   return (
     <>
@@ -215,7 +378,7 @@ const TestimonialsSection = () => {
             <TestimonialsGrid>
               {testimonials.slice(0, 4).map((testimonial) => (
                 <TestimonialCard key={testimonial.id}>
-                  <CardTop>
+                  <CardContent>
                     <QuoteIcon>
                       <Quote size={32} />
                     </QuoteIcon>
@@ -224,13 +387,15 @@ const TestimonialsSection = () => {
                         <Star key={i} size={18} />
                       ))}
                     </Stars>
-                    <Content>{testimonial.content}</Content>
-                    {isContentLong(testimonial.content) && (
-                      <ReadMore onClick={() => setSelectedTestimonial(testimonial)}>
-                        קרא עוד...
-                      </ReadMore>
-                    )}
-                  </CardTop>
+                    <ContentWrapper>
+                      <Content>{testimonial.content}</Content>
+                      {isContentLong(testimonial.content) && (
+                        <ReadMore onClick={() => handleOpenModal(testimonial)}>
+                          קרא עוד...
+                        </ReadMore>
+                      )}
+                    </ContentWrapper>
+                  </CardContent>
                   <Author>
                     <Avatar>{testimonial.name.charAt(0)}</Avatar>
                     <AuthorInfo>
@@ -245,34 +410,34 @@ const TestimonialsSection = () => {
         </Container>
       </SectionWrapper>
 
-      <Dialog open={!!selectedTestimonial} onOpenChange={() => setSelectedTestimonial(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>המלצה</DialogTitle>
-          </DialogHeader>
-          {selectedTestimonial && (
-            <>
-              <ModalStars>
-                {Array.from({ length: selectedTestimonial.rating }).map((_, i) => (
-                  <Star key={i} size={18} />
-                ))}
-              </ModalStars>
-              <ModalContent>{selectedTestimonial.content}</ModalContent>
-              <ModalAuthor>
-                <ModalAvatar>{selectedTestimonial.name.charAt(0)}</ModalAvatar>
-                <div>
-                  <AuthorName style={{ color: 'hsl(var(--foreground))' }}>{selectedTestimonial.name}</AuthorName>
-                  {selectedTestimonial.title && (
-                    <AuthorTitle style={{ color: 'hsl(var(--muted-foreground))' }}>
-                      {selectedTestimonial.title}
-                    </AuthorTitle>
-                  )}
-                </div>
-              </ModalAuthor>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedTestimonial && (
+        <>
+          <ModalOverlay $isClosing={isClosing} onClick={handleCloseModal} />
+          <ModalContainer $isClosing={isClosing}>
+            <ModalCloseButton onClick={handleCloseModal} aria-label="סגור">
+              <X size={16} />
+            </ModalCloseButton>
+            <ModalQuoteIcon>
+              <Quote size={48} />
+            </ModalQuoteIcon>
+            <ModalHeader>
+              <ModalAvatar>{selectedTestimonial.name.charAt(0)}</ModalAvatar>
+              <ModalAuthorInfo>
+                <ModalAuthorName>{selectedTestimonial.name}</ModalAuthorName>
+                {selectedTestimonial.title && (
+                  <ModalAuthorTitle>{selectedTestimonial.title}</ModalAuthorTitle>
+                )}
+              </ModalAuthorInfo>
+            </ModalHeader>
+            <ModalStars>
+              {Array.from({ length: selectedTestimonial.rating }).map((_, i) => (
+                <Star key={i} size={20} />
+              ))}
+            </ModalStars>
+            <ModalContent>{selectedTestimonial.content}</ModalContent>
+          </ModalContainer>
+        </>
+      )}
     </>
   );
 };
