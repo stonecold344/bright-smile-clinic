@@ -78,12 +78,12 @@ const LogoText = styled.div`
 const LogoTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.foreground};
+  color: white;
   margin: 0;
 `;
 const LogoSubtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.primary};
+  color: white;
   margin: 0;
   display: none;
   
