@@ -86,7 +86,6 @@ const HeroTitle = styled.h1`
   color: ${({ theme }) => theme.colors.primaryForeground};
   line-height: 1.1;
   margin-bottom: 1.5rem;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: ${({ theme }) => theme.fontSizes['6xl']};
