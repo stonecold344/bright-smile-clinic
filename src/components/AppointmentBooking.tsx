@@ -446,7 +446,7 @@ const AppointmentBooking = () => {
     };
   }, [currentMonth]);
 
-  // Generate days for full month view (4-5 weeks grid)
+  // Generate days for full month view (exactly 4 rows = 28 slots)
   const getMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -465,17 +465,8 @@ const AppointmentBooking = () => {
       currentDate = addDays(currentDate, 1);
     }
     
-    // Pad to complete the last week (28 days = 4 rows)
-    while (days.length < 28) {
-      days.push(null);
-    }
-    
-    // If we have more than 28, extend to 35 (5 rows)
-    while (days.length > 28 && days.length < 35) {
-      days.push(null);
-    }
-    
-    return days;
+    // Limit to exactly 28 slots (4 rows)
+    return days.slice(0, 28);
   };
 
   // Check if a date is a working day (Sunday to Thursday)
