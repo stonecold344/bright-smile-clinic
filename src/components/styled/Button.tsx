@@ -71,13 +71,41 @@ const variantStyles = {
     }
   `,
   heroOutline: css`
-    background: transparent;
+    background: linear-gradient(135deg, hsla(0, 0%, 100%, 0.15) 0%, hsla(0, 0%, 100%, 0.05) 100%);
+    backdrop-filter: blur(8px);
     color: ${({ theme }) => theme.colors.primaryForeground};
-    font-weight: ${({ theme }) => theme.fontWeights.semibold};
-    border: 2px solid ${({ theme }) => theme.colors.primaryForeground};
+    font-weight: ${({ theme }) => theme.fontWeights.bold};
+    border: 2px solid hsla(0, 0%, 100%, 0.4);
+    box-shadow: 
+      0 4px 20px -4px hsla(174, 62%, 45%, 0.3),
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.2);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, hsla(174, 62%, 45%, 0.2) 0%, hsla(38, 90%, 55%, 0.15) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
     
     &:hover {
-      background: ${({ theme }) => theme.colors.primaryForeground}1a;
+      transform: translateY(-2px) scale(1.02);
+      border-color: hsla(0, 0%, 100%, 0.6);
+      box-shadow: 
+        0 8px 30px -4px hsla(174, 62%, 45%, 0.4),
+        0 0 20px hsla(38, 90%, 55%, 0.2),
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.3);
+      
+      &::before {
+        opacity: 1;
+      }
+    }
+    
+    &:active {
+      transform: translateY(0) scale(1);
     }
   `,
   call: css`
