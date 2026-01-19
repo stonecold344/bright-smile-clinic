@@ -163,28 +163,30 @@ const TrustBadges = styled.div`
 const TrustBadge = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   color: white;
-  font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+  }
 `;
 const TrustIcon = styled.div`
-  width: 3rem;
-  height: 3rem;
-  background: ${({
-  theme
-}) => theme.colors.primary}4d;
-  border-radius: ${({
-  theme
-}) => theme.radii.full};
+  width: 2.5rem;
+  height: 2.5rem;
+  background: ${({ theme }) => theme.colors.primary}4d;
+  border-radius: ${({ theme }) => theme.radii.full};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  flex-shrink: 0;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    width: 3rem;
+    height: 3rem;
+  }
 `;
 const ScrollIndicator = styled.button`
   position: absolute;

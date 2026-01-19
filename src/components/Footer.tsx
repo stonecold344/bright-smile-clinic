@@ -99,6 +99,8 @@ const ContactItem = styled.a`
   svg {
     color: ${({ theme }) => theme.colors.primary};
     flex-shrink: 0;
+    width: 20px;
+    height: 20px;
   }
   
   &:hover {
@@ -117,6 +119,8 @@ const ContactInfo = styled.div`
   svg {
     color: ${({ theme }) => theme.colors.primary};
     flex-shrink: 0;
+    width: 20px;
+    height: 20px;
     margin-top: 0.125rem;
   }
 `;

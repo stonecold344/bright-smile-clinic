@@ -124,27 +124,20 @@ const TrustElements = styled.div`
 const TrustItem = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground}cc;
+  color: ${({ theme }) => theme.colors.primaryForeground}cc;
 `;
+
 const CheckIcon = styled.div`
   width: 1.5rem;
   height: 1.5rem;
-  background: ${({
-  theme
-}) => theme.colors.primaryForeground}33;
-  border-radius: ${({
-  theme
-}) => theme.radii.full};
-  display: none;
+  background: ${({ theme }) => theme.colors.primaryForeground}33;
+  border-radius: ${({ theme }) => theme.radii.full};
+  display: flex;
   align-items: center;
   justify-content: center;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    display: flex;
-  }
+  flex-shrink: 0;
 `;
 const CTASection = () => {
   return <SectionWrapper>
