@@ -46,24 +46,16 @@ const Logo = styled(Link)`
 const MobileCenterTitle = styled.div`
   display: none;
   
-  @media (max-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
     display: block;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     
     h1 {
-      font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-      font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
-      color: ${({
-  theme
-}) => theme.colors.primary};
+      font-size: ${({ theme }) => theme.fontSizes.lg};
+      font-weight: ${({ theme }) => theme.fontWeights.bold};
+      color: ${({ theme }) => theme.colors.primary};
       margin: 0;
       white-space: nowrap;
     }
