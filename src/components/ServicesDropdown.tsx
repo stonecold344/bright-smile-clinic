@@ -36,14 +36,15 @@ const DropdownContainer = styled.div`
   }
 `;
 
-const DropdownTrigger = styled.button<{ $active?: boolean }>`
+const DropdownTrigger = styled.button<{ $active?: boolean; $scrolled?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.25rem;
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
-  transition: color ${({ theme }) => theme.transitions.normal};
+  color: ${({ $active, $scrolled, theme }) => 
+    $active ? theme.colors.primary : ($scrolled ? theme.colors.foreground : 'white')};
+  transition: color 0.3s ease;
   padding-bottom: 0.25rem;
   border-bottom: ${({ $active, theme }) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
   background: transparent;
@@ -122,9 +123,10 @@ const AllServicesLink = styled(Link)`
 
 interface ServicesDropdownProps {
   onNavigate?: () => void;
+  scrolled?: boolean;
 }
 
-const ServicesDropdown = ({ onNavigate }: ServicesDropdownProps) => {
+const ServicesDropdown = ({ onNavigate, scrolled }: ServicesDropdownProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { data: treatments = [] } = useTreatments();
@@ -145,6 +147,7 @@ const ServicesDropdown = ({ onNavigate }: ServicesDropdownProps) => {
       <DropdownTrigger
         className="dropdown-trigger"
         $active={isActive}
+        $scrolled={scrolled}
         aria-haspopup="true"
       >
         שירותים
