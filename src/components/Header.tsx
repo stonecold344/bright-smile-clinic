@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Calendar, Menu, X, Smile, ChevronDown } from 'lucide-react';
@@ -258,97 +258,133 @@ const Header = () => {
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const {
-    data: treatments = []
-  } = useTreatments();
+  const { data: treatments = [] } = useTreatments();
 
-  // Detect if header is over a dark background
+  // Stabilize background detection to prevent flicker
+  const lastBgIsLightRef = useRef<boolean | null>(null);
+  const pendingBgIsLightRef = useRef<{ value: boolean; since: number } | null>(null);
+
+  // Detect if header is over a light/dark background
   useEffect(() => {
     let rafId = 0;
-    let lastResult: boolean | null = null;
+
+    const parseRgb = (rgb: string) => {
+      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return null;
+      return {
+        r: Number(match[1]),
+        g: Number(match[2]),
+        b: Number(match[3]),
+      };
+    };
+
+    const luminanceFromRgb = ({ r, g, b }: { r: number; g: number; b: number }) =>
+      (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    const pickBehindHeaderElement = (x: number, y: number, headerEl: HTMLElement | null) => {
+      const stack = document.elementsFromPoint(x, y);
+      if (!headerEl) return stack[0];
+      return stack.find((el) => !headerEl.contains(el));
+    };
+
+    const isLightAtElement = (element: Element, fallback: boolean) => {
+      // If we're over an actual image/video/canvas, assume "dark" for readability.
+      if (
+        element instanceof HTMLImageElement ||
+        element instanceof HTMLVideoElement ||
+        element instanceof HTMLCanvasElement
+      ) {
+        return false;
+      }
+
+      let current: Element | null = element;
+      while (current && current !== document.body) {
+        const style = window.getComputedStyle(current);
+
+        // Gradients / background images: treat as dark to keep header stable
+        const bgImage = style.backgroundImage;
+        if (bgImage && bgImage !== 'none') return false;
+
+        const bg = style.backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          const parsed = parseRgb(bg);
+          if (!parsed) return fallback;
+
+          const l = luminanceFromRgb(parsed);
+          if (l >= 0.58) return true;
+          if (l <= 0.42) return false;
+          return fallback;
+        }
+
+        current = current.parentElement;
+      }
+
+      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+      const parsed = parseRgb(bodyBg);
+      if (!parsed) return fallback;
+
+      const l = luminanceFromRgb(parsed);
+      return l >= 0.5;
+    };
+
+    const computeIsLightBehindHeader = () => {
+      const headerEl = document.querySelector('header') as HTMLElement | null;
+      const rect = headerEl?.getBoundingClientRect();
+      const sampleY = rect
+        ? Math.min(Math.floor(rect.bottom + 4), window.innerHeight - 1)
+        : Math.min(90, window.innerHeight - 1);
+
+      const xs = [
+        Math.floor(window.innerWidth * 0.25),
+        Math.floor(window.innerWidth * 0.5),
+        Math.floor(window.innerWidth * 0.75),
+      ];
+
+      const fallback = lastBgIsLightRef.current ?? true;
+      const votes = xs
+        .map((x) => pickBehindHeaderElement(x, sampleY, headerEl))
+        .filter(Boolean)
+        .map((el) => isLightAtElement(el as Element, fallback));
+
+      if (votes.length === 0) return fallback;
+      const lightCount = votes.filter(Boolean).length;
+      return lightCount >= Math.ceil(votes.length / 2);
+    };
+
+    const applyDebounced = (isLight: boolean) => {
+      const now = performance.now();
+      const last = lastBgIsLightRef.current;
+
+      if (last === null) {
+        lastBgIsLightRef.current = isLight;
+        setIsScrolled(isLight);
+        return;
+      }
+
+      if (isLight === last) {
+        pendingBgIsLightRef.current = null;
+        return;
+      }
+
+      const pending = pendingBgIsLightRef.current;
+      if (!pending || pending.value !== isLight) {
+        pendingBgIsLightRef.current = { value: isLight, since: now };
+        return;
+      }
+
+      if (now - pending.since >= 180) {
+        pendingBgIsLightRef.current = null;
+        lastBgIsLightRef.current = isLight;
+        setIsScrolled(isLight);
+      }
+    };
 
     const checkBackground = () => {
       if (rafId) cancelAnimationFrame(rafId);
 
       rafId = requestAnimationFrame(() => {
-        // Sample the content *behind* the fixed header, without mutating DOM styles.
-        const headerY = 44; // center of header (88px / 2)
-        const headerX = window.innerWidth / 2;
-
-        const headerEl = document.querySelector('header') as HTMLElement | null;
-        const stack = document.elementsFromPoint(headerX, headerY);
-        const element = headerEl
-          ? (stack.find(el => !headerEl.contains(el)) as Element | undefined)
-          : stack[0];
-
-        if (!element) return;
-
-        // If we're over an actual image/video/canvas, assume "dark" for readability.
-        if (
-          element instanceof HTMLImageElement ||
-          element instanceof HTMLVideoElement ||
-          element instanceof HTMLCanvasElement
-        ) {
-          const newResult = false; // dark background => use white text
-          if (lastResult !== newResult) {
-            lastResult = newResult;
-            setIsScrolled(newResult);
-          }
-          return;
-        }
-
-        let currentElement: Element | null = element;
-        let foundDarkBackground: boolean | null = null;
-
-        while (currentElement && currentElement !== document.body) {
-          const computedStyle = window.getComputedStyle(currentElement);
-
-          // Gradients / background images
-          const bgImage = computedStyle.backgroundImage;
-          if (bgImage && bgImage !== 'none') {
-            foundDarkBackground = true;
-            break;
-          }
-
-          // Solid background color
-          const bg = computedStyle.backgroundColor;
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-            if (match) {
-              const [, r, g, b] = match.map(Number);
-              const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-              // Hysteresis to avoid toggling near the threshold
-              if (luminance >= 0.6) foundDarkBackground = false;
-              else if (luminance <= 0.4) foundDarkBackground = true;
-              else foundDarkBackground = lastResult === null ? luminance < 0.5 : !lastResult;
-            } else {
-              foundDarkBackground = false;
-            }
-            break;
-          }
-
-          currentElement = currentElement.parentElement;
-        }
-
-        // Fallback: body background
-        if (foundDarkBackground === null) {
-          const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-          const match = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-          if (match) {
-            const [, r, g, b] = match.map(Number);
-            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-            foundDarkBackground = luminance < 0.5;
-          } else {
-            foundDarkBackground = false;
-          }
-        }
-
-        const newResult = !foundDarkBackground; // light => primary text
-        if (lastResult !== newResult) {
-          lastResult = newResult;
-          setIsScrolled(newResult);
-        }
+        const isLight = computeIsLightBehindHeader();
+        applyDebounced(isLight);
       });
     };
 
