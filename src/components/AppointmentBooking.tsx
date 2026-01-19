@@ -139,14 +139,14 @@ const NavButton = styled.button`
 `;
 
 const WeekDays = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
   margin-bottom: 0.375rem;
   direction: rtl;
 `;
 
 const WeekDay = styled.div`
-  flex: 1;
   text-align: center;
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -155,15 +155,15 @@ const WeekDay = styled.div`
 `;
 
 const DaysGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
   direction: rtl;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
-  width: calc((100% - 0.75rem) / 7);
   aspect-ratio: 1;
+  width: 100%;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -388,8 +388,8 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-// Hebrew day names (Saturday to Sunday)
-const hebrewDays = ['ש׳', 'ו׳', 'ה׳', 'ד׳', 'ג׳', 'ב׳', 'א׳'];
+// Hebrew day names (Sunday to Saturday)
+const hebrewDays = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
 interface Appointment {
   appointment_date: string;
@@ -452,8 +452,7 @@ const AppointmentBooking = () => {
   const getMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    // Treat Saturday as the first day of the week (0 = Saturday)
-    const startDay = (getDay(monthStart) + 1) % 7;
+    const startDay = getDay(monthStart); // 0 = Sunday
     const days: (Date | null)[] = [];
     
     // Add empty slots for days before the month starts
