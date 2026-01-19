@@ -49,6 +49,7 @@ const DropdownTrigger = styled.button<{ $active?: boolean; $scrolled?: boolean }
   border-bottom: ${({ $active, theme }) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
   background: transparent;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
@@ -56,6 +57,10 @@ const DropdownTrigger = styled.button<{ $active?: boolean; $scrolled?: boolean }
 
   svg {
     transition: transform ${({ theme }) => theme.transitions.normal};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 `;
 
