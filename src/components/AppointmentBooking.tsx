@@ -513,17 +513,24 @@ const AppointmentBooking = () => {
         return;
       }
 
-      // Send WhatsApp notification (fire and forget, don't block on errors)
-      supabase.functions.invoke('send-whatsapp', {
-        body: {
-          phone: validatedData.client_phone,
-          name: validatedData.client_name,
-          date: format(selectedDate, 'dd/MM/yyyy'),
-          time: selectedTime
+      // Send WhatsApp confirmation - opens WhatsApp for customer to confirm with clinic
+      try {
+        const { data: whatsappData } = await supabase.functions.invoke('send-appointment-confirmation', {
+          body: {
+            clientName: validatedData.client_name,
+            clientPhone: validatedData.client_phone,
+            appointmentDate: format(selectedDate, 'dd/MM/yyyy'),
+            appointmentTime: selectedTime
+          }
+        });
+        
+        if (whatsappData?.success && whatsappData?.whatsappUrl) {
+          // Open WhatsApp so customer can confirm with clinic
+          window.open(whatsappData.whatsappUrl, '_blank');
         }
-      }).catch(() => {
+      } catch {
         // Silently ignore WhatsApp errors - appointment was already created
-      });
+      }
 
       toast.success('התור נקבע בהצלחה!');
       
