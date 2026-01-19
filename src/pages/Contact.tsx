@@ -10,7 +10,7 @@ import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const contactInfo = [
-  { icon: MessageCircle, title: 'WhatsApp', value: 'שלחו לנו הודעה', link: 'https://wa.me/97200000000' },
+  { icon: MessageCircle, title: 'WhatsApp', value: 'שלחו לנו הודעה', link: 'https://wa.me/972507334482' },
   { icon: Mail, title: 'אימייל', value: 'info@dental-clinic.co.il', link: 'mailto:info@dental-clinic.co.il' },
   { icon: MapPin, title: 'כתובת', value: 'רחוב הרצל 123, תל אביב', link: '#' },
   { icon: Clock, title: 'שעות פעילות', value: 'א׳-ה׳: 08:00-20:00', link: '#' },
