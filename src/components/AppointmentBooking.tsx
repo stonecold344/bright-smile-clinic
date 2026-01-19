@@ -139,14 +139,14 @@ const NavButton = styled.button`
 `;
 
 const WeekDays = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  flex-direction: row-reverse;
   gap: 0.125rem;
   margin-bottom: 0.375rem;
-  direction: rtl;
 `;
 
 const WeekDay = styled.div`
+  flex: 1;
   text-align: center;
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -155,15 +155,15 @@ const WeekDay = styled.div`
 `;
 
 const DaysGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
   gap: 0.125rem;
-  direction: rtl;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
+  width: calc((100% - 0.75rem) / 7);
   aspect-ratio: 1;
-  width: 100%;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
