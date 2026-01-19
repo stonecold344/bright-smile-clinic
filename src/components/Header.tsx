@@ -281,13 +281,7 @@ const Header = () => {
     const luminanceFromRgb = ({ r, g, b }: { r: number; g: number; b: number }) =>
       (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-    const pickBehindHeaderElement = (x: number, y: number, headerEl: HTMLElement | null) => {
-      const stack = document.elementsFromPoint(x, y);
-      if (!headerEl) return stack[0];
-      return stack.find((el) => !headerEl.contains(el));
-    };
-
-    const isLightAtElement = (element: Element, fallback: boolean) => {
+    const getIsLightFromElement = (element: Element, fallback: boolean): boolean | null => {
       // If we're over an actual image/video/canvas, assume "dark" for readability.
       if (
         element instanceof HTMLImageElement ||
@@ -308,7 +302,7 @@ const Header = () => {
         const bg = style.backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
           const parsed = parseRgb(bg);
-          if (!parsed) return fallback;
+          if (!parsed) return null;
 
           const l = luminanceFromRgb(parsed);
           if (l >= 0.58) return true;
@@ -319,20 +313,35 @@ const Header = () => {
         current = current.parentElement;
       }
 
+      // No decisive background found on this element chain.
+      return null;
+    };
+
+    const isLightAtPoint = (x: number, y: number, headerEl: HTMLElement | null, fallback: boolean) => {
+      const stack = document.elementsFromPoint(x, y);
+      const candidates = headerEl ? stack.filter((el) => !headerEl.contains(el)) : stack;
+
+      for (const el of candidates) {
+        const v = getIsLightFromElement(el as Element, fallback);
+        if (v !== null) return v;
+      }
+
+      // Final fallback: use body background
       const bodyBg = window.getComputedStyle(document.body).backgroundColor;
       const parsed = parseRgb(bodyBg);
       if (!parsed) return fallback;
 
       const l = luminanceFromRgb(parsed);
-      return l >= 0.5;
+      if (l >= 0.58) return true;
+      if (l <= 0.42) return false;
+      return fallback;
     };
 
     const computeIsLightBehindHeader = () => {
       const headerEl = document.querySelector('header') as HTMLElement | null;
       const rect = headerEl?.getBoundingClientRect();
-      const sampleY = rect
-        ? Math.min(Math.floor(rect.bottom + 4), window.innerHeight - 1)
-        : Math.min(90, window.innerHeight - 1);
+      const sampleYRaw = rect ? rect.top + rect.height * 0.5 : 24;
+      const sampleY = Math.min(Math.max(Math.floor(sampleYRaw), 0), window.innerHeight - 1);
 
       const xs = [
         Math.floor(window.innerWidth * 0.25),
@@ -341,12 +350,8 @@ const Header = () => {
       ];
 
       const fallback = lastBgIsLightRef.current ?? true;
-      const votes = xs
-        .map((x) => pickBehindHeaderElement(x, sampleY, headerEl))
-        .filter(Boolean)
-        .map((el) => isLightAtElement(el as Element, fallback));
+      const votes = xs.map((x) => isLightAtPoint(x, sampleY, headerEl, fallback));
 
-      if (votes.length === 0) return fallback;
       const lightCount = votes.filter(Boolean).length;
       return lightCount >= Math.ceil(votes.length / 2);
     };
