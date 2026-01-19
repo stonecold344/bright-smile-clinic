@@ -8,6 +8,7 @@ import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const contactInfo = [
   { icon: MessageCircle, title: 'WhatsApp', value: 'שלחו לנו הודעה', link: 'https://wa.me/972507334482' },
@@ -47,10 +48,42 @@ const Contact = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => { toast.success('ההודעה נשלחה בהצלחה!'); setFormData({ name: '', phone: '', email: '', message: '' }); setIsSubmitting(false); }, 1000);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('send-contact-whatsapp', {
+        body: {
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || undefined,
+          message: formData.message.trim() || undefined,
+        }
+      });
+
+      if (error) {
+        console.error('Error sending contact form:', error);
+        toast.error('אירעה שגיאה, נסו שוב');
+        return;
+      }
+
+      if (data?.success && data?.whatsappUrl) {
+        // Open WhatsApp with the pre-filled message to the clinic
+        window.open(data.whatsappUrl, '_blank');
+        toast.success('ההודעה נשלחה בהצלחה!');
+        setFormData({ name: '', phone: '', email: '', message: '' });
+      } else if (data?.error) {
+        toast.error(data.error);
+      } else {
+        toast.error('אירעה שגיאה, נסו שוב');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('אירעה שגיאה, נסו שוב');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, [e.target.name]: e.target.value });
