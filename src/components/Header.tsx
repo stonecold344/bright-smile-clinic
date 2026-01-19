@@ -12,9 +12,13 @@ const HeaderWrapper = styled.header`
   right: 0;
   left: 0;
   z-index: 50;
-  background: ${({ theme }) => theme.colors.card.replace('hsl(', 'hsla(').replace(')', ', 0.95)')};
+  background: ${({
+  theme
+}) => theme.colors.card}f2;
   backdrop-filter: blur(12px);
-  box-shadow: ${({ theme }) => theme.shadows.soft};
+  box-shadow: ${({
+  theme
+}) => theme.shadows.soft};
 `;
 const HeaderInner = styled.div`
   display: flex;
@@ -277,29 +281,10 @@ const Header = () => {
     const luminanceFromRgb = ({ r, g, b }: { r: number; g: number; b: number }) =>
       (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-    const hasOwnPaint = (el: Element) => {
-      if (
-        el instanceof HTMLImageElement ||
-        el instanceof HTMLVideoElement ||
-        el instanceof HTMLCanvasElement
-      ) {
-        return true;
-      }
-
-      const style = window.getComputedStyle(el);
-      const bgImage = style.backgroundImage;
-      if (bgImage && bgImage !== 'none') return true;
-
-      const bg = style.backgroundColor;
-      return !!bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
-    };
-
     const pickBehindHeaderElement = (x: number, y: number, headerEl: HTMLElement | null) => {
       const stack = document.elementsFromPoint(x, y);
-      const candidates = headerEl ? stack.filter((el) => !headerEl.contains(el)) : stack;
-
-      // Prefer an element that actually paints a background (avoids sampling text wrappers).
-      return candidates.find((el) => hasOwnPaint(el as Element)) ?? candidates[0];
+      if (!headerEl) return stack[0];
+      return stack.find((el) => !headerEl.contains(el));
     };
 
     const isLightAtElement = (element: Element, fallback: boolean) => {
