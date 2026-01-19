@@ -75,8 +75,8 @@ const FeatureItem = styled.li`
 `;
 
 const VideoSection = () => {
-  // Replace with your actual YouTube video ID
-  const youtubeVideoId = 'dQw4w9WgXcQ';
+  // Cinematic nature video
+  const youtubeVideoId = 'BHACKCNDMW8';
 
   const features = [
     'טיפולים מותאמים אישית לכל מטופל',
