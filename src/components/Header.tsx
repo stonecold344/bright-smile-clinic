@@ -482,7 +482,7 @@ const Header = () => {
           </Logo>
           
           <MobileCenterTitle>
-            
+            <h1>מרפאת שיניים</h1>
           </MobileCenterTitle>
 
           <Nav>
