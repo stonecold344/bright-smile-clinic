@@ -46,23 +46,71 @@ serve(async (req) => {
     // Verify the request has proper authorization
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('Missing or invalid authorization header');
       return new Response(
         JSON.stringify({ success: false, error: 'Missing authorization' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    // Create Supabase client with service role to verify the appointment exists
-    const supabaseClient = createClient(
+    // Create Supabase client with user's token to verify their identity
+    const supabaseUserClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Verify the user and get their claims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseUserClient.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.log('Failed to verify user token:', claimsError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+    console.log('User authenticated:', userId);
+
+    // Create Supabase client with service role to check admin status and verify appointment
+    const supabaseServiceClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    // Verify the user has admin role
+    const { data: isAdmin, error: roleError } = await supabaseServiceClient.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin'
+    });
+
+    if (roleError) {
+      console.error('Error checking admin role:', roleError.message);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to verify permissions' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    if (!isAdmin) {
+      console.log('User is not an admin:', userId);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Forbidden - Admin access required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
+
+    console.log('Admin access verified for user:', userId);
 
     const requestData: WhatsAppRequest = await req.json();
     
     // Validate input data
     const validationError = validateInput(requestData);
     if (validationError) {
+      console.log('Input validation failed:', validationError);
       return new Response(
         JSON.stringify({ success: false, error: validationError }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -89,7 +137,7 @@ serve(async (req) => {
 
     // Verify the appointment exists in the database
     const dbDate = convertDateFormat(date);
-    const { data: appointment, error: appointmentError } = await supabaseClient
+    const { data: appointment, error: appointmentError } = await supabaseServiceClient
       .from('appointments')
       .select('id, client_phone, client_name, status')
       .eq('client_phone', phoneForQuery)
@@ -106,11 +154,14 @@ serve(async (req) => {
     }
 
     if (!appointment) {
+      console.log('Appointment not found for phone:', phoneForQuery, 'date:', dbDate, 'time:', time);
       return new Response(
         JSON.stringify({ success: false, error: 'Appointment not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
+
+    console.log('Appointment verified:', appointment.id, 'by admin:', userId);
 
     // Clean phone number - remove non-digits and add country code if needed
     let cleanPhone = phone.replace(/\D/g, '');
@@ -144,6 +195,8 @@ serve(async (req) => {
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 
+    console.log('WhatsApp notification prepared for appointment:', appointment.id);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -157,6 +210,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({
         success: false,
