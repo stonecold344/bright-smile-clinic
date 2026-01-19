@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { format, addDays, isSameDay, startOfToday, getDay } from 'date-fns';
+import { format, addDays, isSameDay, startOfToday, getDay, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
@@ -397,7 +397,7 @@ interface Appointment {
 const AppointmentBooking = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [weekStart, setWeekStart] = useState(startOfToday());
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(startOfToday()));
   const [bookedSlots, setBookedSlots] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -411,7 +411,7 @@ const AppointmentBooking = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       const { data, error } = await supabase
-        .rpc('get_booked_slots', { check_date: format(weekStart, 'yyyy-MM-dd') });
+        .rpc('get_booked_slots', { check_date: format(currentMonth, 'yyyy-MM-dd') });
       
       if (error) {
         if (import.meta.env.DEV) {
@@ -444,14 +444,37 @@ const AppointmentBooking = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [weekStart]);
+  }, [currentMonth]);
 
-  // Generate days for current week view
-  const getDaysInWeek = () => {
-    const days: Date[] = [];
-    for (let i = 0; i < 14; i++) {
-      days.push(addDays(weekStart, i));
+  // Generate days for full month view (4-5 weeks grid)
+  const getMonthDays = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const startDay = getDay(monthStart); // 0 = Sunday
+    const days: (Date | null)[] = [];
+    
+    // Add empty slots for days before the month starts
+    for (let i = 0; i < startDay; i++) {
+      days.push(null);
     }
+    
+    // Add all days of the month
+    let currentDate = monthStart;
+    while (currentDate <= monthEnd) {
+      days.push(currentDate);
+      currentDate = addDays(currentDate, 1);
+    }
+    
+    // Pad to complete the last week (28 days = 4 rows)
+    while (days.length < 28) {
+      days.push(null);
+    }
+    
+    // If we have more than 28, extend to 35 (5 rows)
+    while (days.length > 28 && days.length < 35) {
+      days.push(null);
+    }
+    
     return days;
   };
 
@@ -546,7 +569,8 @@ const AppointmentBooking = () => {
   };
 
   const today = startOfToday();
-  const days = getDaysInWeek();
+  const monthDays = getMonthDays();
+  const thisMonth = startOfMonth(today);
 
   return (
     <SectionWrapper id="booking">
@@ -579,15 +603,15 @@ const AppointmentBooking = () => {
               </ColumnHeader>
               
               <CalendarNav>
-                <MonthLabel>{format(weekStart, 'MMMM yyyy', { locale: he })}</MonthLabel>
+                <MonthLabel>{format(currentMonth, 'MMMM yyyy', { locale: he })}</MonthLabel>
                 <NavButtons>
                   <NavButton 
-                    onClick={() => setWeekStart(addDays(weekStart, -7))}
-                    disabled={isSameDay(weekStart, today)}
+                    onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}
+                    disabled={isSameMonth(currentMonth, thisMonth)}
                   >
                     <ChevronRight size={16} />
                   </NavButton>
-                  <NavButton onClick={() => setWeekStart(addDays(weekStart, 7))}>
+                  <NavButton onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
                     <ChevronLeft size={16} />
                   </NavButton>
                 </NavButtons>
@@ -600,29 +624,10 @@ const AppointmentBooking = () => {
               </WeekDays>
 
               <DaysGrid>
-                {days.slice(0, 7).map((date) => {
-                  const isWorking = isWorkingDay(date);
-                  const isPast = date < today;
-                  return (
-                    <DayButton
-                      key={date.toISOString()}
-                      $isSelected={selectedDate ? isSameDay(date, selectedDate) : false}
-                      $isToday={isSameDay(date, today)}
-                      $isDisabled={!isWorking || isPast}
-                      disabled={!isWorking || isPast}
-                      onClick={() => {
-                        setSelectedDate(date);
-                        setSelectedTime(null);
-                      }}
-                    >
-                      {format(date, 'd')}
-                    </DayButton>
-                  );
-                })}
-              </DaysGrid>
-
-              <DaysGrid style={{ marginTop: '0.125rem' }}>
-                {days.slice(7, 14).map((date) => {
+                {monthDays.map((date, index) => {
+                  if (!date) {
+                    return <DayButton key={`empty-${index}`} $isDisabled disabled style={{ visibility: 'hidden' }} />;
+                  }
                   const isWorking = isWorkingDay(date);
                   const isPast = date < today;
                   return (
