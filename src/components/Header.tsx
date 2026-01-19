@@ -107,30 +107,19 @@ const Nav = styled.nav`
 `;
 const NavLink = styled(Link)<{
   $active?: boolean;
+  $scrolled?: boolean;
 }>`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.base};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.medium};
-  color: ${({
-  $active,
-  theme
-}) => $active ? theme.colors.primary : theme.colors.foreground};
-  transition: color ${({
-  theme
-}) => theme.transitions.normal};
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ $active, $scrolled, theme }) => 
+    $active ? theme.colors.primary : ($scrolled ? theme.colors.foreground : 'white')};
+  transition: color 0.3s ease;
   padding-bottom: 0.25rem;
-  border-bottom: ${({
-  $active,
-  theme
-}) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  border-bottom: ${({ $active, theme }) => 
+    $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
   
   &:hover {
-    color: ${({
-  theme
-}) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
   }
 `;
 const CTAWrapper = styled.div`
@@ -449,11 +438,11 @@ const Header = () => {
           </MobileCenterTitle>
 
           <Nav>
-            <NavLink to="/" $active={isActive('/')}>בית</NavLink>
-            <ServicesDropdown />
+            <NavLink to="/" $active={isActive('/')} $scrolled={isScrolled}>בית</NavLink>
+            <ServicesDropdown scrolled={isScrolled} />
             
-            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
-            <NavLink to="/contact" $active={isActive('/contact')}>צור קשר</NavLink>
+            <NavLink to="/about" $active={isActive('/about')} $scrolled={isScrolled}>אודות</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={isScrolled}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
