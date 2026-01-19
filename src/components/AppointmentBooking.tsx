@@ -157,6 +157,7 @@ const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
+  direction: rtl;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
