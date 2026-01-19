@@ -307,6 +307,10 @@ const Header = () => {
     data: treatments = []
   } = useTreatments();
 
+  // Pages with light hero backgrounds that need dark header text
+  const lightHeroPages = ['/about', '/contact', '/services', '/appointments'];
+  const hasLightHero = lightHeroPages.some(page => location.pathname.startsWith(page));
+
   // Stabilize background detection to prevent flicker
   const lastBgIsLightRef = useRef<boolean | null>(null);
   const pendingBgIsLightRef = useRef<{
@@ -436,6 +440,9 @@ const Header = () => {
     };
   }, []);
 
+  // Force light mode (dark text) on pages with light hero backgrounds
+  const effectiveScrolled = hasLightHero || isScrolled;
+
   // Lock body scroll when mobile menu is open
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -469,8 +476,8 @@ const Header = () => {
           <Logo to="/">
             <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
-              <LogoTitle $scrolled={isScrolled}>מרפאת שיניים</LogoTitle>
-              <LogoSubtitle $scrolled={isScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
+              <LogoTitle $scrolled={effectiveScrolled}>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle $scrolled={effectiveScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
           
@@ -479,11 +486,11 @@ const Header = () => {
           </MobileCenterTitle>
 
           <Nav>
-            <NavLink to="/" $active={isActive('/')} $scrolled={isScrolled}>בית</NavLink>
-            <ServicesDropdown scrolled={isScrolled} />
+            <NavLink to="/" $active={isActive('/')} $scrolled={effectiveScrolled}>בית</NavLink>
+            <ServicesDropdown scrolled={effectiveScrolled} />
             
-            <NavLink to="/about" $active={isActive('/about')} $scrolled={isScrolled}>אודות</NavLink>
-            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={isScrolled}>צור קשר</NavLink>
+            <NavLink to="/about" $active={isActive('/about')} $scrolled={effectiveScrolled}>אודות</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={effectiveScrolled}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
