@@ -32,23 +32,33 @@ const Logo = styled(Link)`
   align-items: center;
   gap: 0.75rem;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+  @media (max-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
     position: static;
   }
 `;
 const MobileCenterTitle = styled.div`
   display: none;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+  @media (max-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
     display: block;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     
     h1 {
-      font-size: ${({ theme }) => theme.fontSizes.lg};
-      font-weight: ${({ theme }) => theme.fontWeights.bold};
-      color: ${({ theme }) => theme.colors.primary};
+      font-size: ${({
+  theme
+}) => theme.fontSizes.lg};
+      font-weight: ${({
+  theme
+}) => theme.fontWeights.bold};
+      color: ${({
+  theme
+}) => theme.colors.primary};
       margin: 0;
       white-space: nowrap;
     }
@@ -71,27 +81,48 @@ const LogoIcon = styled.div`
 const LogoText = styled.div`
   display: none;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
     display: block;
   }
 `;
-const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.primary : 'white'};
+const LogoTitle = styled.h1<{
+  $scrolled?: boolean;
+}>`
+  font-size: ${({
+  theme
+}) => theme.fontSizes['2xl']};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.bold};
+  color: ${({
+  $scrolled,
+  theme
+}) => $scrolled ? theme.colors.primary : 'white'};
   margin: 0;
   transition: color 0.3s ease;
 `;
-const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ $scrolled }) => $scrolled ? 'hsl(var(--muted-foreground))' : 'white'};
+const LogoSubtitle = styled.p<{
+  $scrolled?: boolean;
+}>`
+  font-size: ${({
+  theme
+}) => theme.fontSizes.xs};
+  color: ${({
+  $scrolled
+}) => $scrolled ? 'hsl(var(--muted-foreground))' : 'white'};
   margin: 0;
   display: none;
   transition: color 0.3s ease;
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.sm}) {
     display: block;
-    font-size: ${({ theme }) => theme.fontSizes.sm};
+    font-size: ${({
+  theme
+}) => theme.fontSizes.sm};
   }
 `;
 const Nav = styled.nav`
@@ -109,17 +140,28 @@ const NavLink = styled(Link)<{
   $active?: boolean;
   $scrolled?: boolean;
 }>`
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ $active, $scrolled, theme }) => 
-    $active ? theme.colors.primary : ($scrolled ? theme.colors.foreground : 'white')};
+  font-size: ${({
+  theme
+}) => theme.fontSizes.base};
+  font-weight: ${({
+  theme
+}) => theme.fontWeights.medium};
+  color: ${({
+  $active,
+  $scrolled,
+  theme
+}) => $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
   transition: color 0.3s ease;
   padding-bottom: 0.25rem;
-  border-bottom: ${({ $active, theme }) => 
-    $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  border-bottom: ${({
+  $active,
+  theme
+}) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
   
   &:hover {
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({
+  theme
+}) => theme.colors.primary};
   }
 `;
 const CTAWrapper = styled.div`
@@ -136,15 +178,23 @@ const CTAWrapper = styled.div`
 const MobileMenuButton = styled.button`
   display: flex;
   padding: 0.5rem;
-  color: ${({ theme }) => theme.colors.primary};
+  color: ${({
+  theme
+}) => theme.colors.primary};
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
     display: none;
   }
 `;
 const MobileNav = styled.nav`
-  background: ${({ theme }) => theme.colors.card};
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({
+  theme
+}) => theme.colors.card};
+  border-top: 1px solid ${({
+  theme
+}) => theme.colors.border};
   animation: fadeIn 0.3s ease-out;
   max-height: calc(100vh - 5.5rem);
   overflow-y: auto;
@@ -156,7 +206,9 @@ const MobileNav = styled.nav`
     to { opacity: 1; }
   }
   
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+  @media (min-width: ${({
+  theme
+}) => theme.breakpoints.md}) {
     display: none;
   }
 `;
@@ -247,39 +299,43 @@ const Header = () => {
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { data: treatments = [] } = useTreatments();
+  const {
+    data: treatments = []
+  } = useTreatments();
 
   // Stabilize background detection to prevent flicker
   const lastBgIsLightRef = useRef<boolean | null>(null);
-  const pendingBgIsLightRef = useRef<{ value: boolean; since: number } | null>(null);
+  const pendingBgIsLightRef = useRef<{
+    value: boolean;
+    since: number;
+  } | null>(null);
 
   // Detect if header is over a light/dark background
   useEffect(() => {
     let rafId = 0;
-
     const parseRgb = (rgb: string) => {
       const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
       if (!match) return null;
       return {
         r: Number(match[1]),
         g: Number(match[2]),
-        b: Number(match[3]),
+        b: Number(match[3])
       };
     };
-
-    const luminanceFromRgb = ({ r, g, b }: { r: number; g: number; b: number }) =>
-      (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
+    const luminanceFromRgb = ({
+      r,
+      g,
+      b
+    }: {
+      r: number;
+      g: number;
+      b: number;
+    }) => (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     const getIsLightFromElement = (element: Element, fallback: boolean): boolean | null => {
       // If we're over an actual image/video/canvas, assume "dark" for readability.
-      if (
-        element instanceof HTMLImageElement ||
-        element instanceof HTMLVideoElement ||
-        element instanceof HTMLCanvasElement
-      ) {
+      if (element instanceof HTMLImageElement || element instanceof HTMLVideoElement || element instanceof HTMLCanvasElement) {
         return false;
       }
-
       let current: Element | null = element;
       while (current && current !== document.body) {
         const style = window.getComputedStyle(current);
@@ -287,29 +343,24 @@ const Header = () => {
         // Gradients / background images: treat as dark to keep header stable
         const bgImage = style.backgroundImage;
         if (bgImage && bgImage !== 'none') return false;
-
         const bg = style.backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
           const parsed = parseRgb(bg);
           if (!parsed) return null;
-
           const l = luminanceFromRgb(parsed);
           if (l >= 0.58) return true;
           if (l <= 0.42) return false;
           return fallback;
         }
-
         current = current.parentElement;
       }
 
       // No decisive background found on this element chain.
       return null;
     };
-
     const isLightAtPoint = (x: number, y: number, headerEl: HTMLElement | null, fallback: boolean) => {
       const stack = document.elementsFromPoint(x, y);
-      const candidates = headerEl ? stack.filter((el) => !headerEl.contains(el)) : stack;
-
+      const candidates = headerEl ? stack.filter(el => !headerEl.contains(el)) : stack;
       for (const el of candidates) {
         const v = getIsLightFromElement(el as Element, fallback);
         if (v !== null) return v;
@@ -319,73 +370,60 @@ const Header = () => {
       const bodyBg = window.getComputedStyle(document.body).backgroundColor;
       const parsed = parseRgb(bodyBg);
       if (!parsed) return fallback;
-
       const l = luminanceFromRgb(parsed);
       if (l >= 0.58) return true;
       if (l <= 0.42) return false;
       return fallback;
     };
-
     const computeIsLightBehindHeader = () => {
       const headerEl = document.querySelector('header') as HTMLElement | null;
       const rect = headerEl?.getBoundingClientRect();
       const sampleYRaw = rect ? rect.top + rect.height * 0.5 : 24;
       const sampleY = Math.min(Math.max(Math.floor(sampleYRaw), 0), window.innerHeight - 1);
-
-      const xs = [
-        Math.floor(window.innerWidth * 0.25),
-        Math.floor(window.innerWidth * 0.5),
-        Math.floor(window.innerWidth * 0.75),
-      ];
-
+      const xs = [Math.floor(window.innerWidth * 0.25), Math.floor(window.innerWidth * 0.5), Math.floor(window.innerWidth * 0.75)];
       const fallback = lastBgIsLightRef.current ?? true;
-      const votes = xs.map((x) => isLightAtPoint(x, sampleY, headerEl, fallback));
-
+      const votes = xs.map(x => isLightAtPoint(x, sampleY, headerEl, fallback));
       const lightCount = votes.filter(Boolean).length;
       return lightCount >= Math.ceil(votes.length / 2);
     };
-
     const applyDebounced = (isLight: boolean) => {
       const now = performance.now();
       const last = lastBgIsLightRef.current;
-
       if (last === null) {
         lastBgIsLightRef.current = isLight;
         setIsScrolled(isLight);
         return;
       }
-
       if (isLight === last) {
         pendingBgIsLightRef.current = null;
         return;
       }
-
       const pending = pendingBgIsLightRef.current;
       if (!pending || pending.value !== isLight) {
-        pendingBgIsLightRef.current = { value: isLight, since: now };
+        pendingBgIsLightRef.current = {
+          value: isLight,
+          since: now
+        };
         return;
       }
-
       if (now - pending.since >= 180) {
         pendingBgIsLightRef.current = null;
         lastBgIsLightRef.current = isLight;
         setIsScrolled(isLight);
       }
     };
-
     const checkBackground = () => {
       if (rafId) cancelAnimationFrame(rafId);
-
       rafId = requestAnimationFrame(() => {
         const isLight = computeIsLightBehindHeader();
         applyDebounced(isLight);
       });
     };
-
     const initialTimeout = setTimeout(checkBackground, 150);
-    window.addEventListener('scroll', checkBackground, { passive: true });
+    window.addEventListener('scroll', checkBackground, {
+      passive: true
+    });
     window.addEventListener('resize', checkBackground);
-
     return () => {
       clearTimeout(initialTimeout);
       if (rafId) cancelAnimationFrame(rafId);
@@ -406,7 +444,6 @@ const Header = () => {
       document.body.style.overflow = '';
     };
   }, [isMenuOpen]);
-
   const navLinks = [{
     name: 'בית',
     path: '/'
@@ -434,7 +471,7 @@ const Header = () => {
           </Logo>
           
           <MobileCenterTitle>
-            <h1>מרפאת שיניים</h1>
+            
           </MobileCenterTitle>
 
           <Nav>
