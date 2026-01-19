@@ -154,22 +154,20 @@ const MobileMenuButton = styled.button`
   }
 `;
 const MobileNav = styled.nav`
-  background: ${({
-  theme
-}) => theme.colors.card};
-  border-top: 1px solid ${({
-  theme
-}) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.card};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   animation: fadeIn 0.3s ease-out;
+  max-height: calc(100vh - 5.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: none;
   }
 `;
