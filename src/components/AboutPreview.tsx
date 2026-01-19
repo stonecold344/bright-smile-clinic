@@ -107,11 +107,17 @@ const StatsGrid = styled.div`
 
 const StatItem = styled.div`
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const StatIcon = styled.div`
   color: ${({ theme }) => theme.colors.primary};
-  margin: 0 auto 0.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const StatValue = styled.p`
