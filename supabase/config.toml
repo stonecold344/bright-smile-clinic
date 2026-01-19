@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-contact-whatsapp]
 verify_jwt = false
+
+[functions.send-appointment-confirmation]
+verify_jwt = false
