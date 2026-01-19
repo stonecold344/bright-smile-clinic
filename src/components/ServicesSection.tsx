@@ -46,7 +46,7 @@ const ServicesGrid = styled.div`
   }
 `;
 
-const ServiceCard = styled(Link)`
+const ServiceCard = styled(Link)<{ $hideOnMobile?: boolean; $hideOnDesktop?: boolean }>`
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -58,11 +58,21 @@ const ServiceCard = styled(Link)`
   transition: all ${({ theme }) => theme.transitions.normal};
   cursor: pointer;
   
+  /* Hide 4th item on mobile and desktop, show only on tablet */
+  ${({ $hideOnMobile, $hideOnDesktop, theme }) => ($hideOnMobile || $hideOnDesktop) && `
+    display: none;
+    
+    @media (min-width: ${theme.breakpoints.md}) and (max-width: ${theme.breakpoints.lg}) {
+      display: flex;
+    }
+  `}
+  
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.elevated};
     transform: translateY(-0.5rem);
   }
 `;
+
 
 const ServiceIcon = styled.div`
   width: 4rem;
@@ -127,8 +137,13 @@ const ServicesSection = () => {
           </LoadingWrapper>
         ) : (
           <ServicesGrid>
-            {treatments.slice(0, 3).map((treatment) => (
-              <ServiceCard key={treatment.id} to={`/treatment/${treatment.slug}`}>
+            {treatments.slice(0, 4).map((treatment, index) => (
+              <ServiceCard 
+                key={treatment.id} 
+                to={`/treatment/${treatment.slug}`}
+                $hideOnMobile={index === 3}
+                $hideOnDesktop={index === 3}
+              >
                 <ServiceIcon>{getIcon(treatment.slug)}</ServiceIcon>
                 <ServiceTitle>{treatment.title}</ServiceTitle>
                 <ServiceDescription>{treatment.short_description}</ServiceDescription>
