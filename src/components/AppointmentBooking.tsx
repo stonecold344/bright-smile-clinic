@@ -140,9 +140,9 @@ const NavButton = styled.button`
 
 const WeekDays = styled.div`
   display: flex;
-  flex-direction: row-reverse;
   gap: 0.125rem;
   margin-bottom: 0.375rem;
+  direction: rtl;
 `;
 
 const WeekDay = styled.div`
@@ -157,8 +157,8 @@ const WeekDay = styled.div`
 const DaysGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
-  flex-direction: row-reverse;
   gap: 0.125rem;
+  direction: rtl;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
@@ -388,8 +388,8 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-// Hebrew day names (Sunday to Saturday)
-const hebrewDays = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+// Hebrew day names (Saturday to Sunday)
+const hebrewDays = ['ש׳', 'ו׳', 'ה׳', 'ד׳', 'ג׳', 'ב׳', 'א׳'];
 
 interface Appointment {
   appointment_date: string;
@@ -452,7 +452,8 @@ const AppointmentBooking = () => {
   const getMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    const startDay = getDay(monthStart); // 0 = Sunday
+    // Treat Saturday as the first day of the week (0 = Saturday)
+    const startDay = (getDay(monthStart) + 1) % 7;
     const days: (Date | null)[] = [];
     
     // Add empty slots for days before the month starts
