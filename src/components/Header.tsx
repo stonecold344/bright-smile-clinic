@@ -26,6 +26,11 @@ const HeaderInner = styled.div`
   justify-content: space-between;
   height: 5.5rem;
   position: relative;
+  gap: 1rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    gap: 0.5rem;
+  }
 `;
 const Logo = styled(Link)`
   display: flex;
@@ -130,49 +135,48 @@ const Nav = styled.nav`
   align-items: center;
   gap: 2rem;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: flex;
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    gap: 1rem;
   }
 `;
 const NavLink = styled(Link)<{
   $active?: boolean;
   $scrolled?: boolean;
 }>`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.base};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.medium};
-  color: ${({
-  $active,
-  $scrolled,
-  theme
-}) => $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ $active, $scrolled, theme }) => 
+    $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
   transition: color 0.3s ease;
   padding-bottom: 0.25rem;
-  border-bottom: ${({
-  $active,
-  theme
-}) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  border-bottom: ${({ $active, theme }) => 
+    $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
+  white-space: nowrap;
   
   &:hover {
-    color: ${({
-  theme
-}) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 `;
 const CTAWrapper = styled.div`
   display: none;
+  flex-shrink: 0;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    gap: 0.5rem;
   }
 `;
 const MobileMenuButton = styled.button`
