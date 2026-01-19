@@ -30,7 +30,7 @@ const HeroOverlay = styled.div`
 `;
 const HeroContent = styled.div`
   position: relative;
-  padding-top: 6rem;
+  padding-top: 4rem;
   padding-bottom: 2rem;
   width: 100%;
 `;
@@ -81,54 +81,31 @@ const HeroBadge = styled.span`
   margin-bottom: 1.5rem;
 `;
 const HeroTitle = styled.h1`
-  font-size: ${({
-  theme
-}) => theme.fontSizes['4xl']};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground};
-  line-height: 1.2;
+  font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  line-height: 1.1;
   margin-bottom: 1.5rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes['5xl']};
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['6xl']};
   }
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.lg}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes['6xl']};
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    font-size: 4.5rem;
   }
 `;
 const HeroDescription = styled.p`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-  color: ${({
-  theme
-}) => theme.colors.primaryForeground};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.medium};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  color: ${({ theme }) => theme.colors.primaryForeground};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
   line-height: 1.7;
   margin-bottom: 2rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
-    font-size: ${({
-  theme
-}) => theme.fontSizes.xl};
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
   }
 `;
 const ButtonGroup = styled.div`
