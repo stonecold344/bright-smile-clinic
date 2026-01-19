@@ -30,9 +30,13 @@ const HeroOverlay = styled.div`
 `;
 const HeroContent = styled.div`
   position: relative;
-  padding-top: 4rem;
+  padding-top: 7rem;
   padding-bottom: 2rem;
   width: 100%;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    padding-top: 8rem;
+  }
 `;
 const HeroInner = styled.div`
   max-width: 56rem;
