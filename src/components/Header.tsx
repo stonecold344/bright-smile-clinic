@@ -84,7 +84,7 @@ const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
 `;
 const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.mutedForeground : 'white'};
+  color: ${({ $scrolled }) => $scrolled ? 'hsl(var(--muted-foreground))' : 'white'};
   margin: 0;
   display: none;
   transition: color 0.3s ease;
