@@ -8,16 +8,26 @@ const PageWrapper = styled.div`
 `;
 
 const Content = styled.div`
-  padding: ${({ theme }) => theme.spacing[16]} 0;
+  padding: ${({ theme }) => theme.spacing[16]} ${({ theme }) => theme.spacing[4]};
   max-width: 800px;
   margin: 0 auto;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    padding: ${({ theme }) => theme.spacing[16]} 0;
+  }
 `;
 
 const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.foreground};
   margin-bottom: ${({ theme }) => theme.spacing[4]};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  }
 `;
 
 const UpdateDate = styled.p`
@@ -31,10 +41,14 @@ const Section = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.foreground};
   margin-bottom: ${({ theme }) => theme.spacing[3]};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  }
 `;
 
 const Paragraph = styled.p`
