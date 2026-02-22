@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { Mail, Lock, Loader2, Smile } from 'lucide-react';
+import styled, { keyframes } from 'styled-components';
+import { Mail, Lock, Loader2, Smile, AlertTriangle, ShieldX } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Input, Label, FormGroup } from '@/components/styled/Input';
 import { Title, Text } from '@/components/styled/Typography';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 const PageWrapper = styled.div`
@@ -91,30 +90,32 @@ const LogoIcon = styled.div`
   box-shadow: 0 0 30px -5px hsla(174, 62%, 45%, 0.4);
 `;
 
-const InputWrapper = styled.div`
+const InputWrapper = styled.div<{ $hasError?: boolean }>`
   position: relative;
   
-  svg {
+  svg.input-icon {
     position: absolute;
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: hsla(174, 62%, 45%, 0.6);
+    color: ${({ $hasError }) => $hasError ? 'hsla(0, 84%, 60%, 0.8)' : 'hsla(174, 62%, 45%, 0.6)'};
+    transition: color 0.3s ease;
   }
   
   input {
     padding-left: 3rem;
     background: hsla(200, 30%, 15%, 0.5);
-    border: 1px solid hsla(174, 62%, 45%, 0.15);
+    border: 1px solid ${({ $hasError }) => $hasError ? 'hsla(0, 84%, 60%, 0.5)' : 'hsla(174, 62%, 45%, 0.15)'};
     color: hsl(0, 0%, 95%);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
     
     &::placeholder {
       color: hsla(200, 15%, 60%, 0.5);
     }
     
     &:focus {
-      border-color: hsla(174, 62%, 45%, 0.5);
-      box-shadow: 0 0 20px -5px hsla(174, 62%, 45%, 0.2);
+      border-color: ${({ $hasError }) => $hasError ? 'hsla(0, 84%, 60%, 0.7)' : 'hsla(174, 62%, 45%, 0.5)'};
+      box-shadow: 0 0 20px -5px ${({ $hasError }) => $hasError ? 'hsla(0, 84%, 60%, 0.15)' : 'hsla(174, 62%, 45%, 0.2)'};
     }
   }
 `;
@@ -128,6 +129,52 @@ const StyledLabel = styled(Label)`
   color: hsla(200, 15%, 75%, 0.9);
 `;
 
+const slideDown = keyframes`
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const FieldError = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  animation: ${slideDown} 0.2s ease-out;
+  
+  svg {
+    flex-shrink: 0;
+    color: hsl(0, 84%, 65%);
+  }
+  
+  span {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    color: hsl(0, 84%, 65%);
+  }
+`;
+
+const GeneralError = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+  background: hsla(0, 84%, 60%, 0.12);
+  border: 1px solid hsla(0, 84%, 60%, 0.3);
+  border-radius: ${({ theme }) => theme.radii.lg};
+  animation: ${slideDown} 0.3s ease-out;
+  
+  svg {
+    flex-shrink: 0;
+    color: hsl(0, 84%, 65%);
+  }
+  
+  span {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    color: hsl(0, 80%, 75%);
+    line-height: 1.4;
+  }
+`;
+
 const emailSchema = z.string().email('כתובת אימייל לא תקינה');
 const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
 
@@ -135,7 +182,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
@@ -145,6 +192,10 @@ const Auth = () => {
       navigate('/admin');
     }
   }, [user, navigate]);
+
+  const clearFieldError = (field: 'email' | 'password') => {
+    setErrors(prev => ({ ...prev, [field]: undefined, general: undefined }));
+  };
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -169,17 +220,21 @@ const Auth = () => {
     if (!validateForm()) return;
     
     setLoading(true);
+    setErrors({});
     
     try {
       const { error } = await signIn(email, password);
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          toast.error('פרטי התחברות שגויים');
+          setErrors({ general: 'אימייל או סיסמה שגויים. אנא בדוק את הפרטים ונסה שוב.' });
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrors({ general: 'כתובת האימייל טרם אומתה. בדוק את תיבת הדואר שלך.' });
+        } else if (error.message.includes('Too many requests')) {
+          setErrors({ general: 'יותר מדי ניסיונות. נסה שוב בעוד מספר דקות.' });
         } else {
-          toast.error(error.message);
+          setErrors({ general: error.message });
         }
       } else {
-        toast.success('התחברת בהצלחה!');
         navigate('/admin');
       }
     } finally {
@@ -198,39 +253,56 @@ const Auth = () => {
           <Text $color="muted" style={{ color: 'hsla(200, 15%, 65%, 0.8)' }}>ניהול מערכת המרפאה</Text>
         </LogoWrapper>
 
+        {errors.general && (
+          <GeneralError>
+            <ShieldX size={20} />
+            <span>{errors.general}</span>
+          </GeneralError>
+        )}
+
         <form onSubmit={handleSubmit}>
           <FormGroup>
             <StyledLabel htmlFor="email">אימייל</StyledLabel>
-            <InputWrapper>
-              <Mail size={18} />
+            <InputWrapper $hasError={!!errors.email}>
+              <Mail size={18} className="input-icon" />
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
                 placeholder="your@email.com"
                 dir="ltr"
                 required
               />
             </InputWrapper>
-            {errors.email && <Text $color="muted" $size="sm" style={{ color: 'hsl(0, 84%, 65%)', marginTop: '0.25rem' }}>{errors.email}</Text>}
+            {errors.email && (
+              <FieldError>
+                <AlertTriangle size={14} />
+                <span>{errors.email}</span>
+              </FieldError>
+            )}
           </FormGroup>
 
           <FormGroup>
             <StyledLabel htmlFor="password">סיסמה</StyledLabel>
-            <InputWrapper>
-              <Lock size={18} />
+            <InputWrapper $hasError={!!errors.password}>
+              <Lock size={18} className="input-icon" />
               <Input
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }}
                 placeholder="••••••••"
                 dir="ltr"
                 required
               />
             </InputWrapper>
-            {errors.password && <Text $color="muted" $size="sm" style={{ color: 'hsl(0, 84%, 65%)', marginTop: '0.25rem' }}>{errors.password}</Text>}
+            {errors.password && (
+              <FieldError>
+                <AlertTriangle size={14} />
+                <span>{errors.password}</span>
+              </FieldError>
+            )}
           </FormGroup>
 
           <Button type="submit" $variant="heroPrimary" $size="lg" $fullWidth disabled={loading}>
