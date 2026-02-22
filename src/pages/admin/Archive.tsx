@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -168,18 +168,58 @@ const ResultCount = styled.div`
 `;
 
 const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   border-radius: ${({ theme }) => theme.radii.xl};
   box-shadow: ${({ theme }) => theme.shadows.soft};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
-  min-width: 700px;
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii.xl};
   overflow: hidden;
+`;
+
+const MobileCards = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+  }
+`;
+
+const MobileCard = styled.div`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1rem 1.25rem;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+`;
+
+const MobileCardRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const MobileCardLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+const MobileCardValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.foreground};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
 `;
 
 const Th = styled.th<{ $sortable?: boolean }>`
@@ -330,6 +370,17 @@ const AdminArchive = () => {
   const { data: treatments = [] } = useTreatments();
   const queryClient = useQueryClient();
   const [imageModal, setImageModal] = useState<{ id: string; images: string[] } | null>(null);
+
+  // Lock body scroll when any modal is open
+  const isAnyModalOpen = !!selectedAppointment || !!imageModal;
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isAnyModalOpen]);
 
   const updateImages = useMutation({
     mutationFn: async ({ id, images }: { id: string; images: string[] }) => {
@@ -614,6 +665,7 @@ const AdminArchive = () => {
           <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים שנסגרו יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
+        <>
         <TableWrapper><Table>
           <thead>
             <tr>
@@ -655,6 +707,52 @@ const AdminArchive = () => {
             ))}
           </tbody>
         </Table></TableWrapper>
+
+
+        {/* Mobile card view */}
+        <MobileCards>
+          {sortedAppointments.map((apt) => (
+            <MobileCard key={apt.id}>
+              <MobileCardRow>
+                <MobileCardLabel>שם</MobileCardLabel>
+                <MobileCardValue>{apt.client_name}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>טלפון</MobileCardLabel>
+                <MobileCardValue dir="ltr">{apt.client_phone}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>תאריך</MobileCardLabel>
+                <MobileCardValue>{formatDate(apt.appointment_date)}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>שעה</MobileCardLabel>
+                <MobileCardValue>{apt.appointment_time}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>טיפול</MobileCardLabel>
+                <MobileCardValue>{getTreatmentTitle(apt.treatment_slug)}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>סטטוס</MobileCardLabel>
+                <StatusBadge $status={apt.status}>{getStatusLabel(apt.status)}</StatusBadge>
+              </MobileCardRow>
+              <MobileCardRow>
+                <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', paddingTop: '0.5rem' }}>
+                  <ActionButton onClick={() => setSelectedAppointment(apt)} title="פרטים">
+                    <Eye size={18} />
+                  </ActionButton>
+                  {apt.status === 'completed' && (
+                    <ActionButton $variant={apt.images && apt.images.length > 0 ? 'success' : 'info'} onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
+                      <ImagePlus size={18} />
+                    </ActionButton>
+                  )}
+                </div>
+              </MobileCardRow>
+            </MobileCard>
+          ))}
+        </MobileCards>
+        </>
       )}
 
       {selectedAppointment && (

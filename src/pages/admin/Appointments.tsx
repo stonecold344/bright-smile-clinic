@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -154,18 +154,58 @@ const ClearFilters = styled.button`
 `;
 
 const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   border-radius: ${({ theme }) => theme.radii.xl};
   box-shadow: ${({ theme }) => theme.shadows.soft};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
-  min-width: 700px;
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii.xl};
   overflow: hidden;
+`;
+
+const MobileCards = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+  }
+`;
+
+const MobileCard = styled.div`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1rem 1.25rem;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+`;
+
+const MobileCardRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const MobileCardLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+const MobileCardValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.foreground};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
 `;
 
 const Th = styled.th<{ $sortable?: boolean }>`
@@ -365,6 +405,17 @@ const AdminAppointments = () => {
   const [imageModal, setImageModal] = useState<{ id: string; images: string[] } | null>(null);
   const queryClient = useQueryClient();
   const { data: treatments = [] } = useTreatments();
+
+  // Lock body scroll when any modal is open
+  const isAnyModalOpen = !!selectedAppointment || !!treatmentModal || !!imageModal;
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isAnyModalOpen]);
 
   const { data: allAppointments = [], isLoading } = useQuery({
     queryKey: ['admin-appointments'],
@@ -670,6 +721,7 @@ const AdminAppointments = () => {
           <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
+        <>
         <TableWrapper><Table>
           <thead>
             <tr>
@@ -769,6 +821,76 @@ const AdminAppointments = () => {
             ))}
           </tbody>
         </Table></TableWrapper>
+
+
+        {/* Mobile card view */}
+        <MobileCards>
+          {sortedAppointments.map((appointment) => (
+            <MobileCard key={appointment.id}>
+              <MobileCardRow>
+                <MobileCardLabel>שם</MobileCardLabel>
+                <MobileCardValue>{appointment.client_name}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>טלפון</MobileCardLabel>
+                <MobileCardValue dir="ltr">{appointment.client_phone}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>תאריך</MobileCardLabel>
+                <MobileCardValue>{formatDate(appointment.appointment_date)}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>שעה</MobileCardLabel>
+                <MobileCardValue>{appointment.appointment_time}</MobileCardValue>
+              </MobileCardRow>
+              <MobileCardRow>
+                <MobileCardLabel>סטטוס</MobileCardLabel>
+                <StatusBadge $status={appointment.status}>{getStatusLabel(appointment.status)}</StatusBadge>
+              </MobileCardRow>
+              <MobileCardRow>
+                <Actions style={{ width: '100%', justifyContent: 'center', paddingTop: '0.5rem' }}>
+                  <ActionButton onClick={() => setSelectedAppointment(appointment)} title="פרטים">
+                    <Eye size={18} />
+                  </ActionButton>
+                  {appointment.status === 'pending' && (
+                    <ActionButton $variant="success" onClick={() => updateStatus.mutate({ id: appointment.id, status: 'confirmed' })} title="אשר תור">
+                      <CheckCircle size={18} />
+                    </ActionButton>
+                  )}
+                  {(appointment.status === 'confirmed' || appointment.status === 'arrived') && (
+                    <ActionButton $variant="info" onClick={() => updateStatus.mutate({ id: appointment.id, status: 'arrived' })} title="לקוח הגיע">
+                      <UserCheck size={18} />
+                    </ActionButton>
+                  )}
+                  {appointment.status === 'arrived' && (
+                    <ActionButton $variant={appointment.images && appointment.images.length > 0 ? 'success' : 'info'} onClick={() => setImageModal({ id: appointment.id, images: appointment.images || [] })} title="העלאת תמונות">
+                      <ImagePlus size={18} />
+                    </ActionButton>
+                  )}
+                  {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+                    <ActionButton $variant="danger" onClick={() => updateStatus.mutate({ id: appointment.id, status: 'no_show' })} title="לא הגיע">
+                      <UserX size={18} />
+                    </ActionButton>
+                  )}
+                  {(appointment.status === 'arrived' || appointment.status === 'confirmed') && (
+                    <ActionButton $variant="success" onClick={() => setTreatmentModal({ id: appointment.id, slug: appointment.treatment_slug || '' })} title="סמן כטופל">
+                      <Stethoscope size={18} />
+                    </ActionButton>
+                  )}
+                  {appointment.status !== 'cancelled' && (
+                    <ActionButton $variant="danger" onClick={() => updateStatus.mutate({ id: appointment.id, status: 'cancelled' })} title="בטל תור">
+                      <XCircle size={18} />
+                    </ActionButton>
+                  )}
+                  <ActionButton $variant="danger" onClick={() => { if (confirm('האם אתה בטוח שברצונך למחוק את התור?')) deleteAppointment.mutate(appointment.id); }} title="מחק">
+                    <Trash2 size={18} />
+                  </ActionButton>
+                </Actions>
+              </MobileCardRow>
+            </MobileCard>
+          ))}
+        </MobileCards>
+        </>
       )}
 
       {/* Image upload modal */}
