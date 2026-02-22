@@ -387,10 +387,10 @@ const Gallery = () => {
           </LightboxClose>
           {lightbox.images.length > 1 && (
             <>
-              <LightboxNav style={{ right: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}>
+              <LightboxNav style={{ right: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}>
                 ›
               </LightboxNav>
-              <LightboxNav style={{ left: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}>
+              <LightboxNav style={{ left: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}>
                 ‹
               </LightboxNav>
             </>
