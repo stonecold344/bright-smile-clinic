@@ -1,15 +1,17 @@
 import { useParams, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Container } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Loader2, Calendar, ArrowRight, Clock, Share2, CheckCircle2 } from 'lucide-react';
+import { Loader2, Calendar, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
 import { useBlogPost } from '@/hooks/useBlogPosts';
 import type { ArticleSection } from '@/hooks/useBlogPosts';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Button } from '@/components/styled/Button';
+import SocialShare from '@/components/SocialShare';
 
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -256,21 +258,7 @@ const BottomNav = styled.div`
   flex-wrap: wrap;
 `;
 
-const ShareButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: ${({ theme }) => theme.colors.secondary};
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: ${({ theme }) => theme.radii.full};
-  color: ${({ theme }) => theme.colors.foreground};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-  &:hover { background: ${({ theme }) => theme.colors.primaryLight}; color: ${({ theme }) => theme.colors.primary}; }
-`;
+// ShareButton removed - using SocialShare component instead
 
 const LoadingWrapper = styled.div`
   display: flex;
@@ -296,13 +284,30 @@ const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading, error } = useBlogPost(slug || '');
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: post?.title, url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+  // Set OG meta tags dynamically
+  useEffect(() => {
+    if (post) {
+      const setMeta = (property: string, content: string) => {
+        let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+        if (!el) {
+          el = document.createElement('meta');
+          el.setAttribute('property', property);
+          document.head.appendChild(el);
+        }
+        el.content = content;
+      };
+      setMeta('og:title', post.seo_title || post.title);
+      setMeta('og:description', post.seo_description || '');
+      setMeta('og:url', window.location.href);
+      setMeta('og:type', 'article');
+      if (post.featured_image) setMeta('og:image', post.featured_image);
+      
+      // Twitter card
+      let tw = document.querySelector('meta[name="twitter:card"]') as HTMLMetaElement;
+      if (!tw) { tw = document.createElement('meta'); tw.setAttribute('name', 'twitter:card'); document.head.appendChild(tw); }
+      tw.content = 'summary_large_image';
     }
-  };
+  }, [post]);
 
   if (isLoading) {
     return (
@@ -420,10 +425,11 @@ const BlogPost = () => {
               <ArrowRight size={18} />
               חזרה לבלוג
             </Button>
-            <ShareButton onClick={handleShare}>
-              <Share2 size={16} />
-              שיתוף
-            </ShareButton>
+            <SocialShare
+              title={post.title}
+              description={post.seo_description || undefined}
+              image={post.featured_image || undefined}
+            />
           </BottomNav>
         </ArticleSection_>
       </main>
