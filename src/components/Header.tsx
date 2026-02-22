@@ -548,13 +548,15 @@ const Header = () => {
               </ButtonRouterLink>
 
               {user && isAdmin && (
-                <MobileNavLink to="/admin" $active={false} onClick={() => setIsMenuOpen(false)}>
-                  <Settings size={18} style={{ display: 'inline', marginLeft: '0.5rem' }} />
-                  ניהול מערכת
-                </MobileNavLink>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
+                  <MobileNavLink to="/admin" $active={false} onClick={() => setIsMenuOpen(false)} style={{ textAlign: 'center' }}>
+                    <Settings size={18} style={{ display: 'inline', marginLeft: '0.5rem' }} />
+                    ניהול מערכת
+                  </MobileNavLink>
+                </div>
               )}
               {user && (
-                <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} $variant="outline" $size="sm" $fullWidth style={{ marginTop: '0.5rem' }}>
+                <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} $variant="outline" $size="sm" $fullWidth style={{ marginTop: '0.25rem' }}>
                   <LogOut size={18} />
                   התנתקות
                 </Button>
