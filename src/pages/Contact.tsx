@@ -145,32 +145,18 @@ const Contact = () => {
         return;
       }
 
-      // Send WhatsApp notification to admin
-      const { data, error } = await supabase.functions.invoke('send-contact-whatsapp', {
+      // Send WhatsApp notification to admin (runs silently in background)
+      supabase.functions.invoke('send-contact-whatsapp', {
         body: {
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           email: formData.email.trim() || undefined,
           message: formData.message.trim() || undefined,
         }
-      });
+      }).catch(err => console.error('WhatsApp notification failed:', err));
 
-      if (error) {
-        // Message saved but WhatsApp failed - still show success
-        toast.success('ההודעה נשלחה בהצלחה!');
-        setFormData({ name: '', phone: '', email: '', message: '' });
-        return;
-      }
-
-      if (data?.success && data?.whatsappUrl) {
-        window.open(data.whatsappUrl, '_blank');
-        toast.success('ההודעה נשלחה בהצלחה!');
-        setFormData({ name: '', phone: '', email: '', message: '' });
-      } else if (data?.error) {
-        setFormError(data.error);
-      } else {
-        setFormError('אירעה שגיאה, נסו שוב');
-      }
+      toast.success('ההודעה נשלחה בהצלחה! נחזור אליכם בהקדם');
+      setFormData({ name: '', phone: '', email: '', message: '' });
     } catch {
       setFormError('אירעה שגיאה, נסו שוב');
     } finally {
