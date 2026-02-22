@@ -304,6 +304,8 @@ const AdminTestimonials = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim()) { toast.error('יש למלא שם לקוח'); return; }
+    if (!formData.content.trim()) { toast.error('יש למלא תוכן המלצה'); return; }
     if (editingTestimonial) {
       updateTestimonial.mutate({ id: editingTestimonial.id, data: formData });
     } else {
@@ -392,14 +394,14 @@ const AdminTestimonials = () => {
               </CloseButton>
             </ModalHeader>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <FormGroup>
                 <Label htmlFor="name">שם הלקוח *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
+                
                 />
               </FormGroup>
 
@@ -436,7 +438,7 @@ const AdminTestimonials = () => {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   style={{ minHeight: '100px' }}
-                  required
+                  
                 />
               </FormGroup>
 

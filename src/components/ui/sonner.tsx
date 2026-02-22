@@ -10,6 +10,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       expand
       richColors
+      closeButton
       toastOptions={{
         duration: 5000,
         style: {
@@ -20,10 +21,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
           borderRadius: '1rem',
           boxShadow: '0 12px 40px -8px rgba(0,0,0,0.2)',
           border: '1px solid hsl(200, 20%, 88%)',
+          textAlign: 'center',
+          justifyContent: 'center',
         },
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg [&>[data-close-button]]:!right-auto [&>[data-close-button]]:!left-1 [&>[data-close-button]]:!top-1 [&>[data-close-button]]:!border-border [&>[data-close-button]]:!bg-background [&>[data-close-button]]:!text-foreground",
           description: "group-[.toast]:text-muted-foreground",
           actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
