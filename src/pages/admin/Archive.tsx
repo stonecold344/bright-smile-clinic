@@ -202,9 +202,11 @@ const MobileCard = styled.div`
 
 const MobileCardRow = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 0.5rem;
   padding: 0.375rem 0;
+  text-align: center;
 
   &:not(:last-child) {
     border-bottom: 1px solid ${({ theme }) => theme.colors.border};
@@ -223,7 +225,7 @@ const MobileCardValue = styled.span`
 `;
 
 const Th = styled.th<{ $sortable?: boolean }>`
-  text-align: right;
+  text-align: center;
   padding: 1rem 1.5rem;
   background: ${({ theme }) => theme.colors.secondary}80;
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
@@ -243,6 +245,7 @@ const Td = styled.td`
   padding: 1rem 1.5rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.foreground};
+  text-align: center;
 `;
 
 const StatusBadge = styled.span<{ $status: string }>`
@@ -682,7 +685,7 @@ const AdminArchive = () => {
             {sortedAppointments.map((apt) => (
               <tr key={apt.id}>
                 <Td>{apt.client_name}</Td>
-                <Td dir="ltr" style={{ textAlign: 'right' }}>{apt.client_phone}</Td>
+                <Td dir="ltr">{apt.client_phone}</Td>
                 <Td>{formatDate(apt.appointment_date)}</Td>
                 <Td>{apt.appointment_time}</Td>
                 <Td>{getTreatmentTitle(apt.treatment_slug)}</Td>
