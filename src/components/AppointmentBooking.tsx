@@ -9,7 +9,7 @@ import { Button } from '@/components/styled/Button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { z } from 'zod';
-import { useRecaptcha } from '@/hooks/useRecaptcha';
+
 import { useTreatments } from '@/hooks/useTreatments';
 
 // Validation schema for appointment form
@@ -456,7 +456,6 @@ const AppointmentBooking = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', notes: '' });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
-  const { verify: verifyRecaptcha, hasToken: hasRecaptchaToken } = useRecaptcha('recaptcha-appointment');
   const { data: treatments = [] } = useTreatments();
 
   // Fetch booked appointments using security definer function (no PII exposed)
@@ -546,17 +545,6 @@ const AppointmentBooking = () => {
 
     const validatedData = validationResult.data;
     
-    if (!hasRecaptchaToken()) {
-      setFormError('יש לאמת את reCAPTCHA');
-      return;
-    }
-
-    const isHuman = await verifyRecaptcha();
-    if (!isHuman) {
-      setFormError('אימות reCAPTCHA נכשל, נסו שוב');
-      return;
-    }
-
     setIsLoading(true);
     try {
       const { error } = await supabase.from('appointments').insert({
