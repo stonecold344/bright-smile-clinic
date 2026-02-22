@@ -4,11 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Clock, Search, Filter, User, Phone, Eye, Stethoscope, X } from 'lucide-react';
+import { Calendar, Clock, Search, Filter, User, Phone, Eye, Stethoscope, X, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { useTreatments } from '@/hooks/useTreatments';
 import { Button } from '@/components/styled/Button';
+
+// Archived statuses - these don't appear in active appointments
+const ARCHIVED_STATUSES = ['cancelled', 'no_show', 'completed'];
+
+// --- Styled Components ---
 
 const PageHeader = styled.div`
   display: flex;
@@ -17,6 +22,45 @@ const PageHeader = styled.div`
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const StatCard = styled.button<{ $active?: boolean }>`
+  background: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1.25rem;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.normal};
+  border: 2px solid ${({ $active, theme }) => $active ? theme.colors.primary : 'transparent'};
+  text-align: right;
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.elevated};
+    transform: translateY(-2px);
+  }
+`;
+
+const StatValue = styled.div<{ $active?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ $active, theme }) => $active ? theme.colors.primaryForeground : theme.colors.foreground};
+`;
+
+const StatLabel = styled.div<{ $active?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ $active }) => $active ? 'hsla(0, 0%, 100%, 0.8)' : undefined};
+  ${({ $active, theme }) => !$active && `color: ${theme.colors.mutedForeground};`}
 `;
 
 const FiltersWrapper = styled.div`
@@ -155,11 +199,17 @@ const StatusBadge = styled.span<{ $status: string }>`
   background: ${({ $status }) =>
     $status === 'confirmed' ? '#dcfce7' :
     $status === 'cancelled' ? '#fee2e2' :
+    $status === 'arrived' ? '#dbeafe' :
+    $status === 'no_show' ? '#fce4ec' :
+    $status === 'completed' ? '#e8f5e9' :
     '#fef3c7'
   };
   color: ${({ $status }) =>
     $status === 'confirmed' ? '#166534' :
     $status === 'cancelled' ? '#991b1b' :
+    $status === 'arrived' ? '#1e40af' :
+    $status === 'no_show' ? '#880e4f' :
+    $status === 'completed' ? '#1b5e20' :
     '#92400e'
   };
 `;
@@ -222,6 +272,8 @@ const ActionButton = styled.button`
   }
 `;
 
+// --- Types ---
+
 interface Appointment {
   id: string;
   client_name: string;
@@ -235,16 +287,19 @@ interface Appointment {
   treatment_slug: string | null;
 }
 
+// --- Component ---
+
 const AdminArchive = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [hourFilter, setHourFilter] = useState('');
   const [treatmentFilter, setTreatmentFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   const { data: treatments = [] } = useTreatments();
 
-  const { data: appointments = [], isLoading } = useQuery({
+  const { data: allAppointments = [], isLoading } = useQuery({
     queryKey: ['admin-archive'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -258,42 +313,54 @@ const AdminArchive = () => {
     },
   });
 
-  const hasActiveFilters = searchQuery || dateFilter || hourFilter || treatmentFilter;
+  // Only show archived appointments
+  const archivedAppointments = useMemo(() =>
+    allAppointments.filter(a => ARCHIVED_STATUSES.includes(a.status)),
+    [allAppointments]
+  );
+
+  const stats = useMemo(() => ({
+    total: archivedAppointments.length,
+    cancelled: archivedAppointments.filter(a => a.status === 'cancelled').length,
+    no_show: archivedAppointments.filter(a => a.status === 'no_show').length,
+    completed: archivedAppointments.filter(a => a.status === 'completed').length,
+  }), [archivedAppointments]);
+
+  const hasActiveFilters = searchQuery || dateFilter || hourFilter || treatmentFilter || statusFilter;
 
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(apt => {
-      // Search by client name
+    return archivedAppointments.filter(apt => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        const nameMatch = apt.client_name.toLowerCase().includes(query);
-        if (!nameMatch) return false;
+        if (!apt.client_name.toLowerCase().includes(query)) return false;
       }
-
-      // Filter by date
       if (dateFilter) {
         if (apt.appointment_date !== dateFilter) return false;
       }
-
-      // Filter by hour
       if (hourFilter) {
         const aptHour = apt.appointment_time.substring(0, 2);
         if (aptHour !== hourFilter) return false;
       }
-
-      // Filter by treatment
       if (treatmentFilter) {
         if (apt.treatment_slug !== treatmentFilter) return false;
       }
-
+      if (statusFilter) {
+        if (apt.status !== statusFilter) return false;
+      }
       return true;
     });
-  }, [appointments, searchQuery, dateFilter, hourFilter, treatmentFilter]);
+  }, [archivedAppointments, searchQuery, dateFilter, hourFilter, treatmentFilter, statusFilter]);
 
   const clearAllFilters = () => {
     setSearchQuery('');
     setDateFilter('');
     setHourFilter('');
     setTreatmentFilter('');
+    setStatusFilter(null);
+  };
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilter(prev => prev === status ? null : status);
   };
 
   const formatDate = (date: string) => {
@@ -304,6 +371,9 @@ const AdminArchive = () => {
     switch (status) {
       case 'confirmed': return 'מאושר';
       case 'cancelled': return 'בוטל';
+      case 'arrived': return 'הגיע';
+      case 'no_show': return 'לא הגיע';
+      case 'completed': return 'טופל';
       default: return 'ממתין';
     }
   };
@@ -314,7 +384,6 @@ const AdminArchive = () => {
     return treatment?.title || slug;
   };
 
-  // Generate unique hours from appointments
   const availableHours = useMemo(() => {
     const hours = new Set<string>();
     for (let h = 9; h < 17; h++) {
@@ -336,10 +405,29 @@ const AdminArchive = () => {
       <PageHeader>
         <div>
           <Title $size="md">ארכיון תורים</Title>
-          <Text $color="muted">חיפוש וסינון של כל התורים במערכת</Text>
+          <Text $color="muted">תורים שבוטלו, שלקוח לא הגיע, או שטופלו</Text>
         </div>
-        <Badge>{appointments.length} תורים</Badge>
+        <Badge>{archivedAppointments.length} בארכיון</Badge>
       </PageHeader>
+
+      <StatsGrid>
+        <StatCard $active={statusFilter === null} onClick={() => setStatusFilter(null)}>
+          <StatValue $active={statusFilter === null}>{stats.total}</StatValue>
+          <StatLabel $active={statusFilter === null}>סה"כ</StatLabel>
+        </StatCard>
+        <StatCard $active={statusFilter === 'completed'} onClick={() => toggleStatusFilter('completed')}>
+          <StatValue $active={statusFilter === 'completed'}>{stats.completed}</StatValue>
+          <StatLabel $active={statusFilter === 'completed'}>טופלו</StatLabel>
+        </StatCard>
+        <StatCard $active={statusFilter === 'no_show'} onClick={() => toggleStatusFilter('no_show')}>
+          <StatValue $active={statusFilter === 'no_show'}>{stats.no_show}</StatValue>
+          <StatLabel $active={statusFilter === 'no_show'}>לא הגיעו</StatLabel>
+        </StatCard>
+        <StatCard $active={statusFilter === 'cancelled'} onClick={() => toggleStatusFilter('cancelled')}>
+          <StatValue $active={statusFilter === 'cancelled'}>{stats.cancelled}</StatValue>
+          <StatLabel $active={statusFilter === 'cancelled'}>בוטלו</StatLabel>
+        </StatCard>
+      </StatsGrid>
 
       <FiltersWrapper>
         <FiltersTitle>
@@ -393,16 +481,16 @@ const AdminArchive = () => {
 
       <ResultCount>
         {hasActiveFilters 
-          ? `נמצאו ${filteredAppointments.length} תוצאות מתוך ${appointments.length}`
-          : `${appointments.length} תורים סה"כ`
+          ? `נמצאו ${filteredAppointments.length} תוצאות מתוך ${archivedAppointments.length}`
+          : `${archivedAppointments.length} תורים בארכיון`
         }
       </ResultCount>
 
       {filteredAppointments.length === 0 ? (
         <EmptyState>
           <Search size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-          <Title $size="sm">{hasActiveFilters ? 'לא נמצאו תוצאות' : 'אין תורים במערכת'}</Title>
-          <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים חדשים יופיעו כאן'}</Text>
+          <Title $size="sm">{hasActiveFilters ? 'לא נמצאו תוצאות' : 'הארכיון ריק'}</Title>
+          <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים שנסגרו יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
         <Table>
@@ -487,6 +575,7 @@ const AdminArchive = () => {
 
             {selectedAppointment.client_email && (
               <DetailRow>
+                <Mail size={20} />
                 <div>
                   <Text $size="sm" $color="muted">אימייל</Text>
                   <Text dir="ltr">{selectedAppointment.client_email}</Text>
