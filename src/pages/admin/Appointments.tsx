@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus, FileText } from 'lucide-react';
+import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus, FileText, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
@@ -161,7 +161,7 @@ const Table = styled.table`
   box-shadow: ${({ theme }) => theme.shadows.soft};
 `;
 
-const Th = styled.th`
+const Th = styled.th<{ $sortable?: boolean }>`
   text-align: right;
   padding: 1rem 1.5rem;
   background: ${({ theme }) => theme.colors.secondary}80;
@@ -169,6 +169,13 @@ const Th = styled.th`
   color: ${({ theme }) => theme.colors.foreground};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   white-space: nowrap;
+  cursor: ${({ $sortable }) => $sortable ? 'pointer' : 'default'};
+  user-select: ${({ $sortable }) => $sortable ? 'none' : 'auto'};
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ $sortable, theme }) => $sortable ? `${theme.colors.secondary}` : `${theme.colors.secondary}80`};
+  }
 `;
 
 const Td = styled.td`
@@ -340,6 +347,8 @@ const AdminAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<'date' | 'time' | 'status' | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
   const [phoneSearch, setPhoneSearch] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -485,6 +494,35 @@ const AdminAppointments = () => {
     return result;
   }, [appointments, statusFilter, searchQuery, phoneSearch, dateFilter, hourFilter]);
 
+  const sortedAppointments = useMemo(() => {
+    if (!sortField) return filteredAppointments;
+    return [...filteredAppointments].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'date') {
+        cmp = a.appointment_date.localeCompare(b.appointment_date);
+      } else if (sortField === 'time') {
+        cmp = a.appointment_time.localeCompare(b.appointment_time);
+      } else if (sortField === 'status') {
+        cmp = a.status.localeCompare(b.status);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [filteredAppointments, sortField, sortDir]);
+
+  const toggleSort = (field: 'date' | 'time' | 'status') => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: 'date' | 'time' | 'status' }) => {
+    if (sortField !== field) return null;
+    return sortDir === 'asc' ? <ArrowUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <ArrowDown size={14} style={{ display: 'inline', marginRight: '4px' }} />;
+  };
+
   const clearAllFilters = () => {
     setSearchQuery('');
     setPhoneSearch('');
@@ -627,14 +665,14 @@ const AdminAppointments = () => {
             <tr>
               <Th>שם הלקוח</Th>
               <Th>טלפון</Th>
-              <Th>תאריך</Th>
-              <Th>שעה</Th>
-              <Th>סטטוס</Th>
+              <Th $sortable onClick={() => toggleSort('date')}>תאריך <SortIcon field="date" /></Th>
+              <Th $sortable onClick={() => toggleSort('time')}>שעה <SortIcon field="time" /></Th>
+              <Th $sortable onClick={() => toggleSort('status')}>סטטוס <SortIcon field="status" /></Th>
               <Th>פעולות</Th>
             </tr>
           </thead>
           <tbody>
-            {filteredAppointments.map((appointment) => (
+            {sortedAppointments.map((appointment) => (
               <tr key={appointment.id}>
                 <Td>{appointment.client_name}</Td>
                 <Td dir="ltr" style={{ textAlign: 'right' }}>{appointment.client_phone}</Td>
