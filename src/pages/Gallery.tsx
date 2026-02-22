@@ -6,6 +6,8 @@ import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGallery } from '@/hooks/useGallery';
+import BeforeAfterSlider from '@/components/BeforeAfterSlider';
+import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
 
 const MOBILE_BREAKPOINT = '768px';
 
@@ -235,6 +237,28 @@ const EmptyState = styled.div`
   padding: 4rem 2rem;
 `;
 
+const BeforeAfterSection = styled.section`
+  padding: ${({ theme }) => theme.spacing[16]} 0;
+  background: ${({ theme }) => theme.colors.secondary}4d;
+`;
+
+const BeforeAfterGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 64rem;
+  margin: 0 auto;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const SectionHeader = styled.div`
+  text-align: center;
+  margin-bottom: 3rem;
+`;
+
 const SWIPE_THRESHOLD = 50;
 
 const Gallery = () => {
@@ -381,6 +405,34 @@ const Gallery = () => {
             )}
           </Container>
         </GallerySection>
+
+        <BeforeAfterSection>
+          <Container>
+            <SectionHeader>
+              <Badge>לפני ואחרי</Badge>
+              <Title $size="lg" style={{ marginTop: '1rem' }}>תוצאות הטיפולים שלנו</Title>
+              <Text $color="muted" $size="lg">גררו את הסליידר כדי לראות את ההבדל</Text>
+            </SectionHeader>
+            <BeforeAfterGrid>
+              <ScrollAnimationWrapper>
+                <BeforeAfterSlider
+                  beforeImage="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80"
+                  afterImage="https://images.unsplash.com/photo-1601908804492-d5eda22ed523?w=800&q=80"
+                  beforeLabel="לפני"
+                  afterLabel="אחרי"
+                />
+              </ScrollAnimationWrapper>
+              <ScrollAnimationWrapper delay={0.15}>
+                <BeforeAfterSlider
+                  beforeImage="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80"
+                  afterImage="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80"
+                  beforeLabel="לפני"
+                  afterLabel="אחרי"
+                />
+              </ScrollAnimationWrapper>
+            </BeforeAfterGrid>
+          </Container>
+        </BeforeAfterSection>
       </main>
       <Footer />
 

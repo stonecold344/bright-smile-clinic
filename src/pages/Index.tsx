@@ -6,6 +6,7 @@ import AboutPreview from '@/components/AboutPreview';
 import VideoSection from '@/components/VideoSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import CTASection from '@/components/CTASection';
+import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
 
 const Index = () => {
   return (
@@ -13,11 +14,21 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
-        <ServicesSection />
-        <AboutPreview />
-        <VideoSection />
-        <TestimonialsSection />
-        <CTASection />
+        <ScrollAnimationWrapper>
+          <ServicesSection />
+        </ScrollAnimationWrapper>
+        <ScrollAnimationWrapper>
+          <AboutPreview />
+        </ScrollAnimationWrapper>
+        <ScrollAnimationWrapper>
+          <VideoSection />
+        </ScrollAnimationWrapper>
+        <ScrollAnimationWrapper>
+          <TestimonialsSection />
+        </ScrollAnimationWrapper>
+        <ScrollAnimationWrapper>
+          <CTASection />
+        </ScrollAnimationWrapper>
       </main>
       <Footer />
     </div>
