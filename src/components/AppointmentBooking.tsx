@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/sonner';
 import { z } from 'zod';
 
 import { useTreatments } from '@/hooks/useTreatments';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 // Validation schema for appointment form
 const appointmentSchema = z.object({
@@ -457,6 +458,7 @@ const AppointmentBooking = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
   const { data: treatments = [] } = useTreatments();
+  const { verify: verifyRecaptcha, hasToken: hasRecaptchaToken } = useRecaptcha('recaptcha-appointment');
 
   // Fetch booked appointments using security definer function (no PII exposed)
   useEffect(() => {
@@ -544,8 +546,20 @@ const AppointmentBooking = () => {
     }
 
     const validatedData = validationResult.data;
+
+    if (!hasRecaptchaToken()) {
+      setFormError('יש לאמת את ה-reCAPTCHA');
+      return;
+    }
     
     setIsLoading(true);
+
+    const recaptchaValid = await verifyRecaptcha();
+    if (!recaptchaValid) {
+      setFormError('אימות reCAPTCHA נכשל. נסה שוב.');
+      setIsLoading(false);
+      return;
+    }
     try {
       const { error } = await supabase.from('appointments').insert({
         client_name: validatedData.client_name,
