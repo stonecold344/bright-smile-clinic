@@ -363,13 +363,6 @@ const AdminTreatments = () => {
             <Card key={treatment.id}>
               <CardHeader>
                 <div>
-                  {isImageUrl(treatment.icon) ? (
-                    <CardImage src={treatment.icon} alt={treatment.title} />
-                  ) : (
-                    <CardIconFallback>
-                      <Stethoscope size={20} color="white" />
-                    </CardIconFallback>
-                  )}
                   <CardTitle>{treatment.title}</CardTitle>
                 </div>
                 <CardActions>
