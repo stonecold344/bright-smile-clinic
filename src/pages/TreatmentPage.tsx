@@ -6,7 +6,7 @@ import CTASection from '@/components/CTASection';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
-import { Check, Clock, Banknote, ArrowLeft, Loader2, Stethoscope } from 'lucide-react';
+import { Check, Clock, Banknote, ArrowLeft, Loader2 } from 'lucide-react';
 import { useTreatment } from '@/hooks/useTreatments';
 import heroImage from '@/assets/hero-dental.jpg';
 
@@ -48,20 +48,16 @@ const HeroContent = styled.div`
   margin: 0 auto;
 `;
 
-const TreatmentIcon = styled.div`
-  width: 5rem;
-  height: 5rem;
-  background: ${({ theme }) => theme.gradients.hero};
+const TreatmentImage = styled.div`
+  width: 12rem;
+  height: 12rem;
   border-radius: ${({ theme }) => theme.radii['2xl']};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
   margin: 0 auto 1.5rem;
   overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.elevated};
 `;
 
-const TreatmentIconImage = styled.img`
+const TreatmentImg = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -259,13 +255,11 @@ const TreatmentPage = () => {
           </HeroBg>
           <Container>
             <HeroContent>
-              <TreatmentIcon>
-                {treatment.icon && (treatment.icon.startsWith('http://') || treatment.icon.startsWith('https://') || treatment.icon.startsWith('/')) ? (
-                  <TreatmentIconImage src={treatment.icon} alt={treatment.title} />
-                ) : (
-                  <Stethoscope size={36} color="white" />
-                )}
-              </TreatmentIcon>
+              {treatment.icon && (treatment.icon.startsWith('http://') || treatment.icon.startsWith('https://') || treatment.icon.startsWith('/')) && (
+                <TreatmentImage>
+                  <TreatmentImg src={treatment.icon} alt={treatment.title} />
+                </TreatmentImage>
+              )}
               <Badge>טיפולי שיניים</Badge>
               <Title $size="xl" style={{ marginTop: '1rem' }}>
                 {treatment.title}
