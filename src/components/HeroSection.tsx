@@ -3,7 +3,6 @@ import { Phone, Calendar, Sparkles, Stethoscope, Building2, Star } from 'lucide-
 import { Button, ButtonLink, ButtonRouterLink } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
-import heroImage from '@/assets/hero-dental.jpg';
 const HeroWrapper = styled.section`
   position: relative;
   min-height: 70vh;
@@ -16,7 +15,7 @@ const HeroBackground = styled.div`
   position: absolute;
   inset: 0;
 `;
-const HeroImage = styled.img`
+const HeroVideo = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -196,7 +195,9 @@ const ScrollIndicator = styled.button`
 const HeroSection = () => {
   return <HeroWrapper>
       <HeroBackground>
-        <HeroImage src={heroImage} alt="מרפאת שיניים מודרנית" />
+        <HeroVideo autoPlay muted loop playsInline>
+          <source src="https://videos.pexels.com/video-files/7579961/7579961-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+        </HeroVideo>
         <HeroOverlay />
       </HeroBackground>
 
