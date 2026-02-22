@@ -88,14 +88,16 @@ const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.primary : 'white'};
   margin: 0;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 4px rgba(0,0,0,0.5)'};
 `;
 const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ $scrolled }) => $scrolled ? 'hsl(200, 15%, 45%)' : 'hsla(0, 0%, 100%, 0.8)'};
+  color: ${({ $scrolled }) => $scrolled ? 'hsl(200, 15%, 45%)' : 'hsla(0, 0%, 100%, 0.9)'};
   margin: 0;
   display: none;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.4)'};
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     display: block;
