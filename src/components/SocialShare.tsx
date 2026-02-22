@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Share2, X, MessageCircle, Copy, Check } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(8px) scale(0.95); }
