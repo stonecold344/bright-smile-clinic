@@ -21,7 +21,7 @@ const teamMembers = [
     role: 'רופאת שיניים',
     specialization: 'התמחות בהשתלות',
     experience: '12 שנות ניסיון',
-    image: 'https://images.unsplash.com/photo-1594824476967-48c8b964ac31?w=300&h=300&fit=crop&crop=face',
+    image: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=300&h=300&fit=crop&crop=face',
   },
   {
     name: 'ד״ר דוד ישראלי',
