@@ -549,10 +549,10 @@ const Header = () => {
 
               {user && isAdmin && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
-                  <MobileNavLink to="/admin" $active={false} onClick={() => setIsMenuOpen(false)} style={{ textAlign: 'center' }}>
-                    <Settings size={18} style={{ display: 'inline', marginLeft: '0.5rem' }} />
+                  <ButtonRouterLink to="/admin" $variant="outline" $size="sm" $fullWidth onClick={() => setIsMenuOpen(false)}>
+                    <Settings size={18} />
                     ניהול מערכת
-                  </MobileNavLink>
+                  </ButtonRouterLink>
                 </div>
               )}
               {user && (
