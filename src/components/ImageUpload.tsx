@@ -82,8 +82,8 @@ const ImageUpload = ({ images, onChange, multiple = false, folder = 'uploads' }:
 
     try {
       for (const file of Array.from(files)) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`הקובץ ${file.name} גדול מדי (מקסימום 5MB)`);
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`הקובץ ${file.name} גדול מדי (מקסימום 10MB)`);
           continue;
         }
 

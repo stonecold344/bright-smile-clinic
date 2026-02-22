@@ -9,6 +9,7 @@ import { Button } from '@/components/styled/Button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 // Validation schema for appointment form
 const appointmentSchema = z.object({
@@ -435,6 +436,7 @@ const AppointmentBooking = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', notes: '' });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
+  const { verify: verifyRecaptcha, hasToken: hasRecaptchaToken } = useRecaptcha('recaptcha-appointment');
 
   // Fetch booked appointments using security definer function (no PII exposed)
   useEffect(() => {
@@ -522,8 +524,19 @@ const AppointmentBooking = () => {
     }
 
     const validatedData = validationResult.data;
-    setIsLoading(true);
+    
+    if (!hasRecaptchaToken()) {
+      setFormError('יש לאמת את reCAPTCHA');
+      return;
+    }
 
+    const isHuman = await verifyRecaptcha();
+    if (!isHuman) {
+      setFormError('אימות reCAPTCHA נכשל, נסו שוב');
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const { error } = await supabase.from('appointments').insert({
         client_name: validatedData.client_name,
@@ -705,7 +718,7 @@ const AppointmentBooking = () => {
                 </SelectedAppointment>
               )}
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} noValidate>
                 {formError && (
                   <FormError>
                     <AlertTriangle size={18} />
@@ -721,7 +734,6 @@ const AppointmentBooking = () => {
                     value={formData.name}
                     $hasError={!!fieldErrors.client_name}
                     onChange={(e) => { setFormData({ ...formData, name: e.target.value }); clearFieldError('client_name'); }}
-                    required
                   />
                   {fieldErrors.client_name && (
                     <FieldError><AlertTriangle size={13} /><span>{fieldErrors.client_name}</span></FieldError>
@@ -736,7 +748,6 @@ const AppointmentBooking = () => {
                     value={formData.phone}
                     $hasError={!!fieldErrors.client_phone}
                     onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); clearFieldError('client_phone'); }}
-                    required
                     dir="ltr"
                   />
                   {fieldErrors.client_phone && (
@@ -767,6 +778,8 @@ const AppointmentBooking = () => {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   />
                 </FormGroup>
+
+                <div id="recaptcha-appointment" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }} />
 
                 <Button 
                   type="submit" 

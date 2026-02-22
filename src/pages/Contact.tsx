@@ -10,6 +10,7 @@ import { Phone, Mail, MapPin, Clock, Send, MessageCircle, AlertTriangle } from '
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'שם חייב להכיל לפחות 2 תווים'),
@@ -85,6 +86,7 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
+  const { verify: verifyRecaptcha, hasToken: hasRecaptchaToken } = useRecaptcha('recaptcha-contact');
 
   const clearFieldError = (field: string) => {
     setFieldErrors(prev => { const n = { ...prev }; delete n[field]; return n; });
@@ -113,8 +115,18 @@ const Contact = () => {
       return;
     }
 
+    if (!hasRecaptchaToken()) {
+      setFormError('יש לאמת את reCAPTCHA');
+      return;
+    }
+
+    const isHuman = await verifyRecaptcha();
+    if (!isHuman) {
+      setFormError('אימות reCAPTCHA נכשל, נסו שוב');
+      return;
+    }
+
     setIsSubmitting(true);
-    
     try {
       const { data, error } = await supabase.functions.invoke('send-contact-whatsapp', {
         body: {
@@ -161,7 +173,7 @@ const Contact = () => {
             <ContactGrid>
               <FormCard>
                 <FormTitle>השאירו פרטים</FormTitle>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                   {formError && (
                     <FormError>
                       <AlertTriangle size={18} />
@@ -171,13 +183,13 @@ const Contact = () => {
 
                   <FormGroup>
                     <Label htmlFor="name">שם מלא *</Label>
-                    <StyledInput id="name" name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="הכניסו את שמכם" $hasError={!!fieldErrors.name} />
+                    <StyledInput id="name" name="name" type="text" value={formData.name} onChange={handleChange} placeholder="הכניסו את שמכם" $hasError={!!fieldErrors.name} />
                     {fieldErrors.name && <FieldError><AlertTriangle size={13} /><span>{fieldErrors.name}</span></FieldError>}
                   </FormGroup>
 
                   <FormGroup>
                     <Label htmlFor="phone">טלפון *</Label>
-                    <StyledInput id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="050-000-0000" dir="ltr" $hasError={!!fieldErrors.phone} />
+                    <StyledInput id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="050-000-0000" dir="ltr" $hasError={!!fieldErrors.phone} />
                     {fieldErrors.phone && <FieldError><AlertTriangle size={13} /><span>{fieldErrors.phone}</span></FieldError>}
                   </FormGroup>
 
@@ -191,6 +203,8 @@ const Contact = () => {
                     <Label htmlFor="message">הודעה</Label>
                     <Textarea id="message" name="message" value={formData.message} onChange={handleChange} placeholder="ספרו לנו במה נוכל לעזור..." />
                   </FormGroup>
+
+                  <div id="recaptcha-contact" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }} />
 
                   <Button type="submit" $variant="heroPrimary" $size="lg" $fullWidth disabled={isSubmitting}>
                     {isSubmitting ? 'שולח...' : 'שליחת הודעה'}<Send size={20} />
