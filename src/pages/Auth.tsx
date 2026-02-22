@@ -176,8 +176,8 @@ const GeneralError = styled.div`
   }
 `;
 
-const emailSchema = z.string().email('כתובת אימייל לא תקינה');
-const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
+const emailSchema = z.string().trim().email('כתובת אימייל לא תקינה').max(255, 'אימייל ארוך מדי');
+const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים').max(128, 'סיסמה ארוכה מדי');
 
 const Auth = () => {
   const [email, setEmail] = useState('');

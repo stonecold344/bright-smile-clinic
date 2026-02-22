@@ -232,7 +232,12 @@ const AdminGallery = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) { toast.error('יש למלא כותרת'); return; }
+    if (formData.title.trim().length < 2) { toast.error('כותרת חייבת להכיל לפחות 2 תווים'); return; }
+    if (formData.title.trim().length > 200) { toast.error('כותרת ארוכה מדי (מקסימום 200 תווים)'); return; }
     if (formData.images.length === 0) { toast.error('יש להעלות לפחות תמונה אחת'); return; }
+    if (formData.images.length > 20) { toast.error('מקסימום 20 תמונות לפריט'); return; }
+    if (formData.description && formData.description.length > 1000) { toast.error('תיאור ארוך מדי (מקסימום 1000 תווים)'); return; }
+    if (formData.category && formData.category.length > 50) { toast.error('שם קטגוריה ארוך מדי (מקסימום 50 תווים)'); return; }
     if (editingItem) {
       updateItem.mutate({ id: editingItem.id, data: formData });
     } else {

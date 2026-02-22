@@ -427,8 +427,42 @@ const AdminBlog = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Title validation
     if (!formData.title.trim()) { toast.error('יש למלא כותרת'); return; }
+    if (formData.title.trim().length < 3) { toast.error('כותרת חייבת להכיל לפחות 3 תווים'); return; }
+    if (formData.title.trim().length > 200) { toast.error('כותרת ארוכה מדי (מקסימום 200 תווים)'); return; }
+    
+    // Slug validation
     if (!formData.slug.trim()) { toast.error('יש למלא slug'); return; }
+    if (!/^[a-z0-9-]+$/.test(formData.slug.trim())) { toast.error('Slug יכול להכיל רק אותיות קטנות באנגלית, מספרים ומקפים'); return; }
+    
+    // Validate sections - check that non-summary sections with type 'section' have content
+    const contentSections = formData.sections.filter(s => s.type === 'section');
+    for (let i = 0; i < contentSections.length; i++) {
+      if (!contentSections[i].text.trim()) {
+        toast.error(`פסקה ${i + 1} ריקה — יש למלא תוכן או למחוק אותה`);
+        return;
+      }
+    }
+    
+    // Validate intro if exists
+    const introSection = formData.sections.find(s => s.type === 'intro');
+    if (introSection && !introSection.text.trim()) {
+      toast.error('יש למלא טקסט הקדמה או למחוק את ההקדמה');
+      return;
+    }
+    
+    // SEO validation (optional but if filled must be valid)
+    if (formData.seo_title && formData.seo_title.length > 60) {
+      toast.error('כותרת SEO ארוכה מדי (מקסימום 60 תווים)');
+      return;
+    }
+    if (formData.seo_description && formData.seo_description.length > 160) {
+      toast.error('תיאור SEO ארוך מדי (מקסימום 160 תווים)');
+      return;
+    }
+
     if (editingPost) {
       updatePost.mutate({ id: editingPost.id, data: formData });
     } else {
@@ -452,7 +486,16 @@ const AdminBlog = () => {
       : type === 'intro'
       ? { type: 'intro', text: '' }
       : { type: 'section', heading: '', text: '', image: '' };
-    setFormData({ ...formData, sections: [...formData.sections, newSection] });
+    
+    // Insert new sections BEFORE the summary (if exists)
+    const summaryIndex = formData.sections.findIndex(s => s.type === 'summary');
+    if (type !== 'summary' && summaryIndex !== -1) {
+      const newSections = [...formData.sections];
+      newSections.splice(summaryIndex, 0, newSection);
+      setFormData({ ...formData, sections: newSections });
+    } else {
+      setFormData({ ...formData, sections: [...formData.sections, newSection] });
+    }
   };
 
   const updatePoint = (sectionIndex: number, pointIndex: number, value: string) => {

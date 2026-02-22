@@ -13,10 +13,13 @@ import { z } from 'zod';
 import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'שם חייב להכיל לפחות 2 תווים'),
+  name: z.string()
+    .min(2, 'שם חייב להכיל לפחות 2 תווים')
+    .max(100, 'שם ארוך מדי (מקסימום 100 תווים)')
+    .regex(/^[\p{L}\s'-]+$/u, 'שם יכול להכיל רק אותיות ורווחים'),
   phone: z.string().regex(/^0[0-9]{8,9}$/, 'מספר טלפון לא תקין (לדוגמה: 0501234567)'),
-  email: z.string().email('כתובת אימייל לא תקינה').optional().or(z.literal('')),
-  message: z.string().max(1000, 'ההודעה ארוכה מדי').optional(),
+  email: z.string().email('כתובת אימייל לא תקינה').max(255, 'אימייל ארוך מדי').optional().or(z.literal('')),
+  message: z.string().max(1000, 'ההודעה ארוכה מדי (מקסימום 1000 תווים)').optional(),
 });
 
 const contactInfo = [

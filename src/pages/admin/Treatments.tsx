@@ -291,8 +291,13 @@ const AdminTreatments = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) { toast.error('יש למלא שם טיפול'); return; }
+    if (formData.title.trim().length < 2) { toast.error('שם טיפול חייב להכיל לפחות 2 תווים'); return; }
+    if (formData.title.trim().length > 100) { toast.error('שם טיפול ארוך מדי (מקסימום 100 תווים)'); return; }
     if (!formData.slug.trim()) { toast.error('יש למלא slug'); return; }
+    if (!/^[a-z0-9-]+$/.test(formData.slug.trim())) { toast.error('Slug יכול להכיל רק אותיות קטנות באנגלית, מספרים ומקפים'); return; }
     if (!formData.short_description.trim()) { toast.error('יש למלא תיאור קצר'); return; }
+    if (formData.short_description.trim().length > 500) { toast.error('תיאור קצר ארוך מדי (מקסימום 500 תווים)'); return; }
+    if (formData.full_description && formData.full_description.length > 5000) { toast.error('תיאור מלא ארוך מדי (מקסימום 5000 תווים)'); return; }
     if (editingTreatment) {
       updateTreatment.mutate({ id: editingTreatment.id, data: formData });
     } else {
