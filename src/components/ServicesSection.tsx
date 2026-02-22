@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ArrowLeft, Stethoscope, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { useTreatments } from '@/hooks/useTreatments';
 
-const isImageUrl = (value: string) => {
-  return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/');
-};
 
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
@@ -60,30 +57,6 @@ const ServiceCard = styled(Link)<{ $hideOnMobile?: boolean; $hideOnDesktop?: boo
     box-shadow: ${({ theme }) => theme.shadows.elevated};
     transform: translateY(-0.5rem);
   }
-`;
-
-const ServiceIcon = styled.div`
-  width: 4rem;
-  height: 4rem;
-  background: ${({ theme }) => theme.gradients.hero};
-  border-radius: ${({ theme }) => theme.radii['2xl']};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.875rem;
-  margin-bottom: 1.5rem;
-  transition: transform ${({ theme }) => theme.transitions.normal};
-  overflow: hidden;
-  
-  ${ServiceCard}:hover & {
-    transform: scale(1.1);
-  }
-`;
-
-const ServiceIconImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 `;
 
 const ServiceTitle = styled.h3`
@@ -139,13 +112,6 @@ const ServicesSection = () => {
                 $hideOnMobile={index === 3}
                 $hideOnDesktop={index === 3}
               >
-                <ServiceIcon>
-                  {isImageUrl(treatment.icon) ? (
-                    <ServiceIconImage src={treatment.icon} alt={treatment.title} />
-                  ) : (
-                    <Stethoscope size={32} color="white" />
-                  )}
-                </ServiceIcon>
                 <ServiceTitle>{treatment.title}</ServiceTitle>
                 <ServiceDescription>{treatment.short_description}</ServiceDescription>
               </ServiceCard>
