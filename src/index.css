@@ -97,3 +97,21 @@ html.grayscale {
   transform: translateX(-50%);
   top: 0;
 }
+
+/* Toast centering and close button styling */
+[data-sonner-toaster] [data-sonner-toast] {
+  justify-content: center !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-content] {
+  text-align: center !important;
+  flex: 1;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  left: 0.5rem !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}

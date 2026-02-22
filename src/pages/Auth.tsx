@@ -7,6 +7,7 @@ import { Input, Label, FormGroup } from '@/components/styled/Input';
 import { Title, Text } from '@/components/styled/Typography';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 const PageWrapper = styled.div`
   min-height: 100vh;
@@ -235,6 +236,7 @@ const Auth = () => {
           setErrors({ general: error.message });
         }
       } else {
+        toast.success('התחברת בהצלחה! 👋');
         navigate('/admin');
       }
     } finally {
