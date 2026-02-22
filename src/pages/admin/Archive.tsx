@@ -272,10 +272,15 @@ const DetailRow = styled.div`
   }
 `;
 
-const ActionButton = styled.button`
+const ActionButton = styled.button<{ $variant?: 'success' | 'info' | 'default' }>`
   padding: 0.5rem;
   border-radius: ${({ theme }) => theme.radii.md};
   transition: all ${({ theme }) => theme.transitions.normal};
+  color: ${({ $variant }) => 
+    $variant === 'success' ? '#16a34a' :
+    $variant === 'info' ? '#2563eb' :
+    'inherit'
+  };
 
   &:hover {
     background: ${({ theme }) => theme.colors.secondary};
@@ -630,7 +635,7 @@ const AdminArchive = () => {
                       <Eye size={18} />
                     </ActionButton>
                     {apt.status === 'completed' && (
-                      <ActionButton onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
+                      <ActionButton $variant={apt.images && apt.images.length > 0 ? 'success' : 'info'} onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
                         <ImagePlus size={18} />
                       </ActionButton>
                     )}
