@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
-import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
+import { Input, Textarea, Label, FormGroup, Select } from '@/components/styled/Input';
 import { Stethoscope, Loader2, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import ImageUpload from '@/components/ImageUpload';
@@ -526,25 +526,16 @@ const AdminTreatments = () => {
 
               <FormGroup>
                 <Label htmlFor="duration">משך זמן</Label>
-                <select
+                <Select
                   id="duration"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.75rem',
-                    border: '1px solid hsl(var(--border))',
-                    background: 'hsl(var(--card))',
-                    color: 'hsl(var(--foreground))',
-                    fontSize: '0.875rem',
-                  }}
                 >
                   <option value="">בחר משך זמן</option>
                   {DURATION_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
-                </select>
+                </Select>
               </FormGroup>
 
               <FormGroup>
