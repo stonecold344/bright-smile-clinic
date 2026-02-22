@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, FileText, Image, ShieldX, Archive } from 'lucide-react';
+import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, FileText, Image, ShieldX, Archive, Menu, X } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +17,9 @@ const Header = styled.header`
   background: ${({ theme }) => theme.colors.card};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 `;
 
 const HeaderInner = styled.div`
@@ -29,6 +32,7 @@ const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  z-index: 51;
 `;
 
 const LogoIcon = styled.div`
@@ -46,10 +50,43 @@ const LogoText = styled.span`
   color: ${({ theme }) => theme.colors.foreground};
 `;
 
-const Nav = styled.nav`
+const MenuButton = styled.button`
+  display: none;
+  padding: 0.5rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  color: ${({ theme }) => theme.colors.foreground};
+  z-index: 51;
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.secondary};
+  }
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
+const Nav = styled.nav<{ $open?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    background: ${({ theme }) => theme.colors.card};
+    flex-direction: column;
+    align-items: stretch;
+    padding: 5rem 1.5rem 2rem;
+    gap: 0.25rem;
+    overflow-y: auto;
+    transform: ${({ $open }) => $open ? 'translateX(0)' : 'translateX(100%)'};
+    transition: transform 0.3s ease;
+    z-index: 50;
+  }
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean }>`
@@ -66,18 +103,55 @@ const NavLink = styled(Link)<{ $active?: boolean }>`
   &:hover {
     background: ${({ theme }) => theme.colors.secondary};
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+  }
+`;
+
+const NavDivider = styled.hr`
+  display: none;
+  border: none;
+  height: 1px;
+  background: ${({ theme }) => theme.colors.border};
+  margin: 0.75rem 0;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: block;
+  }
 `;
 
 const Actions = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: none;
+  }
+`;
+
+const MobileActions = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: flex;
+  }
 `;
 
 const Main = styled.main`
   flex: 1;
   padding: ${({ theme }) => theme.spacing[8]} 0;
   background: ${({ theme }) => theme.colors.secondary}4d;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    padding: ${({ theme }) => theme.spacing[4]} 0;
+  }
 `;
 
 const LoadingWrapper = styled.div`
@@ -148,6 +222,22 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll when menu open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -225,7 +315,7 @@ const Dashboard = () => {
               <LogoText>ניהול מרפאה</LogoText>
             </Logo>
 
-            <Nav>
+            <Nav $open={menuOpen}>
               <NavLink to="/admin/appointments" $active={isActive('/admin/appointments')}>
                 <Calendar size={18} />
                 תורים
@@ -250,6 +340,17 @@ const Dashboard = () => {
                 <Archive size={18} />
                 ארכיון
               </NavLink>
+              <NavDivider />
+              <MobileActions>
+                <Button as={Link} to="/" $variant="ghost" $size="sm" $fullWidth>
+                  <Home size={18} />
+                  לאתר
+                </Button>
+                <Button onClick={handleSignOut} $variant="outline" $size="sm" $fullWidth>
+                  <LogOut size={18} />
+                  התנתקות
+                </Button>
+              </MobileActions>
             </Nav>
 
             <Actions>
@@ -262,6 +363,10 @@ const Dashboard = () => {
                 התנתקות
               </Button>
             </Actions>
+
+            <MenuButton onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </MenuButton>
           </HeaderInner>
         </Container>
       </Header>

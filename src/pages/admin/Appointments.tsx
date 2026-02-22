@@ -153,12 +153,19 @@ const ClearFilters = styled.button`
   }
 `;
 
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: ${({ theme }) => theme.radii.xl};
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+`;
+
 const Table = styled.table`
   width: 100%;
+  min-width: 700px;
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii.xl};
   overflow: hidden;
-  box-shadow: ${({ theme }) => theme.shadows.soft};
 `;
 
 const Th = styled.th<{ $sortable?: boolean }>`
@@ -663,7 +670,7 @@ const AdminAppointments = () => {
           <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
-        <Table>
+        <TableWrapper><Table>
           <thead>
             <tr>
               <Th>שם הלקוח</Th>
@@ -761,7 +768,7 @@ const AdminAppointments = () => {
               </tr>
             ))}
           </tbody>
-        </Table>
+        </Table></TableWrapper>
       )}
 
       {/* Image upload modal */}
