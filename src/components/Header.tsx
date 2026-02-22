@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Calendar, Menu, X, Smile, ChevronDown } from 'lucide-react';
+import { Calendar, Menu, X, Smile, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { Button, ButtonRouterLink } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import ServicesDropdown from '@/components/ServicesDropdown';
 import { useTreatments } from '@/hooks/useTreatments';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 const HeaderWrapper = styled.header`
   position: fixed;
   top: 0;
@@ -14,8 +16,7 @@ const HeaderWrapper = styled.header`
   z-index: 50;
   background: ${({
   theme
-}) => theme.colors.card}f2;
-  backdrop-filter: blur(12px);
+}) => theme.colors.card};
   box-shadow: ${({
   theme
 }) => theme.shadows.soft};
@@ -84,34 +85,23 @@ const LogoText = styled.div`
     display: block;
   }
 `;
-const LogoTitle = styled.h1<{
-  $scrolled?: boolean;
-}>`
+const LogoTitle = styled.h1`
   font-size: ${({
   theme
 }) => theme.fontSizes['2xl']};
   font-weight: ${({
   theme
 }) => theme.fontWeights.bold};
-  color: ${({
-  $scrolled,
-  theme
-}) => $scrolled ? theme.colors.primary : 'white'};
+  color: ${({ theme }) => theme.colors.primary};
   margin: 0;
-  transition: color 0.3s ease;
 `;
-const LogoSubtitle = styled.p<{
-  $scrolled?: boolean;
-}>`
+const LogoSubtitle = styled.p`
   font-size: ${({
   theme
 }) => theme.fontSizes.xs};
-  color: ${({
-  $scrolled
-}) => $scrolled ? 'hsl(var(--muted-foreground))' : 'white'};
+  color: ${({ theme }) => theme.colors.mutedForeground};
   margin: 0;
   display: none;
-  transition: color 0.3s ease;
   
   @media (min-width: ${({
   theme
@@ -137,12 +127,11 @@ const Nav = styled.nav`
 `;
 const NavLink = styled(Link)<{
   $active?: boolean;
-  $scrolled?: boolean;
 }>`
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ $active, $scrolled, theme }) => 
-    $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
+  color: ${({ $active, theme }) => 
+    $active ? theme.colors.primary : theme.colors.foreground};
   transition: color 0.3s ease;
   padding-bottom: 0.25rem;
   border-bottom: ${({ $active, theme }) => 
@@ -295,9 +284,19 @@ const Header = () => {
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
   const {
     data: treatments = []
   } = useTreatments();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (!error) {
+      toast.success('התנתקת בהצלחה');
+      navigate('/');
+    }
+  };
 
   // Pages with light hero backgrounds that need dark header text
   const lightHeroPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery'];
@@ -468,8 +467,8 @@ const Header = () => {
           <Logo to="/">
             <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
-              <LogoTitle $scrolled={effectiveScrolled}>מרפאת שיניים</LogoTitle>
-              <LogoSubtitle $scrolled={effectiveScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
+              <LogoTitle>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
           
@@ -478,15 +477,27 @@ const Header = () => {
           </MobileCenterTitle>
 
           <Nav>
-            <NavLink to="/" $active={isActive('/')} $scrolled={effectiveScrolled}>בית</NavLink>
-            <ServicesDropdown scrolled={effectiveScrolled} />
-            <NavLink to="/gallery" $active={isActive('/gallery')} $scrolled={effectiveScrolled}>גלריה</NavLink>
-            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')} $scrolled={effectiveScrolled}>בלוג</NavLink>
-            <NavLink to="/about" $active={isActive('/about')} $scrolled={effectiveScrolled}>אודות</NavLink>
-            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={effectiveScrolled}>צור קשר</NavLink>
+            <NavLink to="/" $active={isActive('/')}>בית</NavLink>
+            <ServicesDropdown scrolled={true} />
+            <NavLink to="/gallery" $active={isActive('/gallery')}>גלריה</NavLink>
+            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')}>בלוג</NavLink>
+            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
+            {user && isAdmin && (
+              <ButtonRouterLink to="/admin" $variant="ghost" $size="sm">
+                <Settings size={18} />
+                ניהול
+              </ButtonRouterLink>
+            )}
+            {user && (
+              <Button onClick={handleSignOut} $variant="ghost" $size="sm">
+                <LogOut size={18} />
+                התנתקות
+              </Button>
+            )}
             <ButtonRouterLink to="/appointments" $variant="call" $size="lg">
               <Calendar size={20} />
               קביעת תור
@@ -541,6 +552,19 @@ const Header = () => {
                 <Calendar size={20} />
                 קביעת תור
               </ButtonRouterLink>
+
+              {user && isAdmin && (
+                <MobileNavLink to="/admin" $active={false} onClick={() => setIsMenuOpen(false)}>
+                  <Settings size={18} style={{ display: 'inline', marginLeft: '0.5rem' }} />
+                  ניהול מערכת
+                </MobileNavLink>
+              )}
+              {user && (
+                <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} $variant="outline" $size="sm" $fullWidth style={{ marginTop: '0.5rem' }}>
+                  <LogOut size={18} />
+                  התנתקות
+                </Button>
+              )}
             </MobileNavInner>
           </Container>
         </MobileNav>}
