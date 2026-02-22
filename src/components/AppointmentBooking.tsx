@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { format, addDays, isSameDay, startOfToday, getDay, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays, AlertTriangle } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
@@ -27,6 +27,7 @@ const appointmentSchema = z.object({
     .max(500, 'ההערות ארוכות מדי (מקסימום 500 תווים)')
     .optional()
 });
+
 const SectionWrapper = styled.section`
   padding: ${({ theme }) => theme.spacing[24]} 0;
   background: ${({ theme }) => theme.colors.background};
@@ -196,19 +197,9 @@ const TimeSlotsContainer = styled.div`
   overflow-y: auto;
   padding-left: 0.5rem;
   
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.secondary};
-    border-radius: 2px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.primary};
-    border-radius: 2px;
-  }
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: ${({ theme }) => theme.colors.secondary}; border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: ${({ theme }) => theme.colors.primary}; border-radius: 2px; }
 `;
 
 const TimeSlot = styled.button<{ $isSelected?: boolean; $isBooked?: boolean }>`
@@ -312,10 +303,10 @@ const Label = styled.label`
   margin-bottom: 0.375rem;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 0.75rem 0.875rem;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid ${({ $hasError, theme }) => $hasError ? theme.colors.destructive : theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   background: ${({ theme }) => theme.colors.background};
@@ -324,8 +315,8 @@ const Input = styled.input`
   
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+    border-color: ${({ $hasError, theme }) => $hasError ? theme.colors.destructive : theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ $hasError, theme }) => $hasError ? theme.colors.destructive + '25' : theme.colors.primary + '25'};
   }
   
   &::placeholder {
@@ -375,6 +366,45 @@ const SelectedValue = styled.p`
   font-weight: ${({ theme }) => theme.fontWeights.bold};
 `;
 
+/* Inline error styles */
+const slideDown = keyframes`
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const FieldError = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  animation: ${slideDown} 0.2s ease-out;
+
+  svg {
+    flex-shrink: 0;
+    color: ${({ theme }) => theme.colors.destructive};
+  }
+
+  span {
+    font-size: ${({ theme }) => theme.fontSizes.xs};
+    color: ${({ theme }) => theme.colors.destructive};
+  }
+`;
+
+const FormError = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: ${({ theme }) => theme.colors.destructive}12;
+  border: 1px solid ${({ theme }) => theme.colors.destructive}40;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  animation: ${slideDown} 0.3s ease-out;
+
+  svg { flex-shrink: 0; color: ${({ theme }) => theme.colors.destructive}; }
+  span { font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.destructive}; line-height: 1.4; }
+`;
+
 // Generate time slots from 9:00 to 17:00 every 15 minutes
 const generateTimeSlots = () => {
   const slots: string[] = [];
@@ -402,12 +432,9 @@ const AppointmentBooking = () => {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(startOfToday()));
   const [bookedSlots, setBookedSlots] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    notes: ''
-  });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', notes: '' });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState('');
 
   // Fetch booked appointments using security definer function (no PII exposed)
   useEffect(() => {
@@ -427,57 +454,34 @@ const AppointmentBooking = () => {
 
     fetchAppointments();
 
-    // Subscribe to realtime updates - will trigger refetch
     const channel = supabase
       .channel('appointments-changes')
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'appointments'
-        },
-        () => {
-          fetchAppointments();
-        }
+        { event: 'INSERT', schema: 'public', table: 'appointments' },
+        () => { fetchAppointments(); }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [currentMonth]);
 
-  // Generate days for full month view (exactly 4 rows = 28 slots)
   const getMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    const startDay = getDay(monthStart); // 0 = Sunday
+    const startDay = getDay(monthStart);
     const days: (Date | null)[] = [];
-    
-    // Add empty slots for days before the month starts
-    for (let i = 0; i < startDay; i++) {
-      days.push(null);
-    }
-    
-    // Add all days of the month
+    for (let i = 0; i < startDay; i++) { days.push(null); }
     let currentDate = monthStart;
-    while (currentDate <= monthEnd) {
-      days.push(currentDate);
-      currentDate = addDays(currentDate, 1);
-    }
-    
-    // Limit to exactly 28 slots (4 rows)
+    while (currentDate <= monthEnd) { days.push(currentDate); currentDate = addDays(currentDate, 1); }
     return days.slice(0, 28);
   };
 
-  // Check if a date is a working day (Sunday to Thursday)
   const isWorkingDay = (date: Date) => {
     const day = getDay(date);
-    return day >= 0 && day <= 4; // Sunday = 0, Thursday = 4
+    return day >= 0 && day <= 4;
   };
 
-  // Check if a time slot is booked
   const isTimeBooked = (date: Date, time: string) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return bookedSlots.some(
@@ -485,15 +489,21 @@ const AppointmentBooking = () => {
     );
   };
 
+  const clearFieldError = (field: string) => {
+    setFieldErrors(prev => { const n = { ...prev }; delete n[field]; return n; });
+    setFormError('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+    setFormError('');
     
     if (!selectedDate || !selectedTime) {
-      toast.error('יש לבחור תאריך ושעה');
+      setFormError('יש לבחור תאריך ושעה לפני שליחת הטופס');
       return;
     }
 
-    // Validate form data with Zod schema
     const validationResult = appointmentSchema.safeParse({
       client_name: formData.name.trim(),
       client_phone: formData.phone.trim(),
@@ -502,8 +512,12 @@ const AppointmentBooking = () => {
     });
 
     if (!validationResult.success) {
-      const firstError = validationResult.error.errors[0];
-      toast.error(firstError.message);
+      const errs: Record<string, string> = {};
+      validationResult.error.errors.forEach(err => {
+        const field = err.path[0] as string;
+        if (!errs[field]) errs[field] = err.message;
+      });
+      setFieldErrors(errs);
       return;
     }
 
@@ -522,14 +536,13 @@ const AppointmentBooking = () => {
 
       if (error) {
         if (error.message.includes('rate_limit')) {
-          toast.error('יותר מדי בקשות. נסה שוב מאוחר יותר');
+          setFormError('יותר מדי בקשות. נסה שוב מאוחר יותר');
         } else {
-          throw error;
+          setFormError('אירעה שגיאה בקביעת התור. נסה שוב.');
         }
         return;
       }
 
-      // Send WhatsApp confirmation - opens WhatsApp for customer to confirm with clinic
       try {
         const { data: whatsappData } = await supabase.functions.invoke('send-appointment-confirmation', {
           body: {
@@ -539,23 +552,17 @@ const AppointmentBooking = () => {
             appointmentTime: selectedTime
           }
         });
-        
         if (whatsappData?.success && whatsappData?.whatsappUrl) {
-          // Open WhatsApp so customer can confirm with clinic
           window.open(whatsappData.whatsappUrl, '_blank');
         }
-      } catch {
-        // Silently ignore WhatsApp errors - appointment was already created
-      }
+      } catch { /* silent */ }
 
       toast.success('התור נקבע בהצלחה!');
-      
-      // Reset form
       setSelectedDate(null);
       setSelectedTime(null);
       setFormData({ name: '', phone: '', email: '', notes: '' });
-    } catch (error) {
-      toast.error('אירעה שגיאה בקביעת התור');
+    } catch {
+      setFormError('אירעה שגיאה בקביעת התור');
     } finally {
       setIsLoading(false);
     }
@@ -586,9 +593,7 @@ const AppointmentBooking = () => {
             {/* Calendar Column */}
             <BookingColumn>
               <ColumnHeader>
-                <ColumnIcon>
-                  <Calendar size={20} />
-                </ColumnIcon>
+                <ColumnIcon><Calendar size={20} /></ColumnIcon>
                 <div>
                   <ColumnTitle>בחר תאריך</ColumnTitle>
                   <ColumnSubtitle>א׳ - ה׳</ColumnSubtitle>
@@ -611,16 +616,12 @@ const AppointmentBooking = () => {
               </CalendarNav>
 
               <WeekDays>
-                {hebrewDays.map(day => (
-                  <WeekDay key={day}>{day}</WeekDay>
-                ))}
+                {hebrewDays.map(day => (<WeekDay key={day}>{day}</WeekDay>))}
               </WeekDays>
 
               <DaysGrid>
                 {monthDays.map((date, index) => {
-                  if (!date) {
-                    return <DayButton key={`empty-${index}`} $isDisabled disabled style={{ visibility: 'hidden' }} />;
-                  }
+                  if (!date) return <DayButton key={`empty-${index}`} $isDisabled disabled style={{ visibility: 'hidden' }} />;
                   const isWorking = isWorkingDay(date);
                   const isPast = date < today;
                   return (
@@ -630,10 +631,7 @@ const AppointmentBooking = () => {
                       $isToday={isSameDay(date, today)}
                       $isDisabled={!isWorking || isPast}
                       disabled={!isWorking || isPast}
-                      onClick={() => {
-                        setSelectedDate(date);
-                        setSelectedTime(null);
-                      }}
+                      onClick={() => { setSelectedDate(date); setSelectedTime(null); }}
                     >
                       {format(date, 'd')}
                     </DayButton>
@@ -645,9 +643,7 @@ const AppointmentBooking = () => {
             {/* Time Slots Column */}
             <BookingColumn $withBorder>
               <ColumnHeader>
-                <ColumnIcon>
-                  <Clock size={20} />
-                </ColumnIcon>
+                <ColumnIcon><Clock size={20} /></ColumnIcon>
                 <div>
                   <ColumnTitle>בחר שעה</ColumnTitle>
                   <ColumnSubtitle>
@@ -672,34 +668,20 @@ const AppointmentBooking = () => {
                       ))}
                     {timeSlots.filter(time => !isTimeBooked(selectedDate, time)).length === 0 && (
                       <EmptyState style={{ gridColumn: '1 / -1' }}>
-                        <EmptyStateIcon>
-                          <X size={24} />
-                        </EmptyStateIcon>
-                        <EmptyStateText>
-                          אין שעות פנויות ביום זה<br />נסו לבחור תאריך אחר
-                        </EmptyStateText>
+                        <EmptyStateIcon><X size={24} /></EmptyStateIcon>
+                        <EmptyStateText>אין שעות פנויות ביום זה<br />נסו לבחור תאריך אחר</EmptyStateText>
                       </EmptyState>
                     )}
                   </TimeSlotsContainer>
                   <Legend>
-                    <LegendItem>
-                      <LegendDot $variant="available" />
-                      <span>פנוי</span>
-                    </LegendItem>
-                    <LegendItem>
-                      <LegendDot $variant="selected" />
-                      <span>נבחר</span>
-                    </LegendItem>
+                    <LegendItem><LegendDot $variant="available" /><span>פנוי</span></LegendItem>
+                    <LegendItem><LegendDot $variant="selected" /><span>נבחר</span></LegendItem>
                   </Legend>
                 </>
               ) : (
                 <EmptyState>
-                  <EmptyStateIcon>
-                    <CalendarDays size={24} />
-                  </EmptyStateIcon>
-                  <EmptyStateText>
-                    בחרו תאריך מהלוח כדי לראות<br />את השעות הפנויות
-                  </EmptyStateText>
+                  <EmptyStateIcon><CalendarDays size={24} /></EmptyStateIcon>
+                  <EmptyStateText>בחרו תאריך מהלוח כדי לראות<br />את השעות הפנויות</EmptyStateText>
                 </EmptyState>
               )}
             </BookingColumn>
@@ -707,9 +689,7 @@ const AppointmentBooking = () => {
             {/* Form Column */}
             <BookingColumn $withBorder>
               <ColumnHeader>
-                <ColumnIcon>
-                  <User size={20} />
-                </ColumnIcon>
+                <ColumnIcon><User size={20} /></ColumnIcon>
                 <div>
                   <ColumnTitle>פרטים אישיים</ColumnTitle>
                   <ColumnSubtitle>מלאו את הפרטים</ColumnSubtitle>
@@ -726,47 +706,57 @@ const AppointmentBooking = () => {
               )}
 
               <form onSubmit={handleSubmit}>
+                {formError && (
+                  <FormError>
+                    <AlertTriangle size={18} />
+                    <span>{formError}</span>
+                  </FormError>
+                )}
+
                 <FormGroup>
-                  <Label>
-                    <User size={14} />
-                    שם מלא *
-                  </Label>
+                  <Label><User size={14} />שם מלא *</Label>
                   <Input
                     type="text"
                     placeholder="הכנס שם מלא"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    $hasError={!!fieldErrors.client_name}
+                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }); clearFieldError('client_name'); }}
                     required
                   />
+                  {fieldErrors.client_name && (
+                    <FieldError><AlertTriangle size={13} /><span>{fieldErrors.client_name}</span></FieldError>
+                  )}
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>
-                    <Phone size={14} />
-                    טלפון *
-                  </Label>
+                  <Label><Phone size={14} />טלפון *</Label>
                   <Input
                     type="tel"
                     placeholder="05X-XXX-XXXX"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    $hasError={!!fieldErrors.client_phone}
+                    onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); clearFieldError('client_phone'); }}
                     required
                     dir="ltr"
                   />
+                  {fieldErrors.client_phone && (
+                    <FieldError><AlertTriangle size={13} /><span>{fieldErrors.client_phone}</span></FieldError>
+                  )}
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>
-                    <Mail size={14} />
-                    אימייל
-                  </Label>
+                  <Label><Mail size={14} />אימייל</Label>
                   <Input
                     type="email"
                     placeholder="example@email.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    $hasError={!!fieldErrors.client_email}
+                    onChange={(e) => { setFormData({ ...formData, email: e.target.value }); clearFieldError('client_email'); }}
                     dir="ltr"
                   />
+                  {fieldErrors.client_email && (
+                    <FieldError><AlertTriangle size={13} /><span>{fieldErrors.client_email}</span></FieldError>
+                  )}
                 </FormGroup>
 
                 <FormGroup>
