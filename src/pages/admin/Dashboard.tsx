@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2 } from 'lucide-react';
+import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, FileText, Image } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -149,6 +149,14 @@ const Dashboard = () => {
               <NavLink to="/admin/treatments" $active={isActive('/admin/treatments')}>
                 <Stethoscope size={18} />
                 טיפולים
+              </NavLink>
+              <NavLink to="/admin/blog" $active={isActive('/admin/blog')}>
+                <FileText size={18} />
+                בלוג
+              </NavLink>
+              <NavLink to="/admin/gallery" $active={isActive('/admin/gallery')}>
+                <Image size={18} />
+                גלריה
               </NavLink>
               <NavLink to="/admin/testimonials" $active={isActive('/admin/testimonials')}>
                 <MessageSquare size={18} />

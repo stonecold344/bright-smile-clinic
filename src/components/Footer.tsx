@@ -191,6 +191,8 @@ const Footer = () => {
                 <FooterLink to="/">בית</FooterLink>
                 <FooterLink to="/about">אודות</FooterLink>
                 <FooterLink to="/services">שירותים</FooterLink>
+                <FooterLink to="/gallery">גלריה</FooterLink>
+                <FooterLink to="/blog">בלוג</FooterLink>
                 <FooterLink to="/contact">צור קשר</FooterLink>
               </FooterNav>
             </div>

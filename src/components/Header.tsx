@@ -300,7 +300,7 @@ const Header = () => {
   } = useTreatments();
 
   // Pages with light hero backgrounds that need dark header text
-  const lightHeroPages = ['/about', '/contact', '/services', '/appointments'];
+  const lightHeroPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery'];
   const hasLightHero = lightHeroPages.some(page => location.pathname.startsWith(page));
 
   // Stabilize background detection to prevent flicker
@@ -480,7 +480,8 @@ const Header = () => {
           <Nav>
             <NavLink to="/" $active={isActive('/')} $scrolled={effectiveScrolled}>בית</NavLink>
             <ServicesDropdown scrolled={effectiveScrolled} />
-            
+            <NavLink to="/gallery" $active={isActive('/gallery')} $scrolled={effectiveScrolled}>גלריה</NavLink>
+            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')} $scrolled={effectiveScrolled}>בלוג</NavLink>
             <NavLink to="/about" $active={isActive('/about')} $scrolled={effectiveScrolled}>אודות</NavLink>
             <NavLink to="/contact" $active={isActive('/contact')} $scrolled={effectiveScrolled}>צור קשר</NavLink>
           </Nav>
@@ -521,6 +522,12 @@ const Header = () => {
                   </MobileSubMenu>}
               </div>
               
+              <MobileNavLink to="/gallery" $active={isActive('/gallery')} onClick={() => setIsMenuOpen(false)}>
+                גלריה
+              </MobileNavLink>
+              <MobileNavLink to="/blog" $active={location.pathname.startsWith('/blog')} onClick={() => setIsMenuOpen(false)}>
+                בלוג
+              </MobileNavLink>
               <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
                 אודות
               </MobileNavLink>

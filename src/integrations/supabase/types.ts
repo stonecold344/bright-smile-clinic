@@ -53,6 +53,78 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          content: string
+          created_at: string
+          featured_image: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gallery: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           avatar_url: string | null
