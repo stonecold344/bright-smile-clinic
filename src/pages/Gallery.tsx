@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGallery } from '@/hooks/useGallery';
 
 const MOBILE_BREAKPOINT = '768px';
@@ -149,18 +149,21 @@ const LightboxNav = styled.button`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 3rem;
-  height: 3rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: ${({ theme }) => theme.radii.full};
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 3;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) scale(1.1);
   }
 
   @media (max-width: ${MOBILE_BREAKPOINT}) {
@@ -388,10 +391,10 @@ const Gallery = () => {
           {lightbox.images.length > 1 && (
             <>
               <LightboxNav style={{ left: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}>
-                ›
+                <ChevronLeft size={28} />
               </LightboxNav>
               <LightboxNav style={{ right: '1.5rem' }} onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}>
-                ‹
+                <ChevronRight size={28} />
               </LightboxNav>
             </>
           )}
