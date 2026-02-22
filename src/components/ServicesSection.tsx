@@ -1,23 +1,13 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ArrowLeft, Stethoscope, Sparkles, CircleDot, Baby, AlignCenter, Smile, LucideIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, Stethoscope, Loader2 } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { useTreatments } from '@/hooks/useTreatments';
 
-const iconMap: Record<string, LucideIcon> = {
-  'general-dentistry': Stethoscope,
-  'teeth-whitening': Sparkles,
-  'dental-implants': CircleDot,
-  'pediatric-dentistry': Baby,
-  'orthodontics': AlignCenter,
-  'cosmetic-dentistry': Smile,
-};
-
-const getIcon = (slug: string) => {
-  const IconComponent = iconMap[slug] || Stethoscope;
-  return <IconComponent size={32} color="white" />;
+const isImageUrl = (value: string) => {
+  return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/');
 };
 
 const SectionWrapper = styled.section`
@@ -58,7 +48,6 @@ const ServiceCard = styled(Link)<{ $hideOnMobile?: boolean; $hideOnDesktop?: boo
   transition: all ${({ theme }) => theme.transitions.normal};
   cursor: pointer;
   
-  /* Hide 4th item on mobile and desktop, show only on tablet */
   ${({ $hideOnMobile, $hideOnDesktop, theme }) => ($hideOnMobile || $hideOnDesktop) && `
     display: none;
     
@@ -73,7 +62,6 @@ const ServiceCard = styled(Link)<{ $hideOnMobile?: boolean; $hideOnDesktop?: boo
   }
 `;
 
-
 const ServiceIcon = styled.div`
   width: 4rem;
   height: 4rem;
@@ -85,10 +73,17 @@ const ServiceIcon = styled.div`
   font-size: 1.875rem;
   margin-bottom: 1.5rem;
   transition: transform ${({ theme }) => theme.transitions.normal};
+  overflow: hidden;
   
   ${ServiceCard}:hover & {
     transform: scale(1.1);
   }
+`;
+
+const ServiceIconImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const ServiceTitle = styled.h3`
@@ -144,7 +139,13 @@ const ServicesSection = () => {
                 $hideOnMobile={index === 3}
                 $hideOnDesktop={index === 3}
               >
-                <ServiceIcon>{getIcon(treatment.slug)}</ServiceIcon>
+                <ServiceIcon>
+                  {isImageUrl(treatment.icon) ? (
+                    <ServiceIconImage src={treatment.icon} alt={treatment.title} />
+                  ) : (
+                    <Stethoscope size={32} color="white" />
+                  )}
+                </ServiceIcon>
                 <ServiceTitle>{treatment.title}</ServiceTitle>
                 <ServiceDescription>{treatment.short_description}</ServiceDescription>
               </ServiceCard>

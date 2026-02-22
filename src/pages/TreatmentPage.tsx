@@ -6,7 +6,7 @@ import CTASection from '@/components/CTASection';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
-import { Check, Clock, Banknote, ArrowLeft, Loader2 } from 'lucide-react';
+import { Check, Clock, Banknote, ArrowLeft, Loader2, Stethoscope } from 'lucide-react';
 import { useTreatment } from '@/hooks/useTreatments';
 import heroImage from '@/assets/hero-dental.jpg';
 
@@ -58,6 +58,13 @@ const TreatmentIcon = styled.div`
   justify-content: center;
   font-size: 2.5rem;
   margin: 0 auto 1.5rem;
+  overflow: hidden;
+`;
+
+const TreatmentIconImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const ContentSection = styled.section`
@@ -252,7 +259,13 @@ const TreatmentPage = () => {
           </HeroBg>
           <Container>
             <HeroContent>
-              <TreatmentIcon>{treatment.icon}</TreatmentIcon>
+              <TreatmentIcon>
+                {treatment.icon && (treatment.icon.startsWith('http://') || treatment.icon.startsWith('https://') || treatment.icon.startsWith('/')) ? (
+                  <TreatmentIconImage src={treatment.icon} alt={treatment.title} />
+                ) : (
+                  <Stethoscope size={36} color="white" />
+                )}
+              </TreatmentIcon>
               <Badge>טיפולי שיניים</Badge>
               <Title $size="xl" style={{ marginTop: '1rem' }}>
                 {treatment.title}
