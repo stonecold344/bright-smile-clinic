@@ -403,7 +403,6 @@ const Gallery = () => {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            onClick={e => e.stopPropagation()}
             style={{
               transform: `translateX(${translateX}px)`,
               transition: translateX === 0 ? 'transform 0.25s ease' : 'none',
@@ -413,6 +412,7 @@ const Gallery = () => {
               src={lightbox.images[lightbox.index]}
               alt="תמונה"
               draggable={false}
+              onClick={e => e.stopPropagation()}
             />
           </LightboxContent>
           {lightbox.images.length > 1 && (
