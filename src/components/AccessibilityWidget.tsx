@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
   Accessibility, 
@@ -13,10 +14,10 @@ import {
   Contrast
 } from 'lucide-react';
 
-const WidgetButton = styled.button<{ $isOpen: boolean; $isOnDark: boolean }>`
+const WidgetButton = styled.button<{ $isOpen: boolean; $isOnDark: boolean; $isAdmin: boolean }>`
   position: fixed;
   bottom: 2rem;
-  right: 2rem;
+  ${({ $isAdmin }) => $isAdmin ? 'left: 2rem;' : 'right: 2rem;'}
   width: 3rem;
   height: 3rem;
   border-radius: ${({ theme }) => theme.radii.full};
@@ -46,13 +47,13 @@ const WidgetButton = styled.button<{ $isOpen: boolean; $isOnDark: boolean }>`
   }
 `;
 
-const Panel = styled.div<{ $isOpen: boolean }>`
+const Panel = styled.div<{ $isOpen: boolean; $isAdmin: boolean }>`
   position: fixed;
   bottom: 5.5rem;
-  right: 1rem;
-  left: 1rem;
+  ${({ $isAdmin }) => $isAdmin ? 'left: 1rem;' : 'right: 1rem;'}
+  ${({ $isAdmin }) => $isAdmin ? '' : 'left: 1rem;'}
   max-width: 320px;
-  margin-right: auto;
+  ${({ $isAdmin }) => $isAdmin ? 'margin-left: auto;' : 'margin-right: auto;'}
   max-height: calc(100vh - 8rem);
   overflow-y: auto;
   background: ${({ theme }) => theme.colors.card};
@@ -66,7 +67,7 @@ const Panel = styled.div<{ $isOpen: boolean }>`
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     left: auto;
-    right: 2rem;
+    ${({ $isAdmin }) => $isAdmin ? 'left: 2rem; right: auto;' : 'right: 2rem;'}
     bottom: 6rem;
   }
 `;
@@ -251,6 +252,8 @@ const defaultSettings: AccessibilitySettings = {
 const AccessibilityWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOnDarkBackground, setIsOnDarkBackground] = useState(false);
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
     const saved = localStorage.getItem('accessibility-settings');
     return saved ? JSON.parse(saved) : defaultSettings;
@@ -423,6 +426,7 @@ const AccessibilityWidget = () => {
       <WidgetButton
         $isOpen={isOpen}
         $isOnDark={isOnDarkBackground}
+        $isAdmin={isAdmin}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="פתח תפריט נגישות"
         aria-expanded={isOpen}
@@ -432,7 +436,8 @@ const AccessibilityWidget = () => {
       </WidgetButton>
 
       <Panel 
-        $isOpen={isOpen} 
+        $isOpen={isOpen}
+        $isAdmin={isAdmin}
         id="accessibility-panel"
         role="dialog"
         aria-label="הגדרות נגישות"

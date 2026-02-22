@@ -23,8 +23,11 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminGallery from "./pages/admin/Gallery";
 import AdminArchive from "./pages/admin/Archive";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import ScrollToTop from "./components/ScrollToTop";
+import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -56,8 +59,11 @@ const App = () => (
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="archive" element={<AdminArchive />} />
           </Route>
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <CookieConsent />
       </BrowserRouter>
     </ThemeProvider>
   </QueryClientProvider>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Calendar, Menu, X, Smile, ChevronDown, LogOut, Settings } from 'lucide-react';
@@ -8,6 +8,7 @@ import ServicesDropdown from '@/components/ServicesDropdown';
 import { useTreatments } from '@/hooks/useTreatments';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/sonner';
+
 const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
   position: fixed;
   top: 0;
@@ -17,8 +18,9 @@ const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
   background: ${({ $scrolled, theme }) => $scrolled ? `${theme.colors.card}f2` : 'transparent'};
   backdrop-filter: ${({ $scrolled }) => $scrolled ? 'blur(12px)' : 'none'};
   box-shadow: ${({ $scrolled, theme }) => $scrolled ? theme.shadows.soft : 'none'};
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
 `;
+
 const HeaderInner = styled.div`
   display: flex;
   align-items: center;
@@ -31,17 +33,17 @@ const HeaderInner = styled.div`
     gap: 0.5rem;
   }
 `;
+
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
   
-  @media (max-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     position: static;
   }
 `;
+
 const MobileCenterTitle = styled.div`
   display: none;
   
@@ -60,43 +62,41 @@ const MobileCenterTitle = styled.div`
     }
   }
 `;
+
 const LogoIcon = styled.div`
   width: 3.5rem;
   height: 3.5rem;
-  background: ${({
-  theme
-}) => theme.gradients.hero};
-  border-radius: ${({
-  theme
-}) => theme.radii.xl};
+  background: ${({ theme }) => theme.gradients.hero};
+  border-radius: ${({ theme }) => theme.radii.xl};
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
 `;
+
 const LogoText = styled.div`
   display: none;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: block;
   }
 `;
+
 const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.primary : 'white'};
   margin: 0;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
   text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 4px rgba(0,0,0,0.5)'};
 `;
+
 const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ $scrolled }) => $scrolled ? 'hsl(200, 15%, 45%)' : 'hsla(0, 0%, 100%, 0.9)'};
   margin: 0;
   display: none;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
   text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.4)'};
   
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
@@ -104,6 +104,7 @@ const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
     font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 `;
+
 const Nav = styled.nav`
   display: none;
   align-items: center;
@@ -117,6 +118,7 @@ const Nav = styled.nav`
     gap: 1rem;
   }
 `;
+
 const NavLink = styled(Link)<{
   $active?: boolean;
   $scrolled?: boolean;
@@ -125,7 +127,7 @@ const NavLink = styled(Link)<{
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ $active, $scrolled, theme }) => 
     $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
   text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 4px rgba(0,0,0,0.5)'};
   padding-bottom: 0.25rem;
   border-bottom: ${({ $active, theme }) => 
@@ -140,6 +142,7 @@ const NavLink = styled(Link)<{
     font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 `;
+
 const CTAWrapper = styled.div`
   display: none;
   flex-shrink: 0;
@@ -154,19 +157,17 @@ const CTAWrapper = styled.div`
     gap: 0.5rem;
   }
 `;
+
 const MobileMenuButton = styled.button`
   display: flex;
   padding: 0.5rem;
-  color: ${({
-  theme
-}) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.primary};
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: none;
   }
 `;
+
 const MobileNav = styled.nav<{ $closing?: boolean }>`
   background: ${({ theme }) => theme.colors.card};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
@@ -207,88 +208,68 @@ const MobileNav = styled.nav<{ $closing?: boolean }>`
     display: none;
   }
 `;
+
 const MobileNavInner = styled.div`
   padding: 1.5rem 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 `;
+
 const MobileNavLink = styled(Link)<{
   $active?: boolean;
 }>`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.medium};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
   padding: 0.5rem 0;
-  color: ${({
-  $active,
-  theme
-}) => $active ? theme.colors.primary : theme.colors.foreground};
-  transition: color ${({
-  theme
-}) => theme.transitions.normal};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
+  transition: color ${({ theme }) => theme.transitions.normal};
 `;
+
 const MobileSubMenu = styled.div`
   padding-right: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 `;
+
 const MobileSubMenuItem = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: ${({
-  theme
-}) => theme.fontSizes.base};
-  color: ${({
-  theme
-}) => theme.colors.mutedForeground};
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  color: ${({ theme }) => theme.colors.mutedForeground};
   padding: 0.5rem 0;
-  transition: color ${({
-  theme
-}) => theme.transitions.normal};
+  transition: color ${({ theme }) => theme.transitions.normal};
 
   &:hover {
-    color: ${({
-  theme
-}) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
   }
 `;
+
 const MobileDropdownTrigger = styled.button<{
   $active?: boolean;
 }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: ${({
-  theme
-}) => theme.fontSizes.lg};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.medium};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
   padding: 0.5rem 0;
-  color: ${({
-  $active,
-  theme
-}) => $active ? theme.colors.primary : theme.colors.foreground};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.foreground};
   background: transparent;
   width: 100%;
   text-align: right;
 
   svg {
-    transition: transform ${({
-  theme
-}) => theme.transitions.normal};
+    transition: transform ${({ theme }) => theme.transitions.normal};
   }
 
   &[aria-expanded="true"] svg {
     transform: rotate(180deg);
   }
 `;
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
@@ -297,9 +278,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
-  const {
-    data: treatments = []
-  } = useTreatments();
+  const { data: treatments = [] } = useTreatments();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -326,143 +305,29 @@ const Header = () => {
     }
   };
 
-  // Pages with light hero backgrounds that need dark header text
-  const lightHeroPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery'];
-  const hasLightHero = lightHeroPages.some(page => location.pathname.startsWith(page));
+  // Pages that always have a light background (no dark hero)
+  const alwaysLightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
+  const isAlwaysLight = alwaysLightPages.some(page => location.pathname.startsWith(page));
 
-  // Stabilize background detection to prevent flicker
-  const lastBgIsLightRef = useRef<boolean | null>(null);
-  const pendingBgIsLightRef = useRef<{
-    value: boolean;
-    since: number;
-  } | null>(null);
-
-  // Detect if header is over a light/dark background
+  // Simple, reliable scroll-based detection for the home page hero
   useEffect(() => {
-    let rafId = 0;
-    const parseRgb = (rgb: string) => {
-      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!match) return null;
-      return {
-        r: Number(match[1]),
-        g: Number(match[2]),
-        b: Number(match[3])
-      };
-    };
-    const luminanceFromRgb = ({
-      r,
-      g,
-      b
-    }: {
-      r: number;
-      g: number;
-      b: number;
-    }) => (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    const getIsLightFromElement = (element: Element, fallback: boolean): boolean | null => {
-      // If we're over an actual image/video/canvas, assume "dark" for readability.
-      if (element instanceof HTMLImageElement || element instanceof HTMLVideoElement || element instanceof HTMLCanvasElement) {
-        return false;
-      }
-      let current: Element | null = element;
-      while (current && current !== document.body) {
-        const style = window.getComputedStyle(current);
+    if (isAlwaysLight) {
+      setIsScrolled(true);
+      return;
+    }
 
-        // Gradients / background images: treat as dark to keep header stable
-        const bgImage = style.backgroundImage;
-        if (bgImage && bgImage !== 'none') return false;
-        const bg = style.backgroundColor;
-        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-          const parsed = parseRgb(bg);
-          if (!parsed) return null;
-          const l = luminanceFromRgb(parsed);
-          if (l >= 0.58) return true;
-          if (l <= 0.42) return false;
-          return fallback;
-        }
-        current = current.parentElement;
-      }
+    const handleScroll = () => {
+      // The hero section is ~70vh. Switch to light mode when scrolled past 60% of viewport height.
+      const threshold = window.innerHeight * 0.55;
+      const scrollY = window.scrollY || window.pageYOffset;
+      setIsScrolled(scrollY > threshold);
+    };
 
-      // No decisive background found on this element chain.
-      return null;
-    };
-    const isLightAtPoint = (x: number, y: number, headerEl: HTMLElement | null, fallback: boolean) => {
-      const stack = document.elementsFromPoint(x, y);
-      const candidates = headerEl ? stack.filter(el => !headerEl.contains(el)) : stack;
-      for (const el of candidates) {
-        const v = getIsLightFromElement(el as Element, fallback);
-        if (v !== null) return v;
-      }
+    handleScroll(); // Initial check
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isAlwaysLight, location.pathname]);
 
-      // Final fallback: use body background
-      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-      const parsed = parseRgb(bodyBg);
-      if (!parsed) return fallback;
-      const l = luminanceFromRgb(parsed);
-      if (l >= 0.58) return true;
-      if (l <= 0.42) return false;
-      return fallback;
-    };
-    const computeIsLightBehindHeader = () => {
-      const headerEl = document.querySelector('header') as HTMLElement | null;
-      const rect = headerEl?.getBoundingClientRect();
-      const sampleYRaw = rect ? rect.top + rect.height * 0.5 : 24;
-      const sampleY = Math.min(Math.max(Math.floor(sampleYRaw), 0), window.innerHeight - 1);
-      const xs = [Math.floor(window.innerWidth * 0.25), Math.floor(window.innerWidth * 0.5), Math.floor(window.innerWidth * 0.75)];
-      const fallback = lastBgIsLightRef.current ?? true;
-      const votes = xs.map(x => isLightAtPoint(x, sampleY, headerEl, fallback));
-      const lightCount = votes.filter(Boolean).length;
-      return lightCount >= Math.ceil(votes.length / 2);
-    };
-    const applyDebounced = (isLight: boolean) => {
-      const now = performance.now();
-      const last = lastBgIsLightRef.current;
-      if (last === null) {
-        lastBgIsLightRef.current = isLight;
-        setIsScrolled(isLight);
-        return;
-      }
-      if (isLight === last) {
-        pendingBgIsLightRef.current = null;
-        return;
-      }
-      const pending = pendingBgIsLightRef.current;
-      if (!pending || pending.value !== isLight) {
-        pendingBgIsLightRef.current = {
-          value: isLight,
-          since: now
-        };
-        return;
-      }
-      if (now - pending.since >= 180) {
-        pendingBgIsLightRef.current = null;
-        lastBgIsLightRef.current = isLight;
-        setIsScrolled(isLight);
-      }
-    };
-    const checkBackground = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const isLight = computeIsLightBehindHeader();
-        applyDebounced(isLight);
-      });
-    };
-    const initialTimeout = setTimeout(checkBackground, 150);
-    window.addEventListener('scroll', checkBackground, {
-      passive: true
-    });
-    window.addEventListener('resize', checkBackground);
-    return () => {
-      clearTimeout(initialTimeout);
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', checkBackground);
-      window.removeEventListener('resize', checkBackground);
-    };
-  }, []);
-
-  // Force light mode (dark text) on pages with light hero backgrounds
-  const effectiveScrolled = hasLightHero || isScrolled;
-
-  // Lock body scroll when mobile menu is open
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
@@ -474,29 +339,26 @@ const Header = () => {
       document.body.style.overflow = '';
     };
   }, [isMenuOpen]);
-  const navLinks = [{
-    name: 'בית',
-    path: '/'
-  }, {
-    name: 'אודות',
-    path: '/about'
-  }, {
-    name: 'קביעת תור',
-    path: '/appointments'
-  }, {
-    name: 'צור קשר',
-    path: '/contact'
-  }];
+
+  const navLinks = [
+    { name: 'בית', path: '/' },
+    { name: 'אודות', path: '/about' },
+    { name: 'קביעת תור', path: '/appointments' },
+    { name: 'צור קשר', path: '/contact' },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
   const isServicesActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
-  return <HeaderWrapper $scrolled={effectiveScrolled}>
+
+  return (
+    <HeaderWrapper $scrolled={isScrolled}>
       <Container>
         <HeaderInner>
           <Logo to="/">
             <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
-              <LogoTitle $scrolled={effectiveScrolled}>מרפאת שיניים</LogoTitle>
-              <LogoSubtitle $scrolled={effectiveScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
+              <LogoTitle $scrolled={isScrolled}>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle $scrolled={isScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
           
@@ -505,12 +367,12 @@ const Header = () => {
           </MobileCenterTitle>
 
           <Nav>
-            <NavLink to="/" $active={isActive('/')} $scrolled={effectiveScrolled}>בית</NavLink>
-            <ServicesDropdown scrolled={effectiveScrolled} />
-            <NavLink to="/gallery" $active={isActive('/gallery')} $scrolled={effectiveScrolled}>גלריה</NavLink>
-            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')} $scrolled={effectiveScrolled}>בלוג</NavLink>
-            <NavLink to="/about" $active={isActive('/about')} $scrolled={effectiveScrolled}>אודות</NavLink>
-            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={effectiveScrolled}>צור קשר</NavLink>
+            <NavLink to="/" $active={isActive('/')} $scrolled={isScrolled}>בית</NavLink>
+            <ServicesDropdown scrolled={isScrolled} />
+            <NavLink to="/gallery" $active={isActive('/gallery')} $scrolled={isScrolled}>גלריה</NavLink>
+            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')} $scrolled={isScrolled}>בלוג</NavLink>
+            <NavLink to="/about" $active={isActive('/about')} $scrolled={isScrolled}>אודות</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={isScrolled}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
@@ -538,27 +400,35 @@ const Header = () => {
         </HeaderInner>
       </Container>
 
-      {isMenuOpen && <MobileNav $closing={isMenuClosing}>
+      {isMenuOpen && (
+        <MobileNav $closing={isMenuClosing}>
           <Container>
             <MobileNavInner>
               <MobileNavLink to="/" $active={isActive('/')} onClick={closeMenu}>
                 בית
               </MobileNavLink>
               
-              {/* Services dropdown for mobile */}
               <div>
-                <MobileDropdownTrigger $active={isServicesActive} onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)} aria-expanded={isMobileServicesOpen}>
+                <MobileDropdownTrigger
+                  $active={isServicesActive}
+                  onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
+                  aria-expanded={isMobileServicesOpen}
+                >
                   שירותים
                   <ChevronDown size={18} />
                 </MobileDropdownTrigger>
-                {isMobileServicesOpen && <MobileSubMenu>
-                    {treatments.map(treatment => <MobileSubMenuItem key={treatment.id} to={`/treatment/${treatment.slug}`} onClick={closeMenu}>
+                {isMobileServicesOpen && (
+                  <MobileSubMenu>
+                    {treatments.map(treatment => (
+                      <MobileSubMenuItem key={treatment.id} to={`/treatment/${treatment.slug}`} onClick={closeMenu}>
                         {treatment.title}
-                      </MobileSubMenuItem>)}
+                      </MobileSubMenuItem>
+                    ))}
                     <MobileSubMenuItem to="/services" onClick={closeMenu}>
                       לכל השירותים ←
                     </MobileSubMenuItem>
-                  </MobileSubMenu>}
+                  </MobileSubMenu>
+                )}
               </div>
               
               <MobileNavLink to="/gallery" $active={isActive('/gallery')} onClick={closeMenu}>
@@ -574,9 +444,14 @@ const Header = () => {
                 צור קשר
               </MobileNavLink>
               
-              <ButtonRouterLink to="/appointments" $variant="call" $size="lg" $fullWidth style={{
-            marginTop: '1rem'
-          }} onClick={closeMenu}>
+              <ButtonRouterLink
+                to="/appointments"
+                $variant="call"
+                $size="lg"
+                $fullWidth
+                style={{ marginTop: '1rem' }}
+                onClick={closeMenu}
+              >
                 <Calendar size={20} />
                 קביעת תור
               </ButtonRouterLink>
@@ -597,7 +472,10 @@ const Header = () => {
               )}
             </MobileNavInner>
           </Container>
-        </MobileNav>}
-    </HeaderWrapper>;
+        </MobileNav>
+      )}
+    </HeaderWrapper>
+  );
 };
+
 export default Header;
