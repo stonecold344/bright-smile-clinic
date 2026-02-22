@@ -637,7 +637,7 @@ const AdminAppointments = () => {
             {filteredAppointments.map((appointment) => (
               <tr key={appointment.id}>
                 <Td>{appointment.client_name}</Td>
-                <Td dir="ltr">{appointment.client_phone}</Td>
+                <Td dir="ltr" style={{ textAlign: 'right' }}>{appointment.client_phone}</Td>
                 <Td>{formatDate(appointment.appointment_date)}</Td>
                 <Td>{appointment.appointment_time}</Td>
                 <Td>
