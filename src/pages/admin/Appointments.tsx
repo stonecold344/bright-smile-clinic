@@ -141,6 +141,37 @@ const FilterSelect = styled.select`
   }
 `;
 
+const DatePickerButton = styled.button<{ $hasValue?: boolean }>`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ $hasValue, theme }) => $hasValue ? theme.colors.foreground : theme.colors.mutedForeground};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+  }
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+
+  svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+`;
+
 const ClearFilters = styled.button`
   display: flex;
   align-items: center;
@@ -705,17 +736,10 @@ const AdminAppointments = () => {
             <FilterLabel><CalendarIcon size={14} />מתאריך</FilterLabel>
             <Popover>
               <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border rounded-lg bg-background text-foreground transition-all",
-                    "hover:border-primary focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15",
-                    !dateFrom && "text-muted-foreground"
-                  )}
-                  style={{ borderColor: 'hsl(var(--border))' }}
-                >
+                <DatePickerButton $hasValue={!!dateFrom}>
                   {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
-                  <CalendarIcon size={14} className="opacity-50" />
-                </button>
+                  <CalendarIcon size={14} />
+                </DatePickerButton>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -732,17 +756,10 @@ const AdminAppointments = () => {
             <FilterLabel><CalendarIcon size={14} />עד תאריך</FilterLabel>
             <Popover>
               <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border rounded-lg bg-background text-foreground transition-all",
-                    "hover:border-primary focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15",
-                    !dateTo && "text-muted-foreground"
-                  )}
-                  style={{ borderColor: 'hsl(var(--border))' }}
-                >
+                <DatePickerButton $hasValue={!!dateTo}>
                   {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
-                  <CalendarIcon size={14} className="opacity-50" />
-                </button>
+                  <CalendarIcon size={14} />
+                </DatePickerButton>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
