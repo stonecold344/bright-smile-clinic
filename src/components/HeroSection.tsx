@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { Phone, Calendar, Sparkles, Stethoscope, Building2, Star } from 'lucide-react';
 import { Button, ButtonLink, ButtonRouterLink } from '@/components/styled/Button';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text, GradientText } from '@/components/styled/Typography';
+import heroImage from '@/assets/hero-dental.jpg';
 const HeroWrapper = styled.section`
   position: relative;
   min-height: 70vh;
@@ -16,6 +18,11 @@ const HeroBackground = styled.div`
   inset: 0;
 `;
 const HeroVideo = styled.video`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+const HeroFallbackImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -193,11 +200,17 @@ const ScrollIndicator = styled.button`
   }
 `;
 const HeroSection = () => {
+  const [videoFailed, setVideoFailed] = useState(false);
+
   return <HeroWrapper>
       <HeroBackground>
-        <HeroVideo autoPlay muted loop playsInline>
-          <source src="/videos/dental-hero.mp4" type="video/mp4" />
-        </HeroVideo>
+        {!videoFailed ? (
+          <HeroVideo autoPlay muted loop playsInline poster={heroImage} onError={() => setVideoFailed(true)}>
+            <source src="/videos/dental-hero.mp4" type="video/mp4" onError={() => setVideoFailed(true)} />
+          </HeroVideo>
+        ) : (
+          <HeroFallbackImage src={heroImage} alt="מרפאת שיניים מודרנית" />
+        )}
         <HeroOverlay />
       </HeroBackground>
 
