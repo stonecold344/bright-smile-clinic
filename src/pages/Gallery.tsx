@@ -175,9 +175,10 @@ const LightboxContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  max-width: calc(100% - 10rem);
   height: 100%;
   user-select: none;
+  pointer-events: auto;
 `;
 
 const LightboxImage = styled.img`
