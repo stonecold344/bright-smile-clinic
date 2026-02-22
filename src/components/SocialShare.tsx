@@ -11,6 +11,10 @@ const fadeIn = keyframes`
 const Wrapper = styled.div`
   position: relative;
   display: inline-block;
+
+  @media (max-width: 480px) {
+    position: static;
+  }
 `;
 
 const ShareTrigger = styled.button`
@@ -42,6 +46,19 @@ const Dropdown = styled.div`
   min-width: 200px;
   z-index: 50;
   animation: ${fadeIn} 0.2s ease-out;
+
+  @media (max-width: 480px) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    transform: none;
+    border-radius: ${({ theme }) => theme.radii['2xl']} ${({ theme }) => theme.radii['2xl']} 0 0;
+    min-width: 100%;
+    padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
 `;
 
 const ShareOption = styled.button`
@@ -80,6 +97,11 @@ const Backdrop = styled.div`
   position: fixed;
   inset: 0;
   z-index: 40;
+  background: transparent;
+
+  @media (max-width: 480px) {
+    background: rgba(0, 0, 0, 0.4);
+  }
 `;
 
 // Social platform SVG icons
@@ -129,8 +151,8 @@ const SocialShare = ({ title, url, description, image }: SocialShareProps) => {
       bg: '#25D366',
       color: 'white',
       onClick: () => {
-        const text = `${title}\n\n${shareText}\n\n${shareUrl}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        const text = `${title}\n\n${shareUrl}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       },
     },
     {
@@ -139,7 +161,7 @@ const SocialShare = ({ title, url, description, image }: SocialShareProps) => {
       bg: '#1877F2',
       color: 'white',
       onClick: () => {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(title)}`, '_blank');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
       },
     },
     {
@@ -197,22 +219,25 @@ const SocialShare = ({ title, url, description, image }: SocialShareProps) => {
       </ShareTrigger>
 
       {isOpen && (
-        <Dropdown>
-          {platforms.map((p) => (
-            <ShareOption key={p.name} onClick={() => { p.onClick(); setIsOpen(false); }}>
-              <IconCircle $bg={p.bg} $color={p.color}>
-                {p.icon}
+        <>
+          <Backdrop onClick={() => setIsOpen(false)} />
+          <Dropdown>
+            {platforms.map((p) => (
+              <ShareOption key={p.name} onClick={() => { p.onClick(); setIsOpen(false); }}>
+                <IconCircle $bg={p.bg} $color={p.color}>
+                  {p.icon}
+                </IconCircle>
+                {p.name}
+              </ShareOption>
+            ))}
+            <ShareOption onClick={handleCopyLink}>
+              <IconCircle $bg="hsl(200, 20%, 90%)" $color="hsl(200, 50%, 30%)">
+                {copied ? <Check size={16} /> : <Copy size={16} />}
               </IconCircle>
-              {p.name}
+              {copied ? 'הקישור הועתק!' : 'העתק קישור'}
             </ShareOption>
-          ))}
-          <ShareOption onClick={handleCopyLink}>
-            <IconCircle $bg="hsl(200, 20%, 90%)" $color="hsl(200, 50%, 30%)">
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-            </IconCircle>
-            {copied ? 'הקישור הועתק!' : 'העתק קישור'}
-          </ShareOption>
-        </Dropdown>
+          </Dropdown>
+        </>
       )}
     </Wrapper>
   );
