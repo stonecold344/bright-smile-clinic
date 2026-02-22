@@ -203,9 +203,7 @@ const EmptyState = styled.div`
 `;
 
 const stripHtml = (html: string) => {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  return html.replace(/<[^>]*>/g, '').trim();
 };
 
 const estimateReadingTime = (html: string): number => {
