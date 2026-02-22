@@ -36,8 +36,8 @@ const App = () => (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <Sonner />
-      <AccessibilityWidget />
       <BrowserRouter>
+        <AccessibilityWidget />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
