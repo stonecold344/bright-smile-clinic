@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { format, addDays, isSameDay, startOfToday, getDay, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays, AlertTriangle } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, ChevronRight, ChevronLeft, Check, X, CalendarDays, AlertTriangle, Stethoscope } from 'lucide-react';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { z } from 'zod';
 import { useRecaptcha } from '@/hooks/useRecaptcha';
+import { useTreatments } from '@/hooks/useTreatments';
 
 // Validation schema for appointment form
 const appointmentSchema = z.object({
@@ -348,6 +349,24 @@ const Textarea = styled.textarea`
   }
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.foreground};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+  }
+`;
+
 const SelectedAppointment = styled.div`
   background: ${({ theme }) => theme.gradients.hero};
   border-radius: ${({ theme }) => theme.radii.lg};
@@ -430,6 +449,7 @@ interface Appointment {
 const AppointmentBooking = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTreatment, setSelectedTreatment] = useState<string>('');
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(startOfToday()));
   const [bookedSlots, setBookedSlots] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -437,6 +457,7 @@ const AppointmentBooking = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
   const { verify: verifyRecaptcha, hasToken: hasRecaptchaToken } = useRecaptcha('recaptcha-appointment');
+  const { data: treatments = [] } = useTreatments();
 
   // Fetch booked appointments using security definer function (no PII exposed)
   useEffect(() => {
@@ -544,8 +565,9 @@ const AppointmentBooking = () => {
         client_email: validatedData.client_email || null,
         appointment_date: format(selectedDate, 'yyyy-MM-dd'),
         appointment_time: selectedTime + ':00',
-        notes: validatedData.notes || null
-      });
+        notes: validatedData.notes || null,
+        treatment_slug: selectedTreatment || null
+      } as any);
 
       if (error) {
         if (error.message.includes('rate_limit')) {
@@ -573,6 +595,7 @@ const AppointmentBooking = () => {
       toast.success('התור נקבע בהצלחה!');
       setSelectedDate(null);
       setSelectedTime(null);
+      setSelectedTreatment('');
       setFormData({ name: '', phone: '', email: '', notes: '' });
     } catch {
       setFormError('אירעה שגיאה בקביעת התור');
@@ -768,6 +791,19 @@ const AppointmentBooking = () => {
                   {fieldErrors.client_email && (
                     <FieldError><AlertTriangle size={13} /><span>{fieldErrors.client_email}</span></FieldError>
                   )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label><Stethoscope size={14} />סוג טיפול</Label>
+                  <Select
+                    value={selectedTreatment}
+                    onChange={(e) => setSelectedTreatment(e.target.value)}
+                  >
+                    <option value="">בחר טיפול (אופציונלי)</option>
+                    {treatments.map(t => (
+                      <option key={t.slug} value={t.slug}>{t.title}</option>
+                    ))}
+                  </Select>
                 </FormGroup>
 
                 <FormGroup>

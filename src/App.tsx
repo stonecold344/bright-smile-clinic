@@ -21,6 +21,7 @@ import AdminTreatments from "./pages/admin/Treatments";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import AdminBlog from "./pages/admin/Blog";
 import AdminGallery from "./pages/admin/Gallery";
+import AdminArchive from "./pages/admin/Archive";
 import NotFound from "./pages/NotFound";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import ScrollToTop from "./components/ScrollToTop";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="testimonials" element={<AdminTestimonials />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="gallery" element={<AdminGallery />} />
+            <Route path="archive" element={<AdminArchive />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
