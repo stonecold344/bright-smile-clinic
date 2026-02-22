@@ -427,6 +427,8 @@ const AdminBlog = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title.trim()) { toast.error('יש למלא כותרת'); return; }
+    if (!formData.slug.trim()) { toast.error('יש למלא slug'); return; }
     if (editingPost) {
       updatePost.mutate({ id: editingPost.id, data: formData });
     } else {
@@ -548,7 +550,7 @@ const AdminBlog = () => {
               <CloseButton onClick={closeModal}><X size={20} /></CloseButton>
             </ModalHeader>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <FormGroup>
                 <Label htmlFor="title">כותרת *</Label>
                 <Input
@@ -559,7 +561,7 @@ const AdminBlog = () => {
                     title: e.target.value,
                     slug: editingPost ? formData.slug : slugify(e.target.value),
                   })}
-                  required
+                
                 />
               </FormGroup>
 
@@ -571,7 +573,7 @@ const AdminBlog = () => {
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   dir="ltr"
                   placeholder="my-blog-post"
-                  required
+                  
                 />
               </FormGroup>
 

@@ -231,6 +231,8 @@ const AdminGallery = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title.trim()) { toast.error('יש למלא כותרת'); return; }
+    if (formData.images.length === 0) { toast.error('יש להעלות לפחות תמונה אחת'); return; }
     if (editingItem) {
       updateItem.mutate({ id: editingItem.id, data: formData });
     } else {
@@ -309,14 +311,14 @@ const AdminGallery = () => {
               <CloseButton onClick={closeModal}><X size={20} /></CloseButton>
             </ModalHeader>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <FormGroup>
                 <Label htmlFor="title">כותרת *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
+                  
                 />
               </FormGroup>
 

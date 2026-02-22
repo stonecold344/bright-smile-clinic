@@ -290,6 +290,9 @@ const AdminTreatments = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title.trim()) { toast.error('יש למלא שם טיפול'); return; }
+    if (!formData.slug.trim()) { toast.error('יש למלא slug'); return; }
+    if (!formData.short_description.trim()) { toast.error('יש למלא תיאור קצר'); return; }
     if (editingTreatment) {
       updateTreatment.mutate({ id: editingTreatment.id, data: formData });
     } else {
@@ -367,14 +370,14 @@ const AdminTreatments = () => {
               </CloseButton>
             </ModalHeader>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <FormGroup>
                 <Label htmlFor="title">שם הטיפול *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
+                
                 />
               </FormGroup>
 
@@ -386,7 +389,7 @@ const AdminTreatments = () => {
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   dir="ltr"
                   placeholder="general-dentistry"
-                  required
+                
                 />
               </FormGroup>
 
@@ -396,7 +399,7 @@ const AdminTreatments = () => {
                   id="short_description"
                   value={formData.short_description}
                   onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                  required
+                  
                 />
               </FormGroup>
 
