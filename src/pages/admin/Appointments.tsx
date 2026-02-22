@@ -5,13 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus, FileText, ArrowUp, ArrowDown } from 'lucide-react';
+import { Calendar as CalendarIcon, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus, FileText, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { useTreatments } from '@/hooks/useTreatments';
 import ImageUpload from '@/components/ImageUpload';
 import ImageLightbox from '@/components/ImageLightbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 // --- Styled Components ---
 
@@ -694,12 +697,31 @@ const AdminAppointments = () => {
             {phoneError && <span style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{phoneError}</span>}
           </FilterGroup>
           <FilterGroup>
-            <FilterLabel><Calendar size={14} />תאריך</FilterLabel>
-            <FilterInput
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-            />
+            <FilterLabel><CalendarIcon size={14} />תאריך</FilterLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className={cn(
+                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border rounded-lg bg-background text-foreground transition-all",
+                    "hover:border-primary focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15",
+                    !dateFilter && "text-muted-foreground"
+                  )}
+                  style={{ borderColor: 'hsl(var(--border))' }}
+                >
+                  {dateFilter ? format(new Date(dateFilter), 'dd/MM/yyyy', { locale: he }) : 'בחר תאריך'}
+                  <CalendarIcon size={14} className="opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateFilter ? new Date(dateFilter) : undefined}
+                  onSelect={(date) => setDateFilter(date ? format(date, 'yyyy-MM-dd') : '')}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </FilterGroup>
           <FilterGroup>
             <FilterLabel><Clock size={14} />שעה</FilterLabel>
@@ -721,7 +743,7 @@ const AdminAppointments = () => {
 
       {filteredAppointments.length === 0 ? (
         <EmptyState>
-          <Calendar size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
+          <CalendarIcon size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
           <Title $size="sm">{hasActiveFilters ? 'לא נמצאו תוצאות' : 'אין תורים פעילים'}</Title>
           <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
@@ -971,7 +993,7 @@ const AdminAppointments = () => {
             </ModalHeader>
             
             <DetailRow>
-              <Calendar size={20} />
+              <CalendarIcon size={20} />
               <div>
                 <Text $size="sm" $color="muted">תאריך ושעה</Text>
                 <Text>{formatDate(selectedAppointment.appointment_date)} בשעה {selectedAppointment.appointment_time.substring(0, 5)}</Text>
