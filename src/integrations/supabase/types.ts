@@ -23,6 +23,7 @@ export type Database = {
           client_phone: string
           created_at: string
           id: string
+          images: string[]
           notes: string | null
           status: string
           treatment_slug: string | null
@@ -36,6 +37,7 @@ export type Database = {
           client_phone: string
           created_at?: string
           id?: string
+          images?: string[]
           notes?: string | null
           status?: string
           treatment_slug?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           client_phone?: string
           created_at?: string
           id?: string
+          images?: string[]
           notes?: string | null
           status?: string
           treatment_slug?: string | null

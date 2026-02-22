@@ -5,11 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope } from 'lucide-react';
+import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { useTreatments } from '@/hooks/useTreatments';
+import ImageUpload from '@/components/ImageUpload';
 
 // --- Styled Components ---
 
@@ -57,6 +58,98 @@ const StatLabel = styled.div<{ $active?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ $active }) => $active ? 'hsla(0, 0%, 100%, 0.8)' : undefined};
   ${({ $active, theme }) => !$active && `color: ${theme.colors.mutedForeground};`}
+`;
+
+const FiltersWrapper = styled.div`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+  margin-bottom: 2rem;
+`;
+
+const FiltersTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin-bottom: 1rem;
+`;
+
+const FiltersGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+`;
+
+const FilterGroup = styled.div``;
+
+const FilterLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin-bottom: 0.375rem;
+`;
+
+const FilterInput = styled.input`
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.foreground};
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.mutedForeground};
+  }
+`;
+
+const FilterSelect = styled.select`
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.foreground};
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const ClearFilters = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.primary};
+  margin-top: 1rem;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
 `;
 
 const Table = styled.table`
@@ -214,6 +307,12 @@ const ModalActionsRow = styled.div`
   gap: 0.75rem;
 `;
 
+const ImageSection = styled.div`
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
 // --- Types ---
 
 const ACTIVE_STATUSES = ['pending', 'confirmed', 'arrived'];
@@ -229,6 +328,7 @@ interface Appointment {
   status: string;
   created_at: string;
   treatment_slug: string | null;
+  images: string[];
 }
 
 // --- Component ---
@@ -236,7 +336,11 @@ interface Appointment {
 const AdminAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [hourFilter, setHourFilter] = useState('');
   const [treatmentModal, setTreatmentModal] = useState<{ id: string; slug: string } | null>(null);
+  const [imageModal, setImageModal] = useState<{ id: string; images: string[] } | null>(null);
   const queryClient = useQueryClient();
   const { data: treatments = [] } = useTreatments();
 
@@ -282,6 +386,25 @@ const AdminAppointments = () => {
     },
   });
 
+  const updateImages = useMutation({
+    mutationFn: async ({ id, images }: { id: string; images: string[] }) => {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ images } as any)
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      toast.success('התמונות עודכנו בהצלחה');
+    },
+    onError: () => {
+      toast.error('שגיאה בעדכון התמונות');
+    },
+  });
+
   const deleteAppointment = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -307,10 +430,40 @@ const AdminAppointments = () => {
     confirmed: appointments.filter(a => a.status === 'confirmed').length,
   };
 
+  const hasActiveFilters = searchQuery || dateFilter || hourFilter || statusFilter;
+
+  const availableHours = useMemo(() => {
+    const hours: string[] = [];
+    for (let h = 9; h < 17; h++) {
+      hours.push(h.toString().padStart(2, '0'));
+    }
+    return hours;
+  }, []);
+
   const filteredAppointments = useMemo(() => {
-    if (!statusFilter) return appointments;
-    return appointments.filter(a => a.status === statusFilter);
-  }, [appointments, statusFilter]);
+    let result = appointments;
+    if (statusFilter) {
+      result = result.filter(a => a.status === statusFilter);
+    }
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(a => a.client_name.toLowerCase().includes(query));
+    }
+    if (dateFilter) {
+      result = result.filter(a => a.appointment_date === dateFilter);
+    }
+    if (hourFilter) {
+      result = result.filter(a => a.appointment_time.substring(0, 2) === hourFilter);
+    }
+    return result;
+  }, [appointments, statusFilter, searchQuery, dateFilter, hourFilter]);
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setDateFilter('');
+    setHourFilter('');
+    setStatusFilter(null);
+  };
 
   const toggleFilter = (filter: string) => {
     setStatusFilter(prev => prev === filter ? null : filter);
@@ -339,6 +492,12 @@ const AdminAppointments = () => {
       treatment_slug: treatmentModal.slug || null,
     });
     setTreatmentModal(null);
+  };
+
+  const handleImageChange = (images: string[]) => {
+    if (!imageModal) return;
+    setImageModal({ ...imageModal, images });
+    updateImages.mutate({ id: imageModal.id, images });
   };
 
   if (isLoading) {
@@ -373,11 +532,52 @@ const AdminAppointments = () => {
         </StatCard>
       </StatsGrid>
 
+      <FiltersWrapper>
+        <FiltersTitle>
+          <Filter size={18} />
+          סינון וחיפוש
+        </FiltersTitle>
+        <FiltersGrid>
+          <FilterGroup>
+            <FilterLabel><Search size={14} />חיפוש לפי שם</FilterLabel>
+            <FilterInput
+              type="text"
+              placeholder="שם פרטי או משפחה..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><Calendar size={14} />תאריך</FilterLabel>
+            <FilterInput
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><Clock size={14} />שעה</FilterLabel>
+            <FilterSelect value={hourFilter} onChange={(e) => setHourFilter(e.target.value)}>
+              <option value="">כל השעות</option>
+              {availableHours.map(h => (
+                <option key={h} value={h}>{h}:00</option>
+              ))}
+            </FilterSelect>
+          </FilterGroup>
+        </FiltersGrid>
+        {hasActiveFilters && (
+          <ClearFilters onClick={clearAllFilters}>
+            <X size={14} />
+            נקה סינון
+          </ClearFilters>
+        )}
+      </FiltersWrapper>
+
       {filteredAppointments.length === 0 ? (
         <EmptyState>
           <Calendar size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-          <Title $size="sm">{statusFilter ? 'אין תורים בסטטוס זה' : 'אין תורים פעילים'}</Title>
-          <Text $color="muted">{statusFilter ? 'נסה לבחור סטטוס אחר' : 'תורים חדשים יופיעו כאן'}</Text>
+          <Title $size="sm">{hasActiveFilters ? 'לא נמצאו תוצאות' : 'אין תורים פעילים'}</Title>
+          <Text $color="muted">{hasActiveFilters ? 'נסה לשנות את הסינון' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
         <Table>
@@ -426,6 +626,15 @@ const AdminAppointments = () => {
                         <UserCheck size={18} />
                       </ActionButton>
                     )}
+                    {appointment.status === 'arrived' && (
+                      <ActionButton 
+                        $variant="info"
+                        onClick={() => setImageModal({ id: appointment.id, images: appointment.images || [] })}
+                        title="העלאת תמונות"
+                      >
+                        <ImagePlus size={18} />
+                      </ActionButton>
+                    )}
                     {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
                       <ActionButton 
                         $variant="danger"
@@ -470,6 +679,34 @@ const AdminAppointments = () => {
             ))}
           </tbody>
         </Table>
+      )}
+
+      {/* Image upload modal */}
+      {imageModal && (
+        <Modal onClick={() => setImageModal(null)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <Title $size="sm">תמונות לקוח</Title>
+            </ModalHeader>
+            <Text $color="muted" style={{ marginBottom: '1rem' }}>
+              העלה תמונות הקשורות לתור זה
+            </Text>
+            <ImageUpload
+              images={imageModal.images}
+              onChange={handleImageChange}
+              multiple
+              folder="appointments"
+            />
+            <Button 
+              $variant="outline" 
+              $fullWidth 
+              onClick={() => setImageModal(null)}
+              style={{ marginTop: '1.5rem' }}
+            >
+              סגור
+            </Button>
+          </ModalContent>
+        </Modal>
       )}
 
       {/* Treatment completion modal */}
@@ -556,6 +793,17 @@ const AdminAppointments = () => {
                 <Text>{format(new Date(selectedAppointment.created_at), 'dd/MM/yyyy HH:mm', { locale: he })}</Text>
               </div>
             </DetailRow>
+
+            {selectedAppointment.images && selectedAppointment.images.length > 0 && (
+              <ImageSection>
+                <Text $size="sm" $color="muted" style={{ marginBottom: '0.5rem' }}>תמונות</Text>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
+                  {selectedAppointment.images.map((url, i) => (
+                    <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px' }} />
+                  ))}
+                </div>
+              </ImageSection>
+            )}
 
             <Button 
               $variant="outline" 
