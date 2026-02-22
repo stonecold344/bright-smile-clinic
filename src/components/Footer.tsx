@@ -194,6 +194,7 @@ const Footer = () => {
                 <FooterLink to="/gallery">גלריה</FooterLink>
                 <FooterLink to="/blog">בלוג</FooterLink>
                 <FooterLink to="/contact">צור קשר</FooterLink>
+                <FooterLink to="/auth">כניסת מנהל</FooterLink>
               </FooterNav>
             </div>
 
