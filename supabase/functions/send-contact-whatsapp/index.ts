@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface ContactFormRequest {
@@ -10,6 +10,25 @@ interface ContactFormRequest {
   phone: string;
   email?: string;
   message?: string;
+}
+
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+  entry.count++;
+  return true;
 }
 
 // Input validation
@@ -23,7 +42,6 @@ const validateInput = (data: ContactFormRequest): string | null => {
   if (!data.phone || typeof data.phone !== "string") {
     return "טלפון הוא שדה חובה";
   }
-  // Validate phone format (Israeli phone numbers)
   const phoneRegex = /^0[0-9]{8,9}$/;
   const cleanPhone = data.phone.replace(/\D/g, "");
   if (!phoneRegex.test(cleanPhone) && !/^972[0-9]{8,9}$/.test(cleanPhone)) {
@@ -39,15 +57,22 @@ const validateInput = (data: ContactFormRequest): string | null => {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return new Response(
+      JSON.stringify({ success: false, error: "יותר מדי בקשות, נסו שוב בעוד דקה" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+    );
   }
 
   try {
     const requestData: ContactFormRequest = await req.json();
 
-    // Validate input data
     const validationError = validateInput(requestData);
     if (validationError) {
       console.log("Input validation failed:", validationError);
@@ -59,19 +84,16 @@ serve(async (req) => {
 
     const { name, phone, email, message } = requestData;
 
-    // Sanitize inputs for message (remove any potential injection characters)
     const sanitizedName = name.replace(/[<>\"\'&]/g, "").substring(0, 100).trim();
     const sanitizedMessage = message?.replace(/[<>\"\'&]/g, "").substring(0, 1000).trim() || "";
     const sanitizedEmail = email?.replace(/[<>\"\'&]/g, "").substring(0, 255).trim() || "";
     
-    // Clean phone number for display
     let displayPhone = phone.replace(/\D/g, "");
     if (displayPhone.startsWith("972")) {
       displayPhone = "0" + displayPhone.slice(3);
     }
 
-    // Create WhatsApp message to send TO THE CLINIC
-    const clinicPhone = "972507334482"; // Clinic's WhatsApp number
+    const clinicPhone = "972507334482";
     
     let whatsappMessage = `📩 פנייה חדשה מהאתר!
 
@@ -88,34 +110,20 @@ serve(async (req) => {
 
     whatsappMessage += `\n\n---\nנשלח דרך טופס יצירת קשר באתר`;
 
-    // Generate WhatsApp click-to-chat URL for the clinic
     const encodedMessage = encodeURIComponent(whatsappMessage);
     const whatsappUrl = `https://wa.me/${clinicPhone}?text=${encodedMessage}`;
 
     console.log("Contact form submission prepared for:", sanitizedName, "phone:", displayPhone);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: "הפנייה נשלחה בהצלחה",
-        whatsappUrl,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      },
+      JSON.stringify({ success: true, message: "הפנייה נשלחה בהצלחה", whatsappUrl }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: "אירעה שגיאה, נסו שוב",
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      },
+      JSON.stringify({ success: false, error: "אירעה שגיאה, נסו שוב" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
     );
   }
 });

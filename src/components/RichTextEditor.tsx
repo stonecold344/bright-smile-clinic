@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react';
 import styled from 'styled-components';
+import DOMPurify from 'dompurify';
 import { Bold, Italic, Underline, List, ListOrdered, Heading1, Heading2, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 const EditorWrapper = styled.div`
@@ -110,7 +111,7 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
-        dangerouslySetInnerHTML={{ __html: value }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value) }}
       />
     </EditorWrapper>
   );
