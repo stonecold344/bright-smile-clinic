@@ -1,12 +1,13 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
+import DOMPurify from 'dompurify';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Container } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
-import { Loader2, Calendar, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
-import { useBlogPost } from '@/hooks/useBlogPosts';
+import { Loader2, Calendar, ArrowRight, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
+import { useBlogPost, useBlogPosts } from '@/hooks/useBlogPosts';
 import type { ArticleSection } from '@/hooks/useBlogPosts';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
@@ -415,7 +416,7 @@ const BlogPost = () => {
                 })}
               </>
             ) : (
-              <LegacyContent dangerouslySetInnerHTML={{ __html: post.content }} />
+              <LegacyContent dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
             )}
           </ArticleBody>
 
@@ -432,9 +433,127 @@ const BlogPost = () => {
             />
           </BottomNav>
         </ArticleSection_>
+
+        <RelatedArticles currentSlug={slug || ''} />
       </main>
       <Footer />
     </div>
+  );
+};
+
+/* --- Related Articles Component --- */
+
+const RelatedSection = styled.section`
+  padding: 0 0 ${({ theme }) => theme.spacing[20]};
+`;
+
+const RelatedGrid = styled.div`
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+`;
+
+const RelatedHeading = styled.h2`
+  max-width: 56rem;
+  margin: 0 auto 1.5rem;
+  padding: 0 1.5rem;
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  text-align: center;
+`;
+
+const RelatedCard = styled(Link)`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+  transition: all ${({ theme }) => theme.transitions.normal};
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.elevated};
+    transform: translateY(-4px);
+  }
+`;
+
+const RelatedImage = styled.div<{ $src?: string }>`
+  height: 160px;
+  background: ${({ $src, theme }) => $src ? `url(${$src}) center/cover no-repeat` : theme.colors.secondary};
+`;
+
+const RelatedBody = styled.div`
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const RelatedTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.foreground};
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+`;
+
+const RelatedMeta = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+`;
+
+const RelatedReadMore = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  margin-top: 0.75rem;
+`;
+
+const RelatedArticles = ({ currentSlug }: { currentSlug: string }) => {
+  const { data: allPosts = [] } = useBlogPosts();
+  const related = allPosts.filter(p => p.slug !== currentSlug).slice(0, 3);
+
+  if (related.length === 0) return null;
+
+  return (
+    <RelatedSection>
+      <RelatedHeading>מאמרים נוספים</RelatedHeading>
+      <RelatedGrid>
+        {related.map(post => (
+          <RelatedCard key={post.id} to={`/blog/${post.slug}`}>
+            <RelatedImage $src={post.featured_image || undefined} />
+            <RelatedBody>
+              <RelatedTitle>{post.title}</RelatedTitle>
+              <RelatedMeta>
+                <Calendar size={12} />
+                {post.published_at
+                  ? format(new Date(post.published_at), 'dd MMMM yyyy', { locale: he })
+                  : format(new Date(post.created_at), 'dd MMMM yyyy', { locale: he })}
+              </RelatedMeta>
+              <RelatedReadMore>
+                קראו עוד
+                <ArrowLeft size={14} />
+              </RelatedReadMore>
+            </RelatedBody>
+          </RelatedCard>
+        ))}
+      </RelatedGrid>
+    </RelatedSection>
   );
 };
 
