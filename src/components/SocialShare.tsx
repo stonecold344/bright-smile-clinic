@@ -141,7 +141,10 @@ const SocialShare = ({ title, url, description, image }: SocialShareProps) => {
   const [copied, setCopied] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const shareUrl = url || window.location.href;
+  // Use published URL for sharing, fallback to current URL
+  const publishedBase = 'https://testingdemo.lovable.app';
+  const currentPath = window.location.pathname;
+  const shareUrl = url || `${publishedBase}${currentPath}`;
   const shareText = description || title;
 
   const platforms = [
