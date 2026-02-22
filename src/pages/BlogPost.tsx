@@ -45,15 +45,12 @@ const CategoryBadge = styled.span`
 `;
 
 const HeroTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-size: clamp(1.75rem, 5vw, ${({ theme }) => theme.fontSizes['5xl']});
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.foreground};
   line-height: 1.3;
   margin-bottom: 1.5rem;
-
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  }
+  padding: 0 0.5rem;
 `;
 
 const MetaRow = styled.div`
@@ -120,15 +117,11 @@ const ArticleBody = styled.article`
 /* --- Structured Section Styles --- */
 
 const IntroText = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   line-height: 1.9;
   color: ${({ theme }) => theme.colors.foreground};
   margin-bottom: 2.5rem;
   font-weight: ${({ theme }) => theme.fontWeights.normal};
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 1.3rem;
-  }
 `;
 
 const SectionBlock = styled.div`
@@ -136,7 +129,7 @@ const SectionBlock = styled.div`
 `;
 
 const SectionHeading = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-size: clamp(1.25rem, 3vw, ${({ theme }) => theme.fontSizes['2xl']});
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.foreground};
   margin-bottom: 1rem;
@@ -169,6 +162,10 @@ const SectionImage = styled.div<{ $src: string }>`
     max-height: 400px;
     object-fit: cover;
     display: block;
+
+    @media (max-width: 480px) {
+      max-height: 220px;
+    }
   }
 `;
 
@@ -185,6 +182,12 @@ const SummaryBox = styled.div`
   padding: 2rem;
   margin: 2.5rem 0;
   border-right: 5px solid ${({ theme }) => theme.colors.primary};
+
+  @media (max-width: 480px) {
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: ${({ theme }) => theme.radii.xl};
+  }
 `;
 
 const SummaryTitle = styled.h3`
@@ -257,6 +260,12 @@ const BottomNav = styled.div`
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
 `;
 
 // ShareButton removed - using SocialShare component instead
@@ -454,6 +463,10 @@ const RelatedGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: repeat(3, 1fr);

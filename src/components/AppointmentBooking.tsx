@@ -779,7 +779,7 @@ const AppointmentBooking = () => {
                   />
                 </FormGroup>
 
-                <div id="recaptcha-appointment" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }} />
+                <div id="recaptcha-appointment" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center', transform: 'scale(0.9)', transformOrigin: 'center' }} />
 
                 <Button 
                   type="submit" 
