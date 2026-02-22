@@ -264,6 +264,7 @@ const Actions = styled.div`
   display: flex;
   gap: 0.25rem;
   flex-wrap: wrap;
+  justify-content: center;
 `;
 
 const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' | 'default' }>`
@@ -742,7 +743,7 @@ const AdminAppointments = () => {
                 <Td>{appointment.client_name}</Td>
                 <Td dir="ltr">{appointment.client_phone}</Td>
                 <Td>{formatDate(appointment.appointment_date)}</Td>
-                <Td>{appointment.appointment_time}</Td>
+                <Td>{appointment.appointment_time.substring(0, 5)}</Td>
                 <Td>
                   <StatusBadge $status={appointment.status}>
                     {getStatusLabel(appointment.status)}
@@ -844,7 +845,7 @@ const AdminAppointments = () => {
               </MobileCardRow>
               <MobileCardRow>
                 <MobileCardLabel>שעה</MobileCardLabel>
-                <MobileCardValue>{appointment.appointment_time}</MobileCardValue>
+                <MobileCardValue>{appointment.appointment_time.substring(0, 5)}</MobileCardValue>
               </MobileCardRow>
               <MobileCardRow>
                 <MobileCardLabel>סטטוס</MobileCardLabel>
@@ -972,7 +973,7 @@ const AdminAppointments = () => {
               <Calendar size={20} />
               <div>
                 <Text $size="sm" $color="muted">תאריך ושעה</Text>
-                <Text>{formatDate(selectedAppointment.appointment_date)} בשעה {selectedAppointment.appointment_time}</Text>
+                <Text>{formatDate(selectedAppointment.appointment_date)} בשעה {selectedAppointment.appointment_time.substring(0, 5)}</Text>
               </div>
             </DetailRow>
             

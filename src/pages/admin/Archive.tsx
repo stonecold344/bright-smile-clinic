@@ -687,7 +687,7 @@ const AdminArchive = () => {
                 <Td>{apt.client_name}</Td>
                 <Td dir="ltr">{apt.client_phone}</Td>
                 <Td>{formatDate(apt.appointment_date)}</Td>
-                <Td>{apt.appointment_time}</Td>
+                <Td>{apt.appointment_time.substring(0, 5)}</Td>
                 <Td>{getTreatmentTitle(apt.treatment_slug)}</Td>
                 <Td>
                   <StatusBadge $status={apt.status}>
@@ -695,7 +695,7 @@ const AdminArchive = () => {
                   </StatusBadge>
                 </Td>
                 <Td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                     <ActionButton onClick={() => setSelectedAppointment(apt)} title="פרטים">
                       <Eye size={18} />
                     </ActionButton>
@@ -730,7 +730,7 @@ const AdminArchive = () => {
               </MobileCardRow>
               <MobileCardRow>
                 <MobileCardLabel>שעה</MobileCardLabel>
-                <MobileCardValue>{apt.appointment_time}</MobileCardValue>
+                <MobileCardValue>{apt.appointment_time.substring(0, 5)}</MobileCardValue>
               </MobileCardRow>
               <MobileCardRow>
                 <MobileCardLabel>טיפול</MobileCardLabel>
@@ -780,7 +780,7 @@ const AdminArchive = () => {
               <Calendar size={20} />
               <div>
                 <Text $size="sm" $color="muted">תאריך ושעה</Text>
-                <Text>{formatDate(selectedAppointment.appointment_date)} בשעה {selectedAppointment.appointment_time}</Text>
+                <Text>{formatDate(selectedAppointment.appointment_date)} בשעה {selectedAppointment.appointment_time.substring(0, 5)}</Text>
               </div>
             </DetailRow>
 
