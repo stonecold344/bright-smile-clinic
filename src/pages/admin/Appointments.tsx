@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,22 +28,32 @@ const StatsGrid = styled.div`
   }
 `;
 
-const StatCard = styled.div`
-  background: ${({ theme }) => theme.colors.card};
+const StatCard = styled.button<{ $active?: boolean }>`
+  background: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.card};
   border-radius: ${({ theme }) => theme.radii.xl};
   padding: 1.5rem;
   box-shadow: ${({ theme }) => theme.shadows.soft};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.normal};
+  border: 2px solid ${({ $active, theme }) => $active ? theme.colors.primary : 'transparent'};
+  text-align: right;
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.elevated};
+    transform: translateY(-2px);
+  }
 `;
 
-const StatValue = styled.div`
+const StatValue = styled.div<{ $active?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes['3xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.foreground};
+  color: ${({ $active, theme }) => $active ? theme.colors.primaryForeground : theme.colors.foreground};
 `;
 
-const StatLabel = styled.div`
+const StatLabel = styled.div<{ $active?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.mutedForeground};
+  color: ${({ $active }) => $active ? 'hsla(0, 0%, 100%, 0.8)' : undefined};
+  ${({ $active, theme }) => !$active && `color: ${theme.colors.mutedForeground};`}
 `;
 
 const Table = styled.table`
@@ -177,6 +187,7 @@ interface Appointment {
 
 const AdminAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: appointments = [], isLoading } = useQuery({
@@ -236,6 +247,15 @@ const AdminAppointments = () => {
     cancelled: appointments.filter(a => a.status === 'cancelled').length,
   };
 
+  const filteredAppointments = useMemo(() => {
+    if (!statusFilter) return appointments;
+    return appointments.filter(a => a.status === statusFilter);
+  }, [appointments, statusFilter]);
+
+  const toggleFilter = (filter: string) => {
+    setStatusFilter(prev => prev === filter ? null : filter);
+  };
+
   const formatDate = (date: string) => {
     return format(new Date(date), 'dd/MM/yyyy', { locale: he });
   };
@@ -266,29 +286,29 @@ const AdminAppointments = () => {
       </PageHeader>
 
       <StatsGrid>
-        <StatCard>
-          <StatValue>{stats.total}</StatValue>
-          <StatLabel>סה"כ תורים</StatLabel>
+        <StatCard $active={statusFilter === null} onClick={() => setStatusFilter(null)}>
+          <StatValue $active={statusFilter === null}>{stats.total}</StatValue>
+          <StatLabel $active={statusFilter === null}>סה"כ תורים</StatLabel>
         </StatCard>
-        <StatCard>
-          <StatValue>{stats.pending}</StatValue>
-          <StatLabel>ממתינים</StatLabel>
+        <StatCard $active={statusFilter === 'pending'} onClick={() => toggleFilter('pending')}>
+          <StatValue $active={statusFilter === 'pending'}>{stats.pending}</StatValue>
+          <StatLabel $active={statusFilter === 'pending'}>ממתינים</StatLabel>
         </StatCard>
-        <StatCard>
-          <StatValue>{stats.confirmed}</StatValue>
-          <StatLabel>מאושרים</StatLabel>
+        <StatCard $active={statusFilter === 'confirmed'} onClick={() => toggleFilter('confirmed')}>
+          <StatValue $active={statusFilter === 'confirmed'}>{stats.confirmed}</StatValue>
+          <StatLabel $active={statusFilter === 'confirmed'}>מאושרים</StatLabel>
         </StatCard>
-        <StatCard>
-          <StatValue>{stats.cancelled}</StatValue>
-          <StatLabel>בוטלו</StatLabel>
+        <StatCard $active={statusFilter === 'cancelled'} onClick={() => toggleFilter('cancelled')}>
+          <StatValue $active={statusFilter === 'cancelled'}>{stats.cancelled}</StatValue>
+          <StatLabel $active={statusFilter === 'cancelled'}>בוטלו</StatLabel>
         </StatCard>
       </StatsGrid>
 
-      {appointments.length === 0 ? (
+      {filteredAppointments.length === 0 ? (
         <EmptyState>
           <Calendar size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-          <Title $size="sm">אין תורים במערכת</Title>
-          <Text $color="muted">תורים חדשים יופיעו כאן</Text>
+          <Title $size="sm">{statusFilter ? 'אין תורים בסטטוס זה' : 'אין תורים במערכת'}</Title>
+          <Text $color="muted">{statusFilter ? 'נסה לבחור סטטוס אחר' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
         <Table>
@@ -303,7 +323,7 @@ const AdminAppointments = () => {
             </tr>
           </thead>
           <tbody>
-            {appointments.map((appointment) => (
+            {filteredAppointments.map((appointment) => (
               <tr key={appointment.id}>
                 <Td>{appointment.client_name}</Td>
                 <Td dir="ltr">{appointment.client_phone}</Td>
