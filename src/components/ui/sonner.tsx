@@ -1,4 +1,4 @@
-import { Toaster as Sonner, toast } from "sonner";
+import { Toaster as Sonner, toast as sonnerToast, type ExternalToast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -36,6 +36,31 @@ const Toaster = ({ ...props }: ToasterProps) => {
       {...props}
     />
   );
+};
+
+// Wrapper that dismisses all existing toasts before showing a new one
+const toast = {
+  success: (message: string, opts?: ExternalToast) => {
+    sonnerToast.dismiss();
+    return sonnerToast.success(message, opts);
+  },
+  error: (message: string, opts?: ExternalToast) => {
+    sonnerToast.dismiss();
+    return sonnerToast.error(message, opts);
+  },
+  info: (message: string, opts?: ExternalToast) => {
+    sonnerToast.dismiss();
+    return sonnerToast.info(message, opts);
+  },
+  warning: (message: string, opts?: ExternalToast) => {
+    sonnerToast.dismiss();
+    return sonnerToast.warning(message, opts);
+  },
+  message: (message: string, opts?: ExternalToast) => {
+    sonnerToast.dismiss();
+    return sonnerToast(message, opts);
+  },
+  dismiss: sonnerToast.dismiss,
 };
 
 export { Toaster, toast };
