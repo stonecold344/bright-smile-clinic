@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus } from 'lucide-react';
+import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope, Search, Filter, X, ImagePlus, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
@@ -838,10 +838,17 @@ const AdminAppointments = () => {
 
             {selectedAppointment.images && selectedAppointment.images.length > 0 && (
               <ImageSection>
-                <Text $size="sm" $color="muted" style={{ marginBottom: '0.5rem' }}>תמונות</Text>
+                <Text $size="sm" $color="muted" style={{ marginBottom: '0.5rem' }}>תמונות וקבצים</Text>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
                   {selectedAppointment.images.map((url, i) => (
-                    <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setLightboxIndex(i)} />
+                    url.toLowerCase().endsWith('.pdf') ? (
+                      <div key={i} onClick={() => setLightboxIndex(i)} style={{ width: '100%', aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: '8px', cursor: 'pointer', gap: '0.25rem' }}>
+                        <FileText size={28} color="#6b7280" />
+                        <span style={{ fontSize: '0.6rem', color: '#6b7280' }}>PDF</span>
+                      </div>
+                    ) : (
+                      <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setLightboxIndex(i)} />
+                    )
                   ))}
                 </div>
               </ImageSection>

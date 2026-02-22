@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import styled from 'styled-components';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 
@@ -129,7 +129,7 @@ const ImageUpload = ({ images, onChange, multiple = false, folder = 'uploads' }:
         <HiddenInput
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,application/pdf"
           multiple={multiple}
           onChange={handleUpload}
         />
@@ -139,7 +139,7 @@ const ImageUpload = ({ images, onChange, multiple = false, folder = 'uploads' }:
           <>
             <Upload size={24} />
             <span style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
-              {multiple ? 'לחצו להעלאת תמונות' : 'לחצו להעלאת תמונה'}
+              {multiple ? 'לחצו להעלאת תמונות או קבצי PDF' : 'לחצו להעלאת תמונה או PDF'}
             </span>
           </>
         )}
@@ -149,7 +149,14 @@ const ImageUpload = ({ images, onChange, multiple = false, folder = 'uploads' }:
         <PreviewGrid>
           {images.map((url, i) => (
             <PreviewItem key={i}>
-              <img src={url} alt={`תמונה ${i + 1}`} />
+              {url.toLowerCase().endsWith('.pdf') ? (
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', gap: '0.25rem' }}>
+                  <FileText size={32} color="#6b7280" />
+                  <span style={{ fontSize: '0.65rem', color: '#6b7280' }}>PDF</span>
+                </div>
+              ) : (
+                <img src={url} alt={`תמונה ${i + 1}`} />
+              )}
               <RemoveButton type="button" onClick={() => removeImage(i)}>
                 <X size={12} />
               </RemoveButton>

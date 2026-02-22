@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ExternalLink } from 'lucide-react';
 
 const Overlay = styled.div`
   position: fixed;
@@ -56,11 +56,31 @@ const Counter = styled.div`
   font-size: 0.875rem;
 `;
 
+const OpenLink = styled.a`
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  &:hover { background: rgba(255,255,255,0.3); }
+`;
+
 interface ImageLightboxProps {
   images: string[];
   initialIndex: number;
   onClose: () => void;
 }
+
+const isPdf = (url: string) => url.toLowerCase().endsWith('.pdf');
 
 const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxProps) => {
   const [index, setIndex] = useState(initialIndex);
@@ -71,22 +91,36 @@ const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxProps) =>
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowLeft') next(); // RTL: left = next
+      if (e.key === 'ArrowLeft') next();
       if (e.key === 'ArrowRight') prev();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose, prev, next]);
 
+  const currentUrl = images[index];
+
   return (
     <Overlay onClick={onClose}>
-      <img
-        src={images[index]}
-        alt={`תמונה ${index + 1}`}
-        onClick={e => e.stopPropagation()}
-        style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }}
-      />
+      {isPdf(currentUrl) ? (
+        <iframe
+          src={currentUrl}
+          title={`PDF ${index + 1}`}
+          onClick={e => e.stopPropagation()}
+          style={{ width: '85vw', height: '85vh', border: 'none', borderRadius: '8px', background: 'white' }}
+        />
+      ) : (
+        <img
+          src={currentUrl}
+          alt={`תמונה ${index + 1}`}
+          onClick={e => e.stopPropagation()}
+          style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }}
+        />
+      )}
       <CloseBtn onClick={onClose}><X size={20} /></CloseBtn>
+      <OpenLink href={currentUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+        <ExternalLink size={18} />
+      </OpenLink>
       {images.length > 1 && (
         <>
           <NavBtn $side="right" onClick={e => { e.stopPropagation(); prev(); }}><ChevronRight size={24} /></NavBtn>
