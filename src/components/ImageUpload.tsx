@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 const UploadWrapper = styled.div``;
 

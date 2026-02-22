@@ -7,7 +7,7 @@ import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle, AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { useRecaptcha } from '@/hooks/useRecaptcha';

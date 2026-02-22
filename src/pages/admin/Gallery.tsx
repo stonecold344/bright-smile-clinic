@@ -6,7 +6,7 @@ import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { Image, Loader2, Plus, Pencil, Trash2, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import ImageUpload from '@/components/ImageUpload';
 import type { GalleryItem } from '@/hooks/useGallery';
 

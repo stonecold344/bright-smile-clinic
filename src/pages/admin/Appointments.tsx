@@ -6,7 +6,7 @@ import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
 import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 

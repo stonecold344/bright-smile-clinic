@@ -5,7 +5,7 @@ import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, Fil
 import { Button } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 const DashboardWrapper = styled.div`
   min-height: 100vh;

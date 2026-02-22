@@ -7,7 +7,7 @@ import { Container } from '@/components/styled/Layout';
 import ServicesDropdown from '@/components/ServicesDropdown';
 import { useTreatments } from '@/hooks/useTreatments';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
   position: fixed;
   top: 0;

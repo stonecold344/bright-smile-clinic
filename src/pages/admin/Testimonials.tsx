@@ -6,7 +6,7 @@ import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { MessageSquare, Loader2, Plus, Pencil, Trash2, X, Star, Eye, EyeOff } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 const PageHeader = styled.div`
   display: flex;

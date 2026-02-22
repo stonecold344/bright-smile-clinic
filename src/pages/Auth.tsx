@@ -7,7 +7,7 @@ import { Input, Label, FormGroup } from '@/components/styled/Input';
 import { Title, Text } from '@/components/styled/Typography';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 const PageWrapper = styled.div`
   min-height: 100vh;

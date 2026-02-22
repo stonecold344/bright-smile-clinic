@@ -6,7 +6,7 @@ import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { FileText, Loader2, Plus, Pencil, Trash2, X, GripVertical, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import ImageUpload from '@/components/ImageUpload';
