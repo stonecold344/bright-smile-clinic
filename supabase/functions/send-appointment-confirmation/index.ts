@@ -86,24 +86,28 @@ serve(async (req) => {
 
     const sanitizedName = clientName.replace(/[<>\"\'&]/g, "").substring(0, 100).trim();
     
+    let whatsappPhone = clientPhone.replace(/\D/g, "");
+    if (whatsappPhone.startsWith("0")) {
+      whatsappPhone = "972" + whatsappPhone.slice(1);
+    }
+
     let displayPhone = clientPhone.replace(/\D/g, "");
     if (displayPhone.startsWith("972")) {
       displayPhone = "0" + displayPhone.slice(3);
     }
 
-    const clinicPhone = "972507334482";
+    const customerMessage = `שלום ${sanitizedName}! 👋
 
-    const customerMessage = `שלום! 👋
+התור שלך אושר בהצלחה ✅
 
-אני ${sanitizedName}
-קבעתי תור לתאריך ${appointmentDate} בשעה ${appointmentTime}
+📅 תאריך: ${appointmentDate}
+🕐 שעה: ${appointmentTime}
 
-מספר טלפון שלי: ${displayPhone}
-
-תודה! 🦷`;
+נשמח לראות אותך! 🦷
+במידה ותרצה לבטל או לשנות את התור, אנא צור קשר.`;
 
     const encodedMessage = encodeURIComponent(customerMessage);
-    const whatsappUrl = `https://wa.me/${clinicPhone}?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedMessage}`;
 
     console.log("Appointment confirmation prepared for:", sanitizedName, "date:", appointmentDate, "time:", appointmentTime);
 
