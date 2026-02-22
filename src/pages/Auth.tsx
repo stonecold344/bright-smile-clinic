@@ -14,7 +14,7 @@ const PageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}22 0%, ${({ theme }) => theme.colors.secondary}66 50%, ${({ theme }) => theme.colors.primary}11 100%);
+  background: linear-gradient(135deg, hsla(174, 62%, 45%, 0.12) 0%, hsla(200, 40%, 96%, 0.5) 50%, hsla(174, 62%, 45%, 0.06) 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
@@ -27,7 +27,7 @@ const PageWrapper = styled.div`
     width: 60vw;
     height: 60vw;
     border-radius: 50%;
-    background: ${({ theme }) => theme.colors.primary}0d;
+    background: hsla(174, 62%, 45%, 0.05);
   }
 
   &::after {
@@ -38,7 +38,7 @@ const PageWrapper = styled.div`
     width: 50vw;
     height: 50vw;
     border-radius: 50%;
-    background: ${({ theme }) => theme.colors.secondary}33;
+    background: hsla(200, 40%, 96%, 0.4);
   }
 `;
 
