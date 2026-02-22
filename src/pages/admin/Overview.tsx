@@ -99,14 +99,16 @@ const AdminOverview = () => {
       ]);
 
       const appointments = appointmentsRes.data || [];
+      const activeStatuses = ['pending', 'confirmed', 'arrived'];
+      const activeAppointments = appointments.filter(a => activeStatuses.includes(a.status));
       const treatments = treatmentsRes.data || [];
       const testimonials = testimonialsRes.data || [];
       const blogPosts = blogRes.data || [];
       const galleryItems = galleryRes.data || [];
 
       return {
-        totalAppointments: appointments.length,
-        pendingAppointments: appointments.filter(a => a.status === 'pending').length,
+        totalAppointments: activeAppointments.length,
+        pendingAppointments: activeAppointments.filter(a => a.status === 'pending').length,
         totalTreatments: treatments.length,
         totalTestimonials: testimonials.length,
         visibleTestimonials: testimonials.filter(t => t.is_visible).length,
@@ -141,7 +143,7 @@ const AdminOverview = () => {
             <TrendingUp size={20} style={{ color: '#16a34a' }} />
           </StatHeader>
           <StatValue>{stats?.totalAppointments || 0}</StatValue>
-          <StatLabel>תורים ({stats?.pendingAppointments || 0} ממתינים)</StatLabel>
+          <StatLabel>תורים פעילים ({stats?.pendingAppointments || 0} ממתינים)</StatLabel>
         </StatCard>
 
         <StatCard to="/admin/treatments">
