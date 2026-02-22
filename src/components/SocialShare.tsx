@@ -195,15 +195,6 @@ const SocialShare = ({ title, url, description, image }: SocialShareProps) => {
       },
     },
     {
-      name: 'LinkedIn',
-      icon: <LinkedInIcon />,
-      bg: '#0A66C2',
-      color: 'white',
-      onClick: () => {
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
-      },
-    },
-    {
       name: 'Telegram',
       icon: <TelegramIcon />,
       bg: '#0088cc',
