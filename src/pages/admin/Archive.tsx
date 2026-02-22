@@ -433,6 +433,8 @@ const AdminArchive = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success('הקבצים עודכנו בהצלחה');
     },
     onError: () => {

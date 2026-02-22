@@ -494,6 +494,7 @@ const AdminAppointments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success('סטטוס התור עודכן בהצלחה');
     },
     onError: () => {
@@ -513,6 +514,7 @@ const AdminAppointments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success('התמונות עודכנו בהצלחה');
     },
     onError: () => {
@@ -532,6 +534,7 @@ const AdminAppointments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success('התור נמחק בהצלחה');
     },
     onError: () => {
