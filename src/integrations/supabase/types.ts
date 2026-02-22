@@ -61,6 +61,7 @@ export type Database = {
           id: string
           is_published: boolean
           published_at: string | null
+          sections: Json | null
           seo_description: string | null
           seo_title: string | null
           slug: string
@@ -74,6 +75,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           published_at?: string | null
+          sections?: Json | null
           seo_description?: string | null
           seo_title?: string | null
           slug: string
@@ -87,6 +89,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           published_at?: string | null
+          sections?: Json | null
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
