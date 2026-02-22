@@ -629,9 +629,11 @@ const AdminArchive = () => {
                     <ActionButton onClick={() => setSelectedAppointment(apt)} title="פרטים">
                       <Eye size={18} />
                     </ActionButton>
-                    <ActionButton onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
-                      <ImagePlus size={18} />
-                    </ActionButton>
+                    {apt.status === 'completed' && (
+                      <ActionButton onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
+                        <ImagePlus size={18} />
+                      </ActionButton>
+                    )}
                   </div>
                 </Td>
               </tr>
