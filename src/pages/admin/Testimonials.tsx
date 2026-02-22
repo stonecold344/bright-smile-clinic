@@ -305,7 +305,13 @@ const AdminTestimonials = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) { toast.error('יש למלא שם לקוח'); return; }
+    if (formData.name.trim().length < 2) { toast.error('שם חייב להכיל לפחות 2 תווים'); return; }
+    if (formData.name.trim().length > 100) { toast.error('שם ארוך מדי (מקסימום 100 תווים)'); return; }
     if (!formData.content.trim()) { toast.error('יש למלא תוכן המלצה'); return; }
+    if (formData.content.trim().length < 10) { toast.error('תוכן המלצה חייב להכיל לפחות 10 תווים'); return; }
+    if (formData.content.trim().length > 2000) { toast.error('תוכן המלצה ארוך מדי (מקסימום 2000 תווים)'); return; }
+    if (formData.rating < 1 || formData.rating > 5) { toast.error('יש לבחור דירוג בין 1 ל-5'); return; }
+    if (formData.title && formData.title.length > 100) { toast.error('תפקיד/כותרת ארוך מדי (מקסימום 100 תווים)'); return; }
     if (editingTestimonial) {
       updateTestimonial.mutate({ id: editingTestimonial.id, data: formData });
     } else {
