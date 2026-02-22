@@ -5,13 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
-import { FileText, Loader2, Plus, Pencil, Trash2, X, Eye, EyeOff } from 'lucide-react';
+import { FileText, Loader2, Plus, Pencil, Trash2, X, GripVertical, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import RichTextEditor from '@/components/RichTextEditor';
 import ImageUpload from '@/components/ImageUpload';
-import type { BlogPost } from '@/hooks/useBlogPosts';
+import type { BlogPost, ArticleSection } from '@/hooks/useBlogPosts';
 
 const PageHeader = styled.div`
   display: flex;
@@ -109,7 +108,7 @@ const ModalContent = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   padding: 2rem;
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
   margin: 2rem 0;
 `;
@@ -143,6 +142,128 @@ const CheckboxWrapper = styled.label`
   color: ${({ theme }) => theme.colors.foreground};
 `;
 
+/* --- Template Section Styles --- */
+
+const SectionCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  background: ${({ theme }) => theme.colors.background};
+  position: relative;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
+const SectionLabel = styled.span<{ $type: string }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  background: ${({ $type, theme }) =>
+    $type === 'intro' ? theme.colors.primaryLight :
+    $type === 'summary' ? '#fef3c7' :
+    theme.colors.secondary};
+  color: ${({ $type, theme }) =>
+    $type === 'intro' ? theme.colors.primary :
+    $type === 'summary' ? '#92400e' :
+    theme.colors.foreground};
+`;
+
+const RemoveSectionButton = styled.button`
+  padding: 0.35rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  &:hover { background: #fee2e2; color: #dc2626; }
+`;
+
+const AddSectionBar = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 1rem;
+  border: 2px dashed ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  margin-bottom: 1rem;
+`;
+
+const AddSectionButton = styled.button`
+  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  background: ${({ theme }) => theme.colors.secondary};
+  color: ${({ theme }) => theme.colors.foreground};
+  transition: all ${({ theme }) => theme.transitions.fast};
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryLight};
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const SectionImagePreview = styled.div`
+  margin-top: 0.75rem;
+  position: relative;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  overflow: hidden;
+  max-height: 160px;
+
+  img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+`;
+
+const RemoveImageBtn = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const PointsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const PointRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
+const TemplatePreview = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.secondary}40;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  text-align: center;
+`;
+
 const slugify = (text: string) =>
   text
     .toLowerCase()
@@ -151,17 +272,30 @@ const slugify = (text: string) =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 100) || `post-${Date.now()}`;
 
+const defaultSections: ArticleSection[] = [
+  { type: 'intro', text: '' },
+  { type: 'section', heading: '', text: '', image: '' },
+  { type: 'section', heading: '', text: '', image: '' },
+  { type: 'summary', text: '', points: [''] },
+];
+
+const sectionLabels: Record<string, string> = {
+  intro: '🟢 הקדמה',
+  section: '📄 פסקה',
+  summary: '⭐ סיכום ונקודות עיקריות',
+};
+
 const AdminBlog = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
-    content: '',
     featured_image: [] as string[],
     seo_title: '',
     seo_description: '',
     is_published: false,
+    sections: defaultSections as ArticleSection[],
   });
 
   const queryClient = useQueryClient();
@@ -174,16 +308,40 @@ const AdminBlog = () => {
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as BlogPost[];
+      return data as unknown as BlogPost[];
     },
   });
 
+  // Build content HTML from sections for backward compatibility
+  const buildContentFromSections = (sections: ArticleSection[]): string => {
+    return sections.map((s) => {
+      if (s.type === 'intro') return `<p>${s.text}</p>`;
+      if (s.type === 'section') {
+        let html = '';
+        if (s.heading) html += `<h2>${s.heading}</h2>`;
+        if (s.image) html += `<img src="${s.image}" alt="${s.heading || ''}" />`;
+        html += `<p>${s.text}</p>`;
+        return html;
+      }
+      if (s.type === 'summary') {
+        let html = `<h2>סיכום</h2><p>${s.text}</p>`;
+        if (s.points && s.points.filter(Boolean).length > 0) {
+          html += '<ul>' + s.points.filter(Boolean).map(p => `<li>${p}</li>`).join('') + '</ul>';
+        }
+        return html;
+      }
+      return '';
+    }).join('\n');
+  };
+
   const createPost = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const content = buildContentFromSections(data.sections);
       const { error } = await supabase.from('blog_posts').insert({
         title: data.title,
         slug: data.slug || slugify(data.title),
-        content: data.content,
+        content,
+        sections: data.sections as any,
         featured_image: data.featured_image[0] || null,
         seo_title: data.seo_title || null,
         seo_description: data.seo_description || null,
@@ -203,10 +361,12 @@ const AdminBlog = () => {
 
   const updatePost = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
+      const content = buildContentFromSections(data.sections);
       const { error } = await supabase.from('blog_posts').update({
         title: data.title,
         slug: data.slug || slugify(data.title),
-        content: data.content,
+        content,
+        sections: data.sections as any,
         featured_image: data.featured_image[0] || null,
         seo_title: data.seo_title || null,
         seo_description: data.seo_description || null,
@@ -239,20 +399,26 @@ const AdminBlog = () => {
 
   const openCreateModal = () => {
     setEditingPost(null);
-    setFormData({ title: '', slug: '', content: '', featured_image: [], seo_title: '', seo_description: '', is_published: false });
+    setFormData({
+      title: '', slug: '', featured_image: [], seo_title: '', seo_description: '',
+      is_published: false, sections: [...defaultSections.map(s => ({ ...s, points: s.points ? [...s.points] : undefined }))],
+    });
     setIsModalOpen(true);
   };
 
   const openEditModal = (post: BlogPost) => {
     setEditingPost(post);
+    const sections: ArticleSection[] = (post.sections && Array.isArray(post.sections) && (post.sections as ArticleSection[]).length > 0)
+      ? (post.sections as ArticleSection[])
+      : defaultSections;
     setFormData({
       title: post.title,
       slug: post.slug,
-      content: post.content,
       featured_image: post.featured_image ? [post.featured_image] : [],
       seo_title: post.seo_title || '',
       seo_description: post.seo_description || '',
       is_published: post.is_published,
+      sections,
     });
     setIsModalOpen(true);
   };
@@ -266,6 +432,51 @@ const AdminBlog = () => {
     } else {
       createPost.mutate(formData);
     }
+  };
+
+  const updateSection = (index: number, updates: Partial<ArticleSection>) => {
+    const newSections = [...formData.sections];
+    newSections[index] = { ...newSections[index], ...updates };
+    setFormData({ ...formData, sections: newSections });
+  };
+
+  const removeSection = (index: number) => {
+    setFormData({ ...formData, sections: formData.sections.filter((_, i) => i !== index) });
+  };
+
+  const addSection = (type: ArticleSection['type']) => {
+    const newSection: ArticleSection = type === 'summary'
+      ? { type: 'summary', text: '', points: [''] }
+      : type === 'intro'
+      ? { type: 'intro', text: '' }
+      : { type: 'section', heading: '', text: '', image: '' };
+    setFormData({ ...formData, sections: [...formData.sections, newSection] });
+  };
+
+  const updatePoint = (sectionIndex: number, pointIndex: number, value: string) => {
+    const newSections = [...formData.sections];
+    const points = [...(newSections[sectionIndex].points || [])];
+    points[pointIndex] = value;
+    newSections[sectionIndex] = { ...newSections[sectionIndex], points };
+    setFormData({ ...formData, sections: newSections });
+  };
+
+  const addPoint = (sectionIndex: number) => {
+    const newSections = [...formData.sections];
+    const points = [...(newSections[sectionIndex].points || []), ''];
+    newSections[sectionIndex] = { ...newSections[sectionIndex], points };
+    setFormData({ ...formData, sections: newSections });
+  };
+
+  const removePoint = (sectionIndex: number, pointIndex: number) => {
+    const newSections = [...formData.sections];
+    const points = (newSections[sectionIndex].points || []).filter((_, i) => i !== pointIndex);
+    newSections[sectionIndex] = { ...newSections[sectionIndex], points };
+    setFormData({ ...formData, sections: newSections });
+  };
+
+  const handleSectionImageUpload = (sectionIndex: number, images: string[]) => {
+    updateSection(sectionIndex, { image: images[0] || '' });
   };
 
   if (isLoading) {
@@ -365,7 +576,7 @@ const AdminBlog = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>תמונה ראשית</Label>
+                <Label>תמונה ראשית (Hero)</Label>
                 <ImageUpload
                   images={formData.featured_image}
                   onChange={(images) => setFormData({ ...formData, featured_image: images })}
@@ -373,32 +584,148 @@ const AdminBlog = () => {
                 />
               </FormGroup>
 
+              {/* Structured Sections */}
               <FormGroup>
-                <Label>תוכן *</Label>
-                <RichTextEditor
-                  value={formData.content}
-                  onChange={(content) => setFormData({ ...formData, content })}
-                />
+                <Label>תבנית מאמר</Label>
+                <TemplatePreview>
+                  תבנית אחידה: הקדמה → פסקאות עם תמונות → סיכום ונקודות עיקריות
+                </TemplatePreview>
               </FormGroup>
 
+              {formData.sections.map((section, idx) => (
+                <SectionCard key={idx}>
+                  <SectionHeader>
+                    <SectionLabel $type={section.type}>
+                      <GripVertical size={14} />
+                      {sectionLabels[section.type]}
+                    </SectionLabel>
+                    {formData.sections.length > 1 && (
+                      <RemoveSectionButton type="button" onClick={() => removeSection(idx)}>
+                        <Trash2 size={14} />
+                      </RemoveSectionButton>
+                    )}
+                  </SectionHeader>
+
+                  {/* Heading for section type */}
+                  {section.type === 'section' && (
+                    <FormGroup style={{ marginBottom: '0.75rem' }}>
+                      <Label>כותרת פסקה</Label>
+                      <Input
+                        value={section.heading || ''}
+                        onChange={(e) => updateSection(idx, { heading: e.target.value })}
+                        placeholder="כותרת הפסקה..."
+                      />
+                    </FormGroup>
+                  )}
+
+                  {/* Text area */}
+                  <FormGroup style={{ marginBottom: '0.75rem' }}>
+                    <Label>
+                      {section.type === 'intro' ? 'טקסט הקדמה' :
+                       section.type === 'summary' ? 'טקסט סיכום' : 'תוכן'}
+                    </Label>
+                    <Textarea
+                      value={section.text}
+                      onChange={(e) => updateSection(idx, { text: e.target.value })}
+                      placeholder={
+                        section.type === 'intro' ? 'פתיחה קצרה שמסבירה על מה המאמר...' :
+                        section.type === 'summary' ? 'סיכום קצר של המאמר...' :
+                        'תוכן הפסקה...'
+                      }
+                      style={{ minHeight: section.type === 'intro' ? '80px' : '120px' }}
+                    />
+                  </FormGroup>
+
+                  {/* Image upload for section type */}
+                  {section.type === 'section' && (
+                    <FormGroup style={{ marginBottom: '0' }}>
+                      <Label>תמונת פסקה (אופציונלי)</Label>
+                      {section.image ? (
+                        <SectionImagePreview>
+                          <img src={section.image} alt="תמונת פסקה" />
+                          <RemoveImageBtn type="button" onClick={() => updateSection(idx, { image: '' })}>
+                            <X size={14} />
+                          </RemoveImageBtn>
+                        </SectionImagePreview>
+                      ) : (
+                        <ImageUpload
+                          images={[]}
+                          onChange={(imgs) => handleSectionImageUpload(idx, imgs)}
+                          folder="blog"
+                        />
+                      )}
+                    </FormGroup>
+                  )}
+
+                  {/* Summary points */}
+                  {section.type === 'summary' && (
+                    <FormGroup style={{ marginBottom: '0' }}>
+                      <Label>נקודות עיקריות</Label>
+                      <PointsList>
+                        {(section.points || []).map((point, pIdx) => (
+                          <PointRow key={pIdx}>
+                            <span style={{ color: 'hsl(var(--primary))', fontWeight: 600 }}>•</span>
+                            <Input
+                              value={point}
+                              onChange={(e) => updatePoint(idx, pIdx, e.target.value)}
+                              placeholder={`נקודה ${pIdx + 1}...`}
+                              style={{ flex: 1 }}
+                            />
+                            {(section.points || []).length > 1 && (
+                              <RemoveSectionButton type="button" onClick={() => removePoint(idx, pIdx)}>
+                                <X size={14} />
+                              </RemoveSectionButton>
+                            )}
+                          </PointRow>
+                        ))}
+                      </PointsList>
+                      <Button
+                        type="button"
+                        $variant="outline"
+                        onClick={() => addPoint(idx)}
+                        style={{ marginTop: '0.5rem', fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
+                      >
+                        <Plus size={14} /> הוסף נקודה
+                      </Button>
+                    </FormGroup>
+                  )}
+                </SectionCard>
+              ))}
+
+              <AddSectionBar>
+                <AddSectionButton type="button" onClick={() => addSection('section')}>
+                  <Plus size={14} /> פסקה + תמונה
+                </AddSectionButton>
+                {!formData.sections.some(s => s.type === 'intro') && (
+                  <AddSectionButton type="button" onClick={() => addSection('intro')}>
+                    <Plus size={14} /> הקדמה
+                  </AddSectionButton>
+                )}
+                {!formData.sections.some(s => s.type === 'summary') && (
+                  <AddSectionButton type="button" onClick={() => addSection('summary')}>
+                    <Plus size={14} /> סיכום
+                  </AddSectionButton>
+                )}
+              </AddSectionBar>
+
               <FormGroup>
-                <Label htmlFor="seo_title">כותרת SEO</Label>
+                <Label htmlFor="seo_title">כותרת SEO (לגוגל)</Label>
                 <Input
                   id="seo_title"
                   value={formData.seo_title}
                   onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
-                  placeholder="כותרת לתוצאות חיפוש (עד 60 תווים)"
+                  placeholder="כותרת שתופיע בתוצאות חיפוש גוגל (עד 60 תווים)"
                   maxLength={60}
                 />
               </FormGroup>
 
               <FormGroup>
-                <Label htmlFor="seo_description">תיאור SEO</Label>
+                <Label htmlFor="seo_description">תיאור SEO (לגוגל)</Label>
                 <Textarea
                   id="seo_description"
                   value={formData.seo_description}
                   onChange={(e) => setFormData({ ...formData, seo_description: e.target.value })}
-                  placeholder="תיאור לתוצאות חיפוש (עד 160 תווים)"
+                  placeholder="תיאור קצר שיופיע מתחת לכותרת בתוצאות חיפוש גוגל (עד 160 תווים)"
                   maxLength={160}
                   style={{ minHeight: '60px' }}
                 />
