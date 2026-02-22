@@ -15,10 +15,17 @@ const HeroBackground = styled.div`
   position: absolute;
   inset: 0;
 `;
-const HeroVideo = styled.video`
+const HeroVideo = styled.iframe`
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 177.78vh;
+  min-height: 56.25vw;
+  border: none;
+  pointer-events: none;
 `;
 const HeroOverlay = styled.div`
   position: absolute;
@@ -195,9 +202,11 @@ const ScrollIndicator = styled.button`
 const HeroSection = () => {
   return <HeroWrapper>
       <HeroBackground>
-        <HeroVideo autoPlay muted loop playsInline>
-          <source src="https://cdn.pixabay.com/video/2020/02/10/32112-391539498_large.mp4" type="video/mp4" />
-        </HeroVideo>
+        <HeroVideo
+          src="https://www.youtube.com/embed/dA2FnfiuB1E?autoplay=1&mute=1&loop=1&playlist=dA2FnfiuB1E&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+          allow="autoplay; encrypted-media"
+          title="Dental clinic background video"
+        />
         <HeroOverlay />
       </HeroBackground>
 
