@@ -1,0 +1,1 @@
+ALTER TABLE public.appointments ADD COLUMN images text[] NOT NULL DEFAULT '{}'::text[];
