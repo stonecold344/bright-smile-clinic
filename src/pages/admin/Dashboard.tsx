@@ -88,7 +88,7 @@ const LoadingWrapper = styled.div`
 `;
 
 const Dashboard = () => {
-  const { user, loading, isAdmin, signOut } = useAuth();
+  const { user, loading, adminLoading, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -99,11 +99,11 @@ const Dashboard = () => {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (!loading && user && !isAdmin) {
+    if (!loading && !adminLoading && user && !isAdmin) {
       toast.error('אין לך הרשאות גישה לאזור הניהול');
       navigate('/');
     }
-  }, [isAdmin, loading, user, navigate]);
+  }, [isAdmin, adminLoading, loading, user, navigate]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -115,7 +115,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <LoadingWrapper>
         <Loader2 size={48} className="animate-spin" style={{ color: 'hsl(var(--primary))' }} />
