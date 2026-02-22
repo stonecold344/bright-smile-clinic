@@ -161,7 +161,7 @@ const ServicesDropdown = ({ onNavigate, scrolled }: ServicesDropdownProps) => {
       </DropdownTrigger>
 
       <DropdownMenu className="dropdown-menu" role="menu">
-        {treatments.map((treatment) => (
+        {treatments.slice(0, 6).map((treatment) => (
           <MenuItem
             key={treatment.id}
             to={`/treatment/${treatment.slug}`}
