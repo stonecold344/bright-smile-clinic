@@ -22,6 +22,7 @@ import AdminTestimonials from "./pages/admin/Testimonials";
 import AdminBlog from "./pages/admin/Blog";
 import AdminGallery from "./pages/admin/Gallery";
 import AdminArchive from "./pages/admin/Archive";
+import AdminMessages from "./pages/admin/Messages";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="testimonials" element={<AdminTestimonials />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="gallery" element={<AdminGallery />} />
+            <Route path="messages" element={<AdminMessages />} />
             <Route path="archive" element={<AdminArchive />} />
           </Route>
           <Route path="/privacy" element={<Privacy />} />

@@ -131,6 +131,21 @@ const Contact = () => {
 
     setIsSubmitting(true);
     try {
+      // Save to database first
+      const { error: dbError } = await supabase.from('contact_messages' as any).insert({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || null,
+        message: formData.message.trim() || null,
+      });
+
+      if (dbError) {
+        console.error('DB insert error:', dbError);
+        setFormError('אירעה שגיאה, נסו שוב');
+        return;
+      }
+
+      // Send WhatsApp notification to admin
       const { data, error } = await supabase.functions.invoke('send-contact-whatsapp', {
         body: {
           name: formData.name.trim(),
@@ -141,7 +156,9 @@ const Contact = () => {
       });
 
       if (error) {
-        setFormError('אירעה שגיאה, נסו שוב');
+        // Message saved but WhatsApp failed - still show success
+        toast.success('ההודעה נשלחה בהצלחה!');
+        setFormData({ name: '', phone: '', email: '', message: '' });
         return;
       }
 

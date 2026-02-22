@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, FileText, Image, ShieldX, Archive, Menu, X } from 'lucide-react';
+import { Calendar, Stethoscope, MessageSquare, LogOut, Home, Smile, Loader2, FileText, Image, ShieldX, Archive, Menu, X, Mail } from 'lucide-react';
 import { Button } from '@/components/styled/Button';
 import { Container } from '@/components/styled/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -335,6 +335,10 @@ const Dashboard = () => {
               <NavLink to="/admin/testimonials" $active={isActive('/admin/testimonials')}>
                 <MessageSquare size={18} />
                 המלצות
+              </NavLink>
+              <NavLink to="/admin/messages" $active={isActive('/admin/messages')}>
+                <Mail size={18} />
+                הודעות
               </NavLink>
               <NavLink to="/admin/archive" $active={isActive('/admin/archive')}>
                 <Archive size={18} />
