@@ -93,7 +93,7 @@ const FiltersGrid = styled.div`
   gap: 1rem;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   }
 `;
 
@@ -364,7 +364,8 @@ const AdminArchive = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [phoneSearch, setPhoneSearch] = useState('');
   const [phoneError, setPhoneError] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [hourFilter, setHourFilter] = useState('');
   const [treatmentFilter, setTreatmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -438,7 +439,7 @@ const AdminArchive = () => {
     completed: archivedAppointments.filter(a => a.status === 'completed').length,
   }), [archivedAppointments]);
 
-  const hasActiveFilters = searchQuery || phoneSearch || dateFilter || hourFilter || treatmentFilter || statusFilter;
+  const hasActiveFilters = searchQuery || phoneSearch || dateFrom || dateTo || hourFilter || treatmentFilter || statusFilter;
 
   const handlePhoneChange = (value: string) => {
     const cleaned = value.replace(/[^0-9-]/g, '');
@@ -465,8 +466,11 @@ const AdminArchive = () => {
         const cleanPhone = phoneSearch.replace(/-/g, '');
         if (!apt.client_phone.replace(/-/g, '').includes(cleanPhone)) return false;
       }
-      if (dateFilter) {
-        if (apt.appointment_date !== dateFilter) return false;
+      if (dateFrom) {
+        if (apt.appointment_date < format(dateFrom, 'yyyy-MM-dd')) return false;
+      }
+      if (dateTo) {
+        if (apt.appointment_date > format(dateTo, 'yyyy-MM-dd')) return false;
       }
       if (hourFilter) {
         const aptHour = apt.appointment_time.substring(0, 2);
@@ -480,7 +484,7 @@ const AdminArchive = () => {
       }
       return true;
     });
-  }, [archivedAppointments, searchQuery, phoneSearch, dateFilter, hourFilter, treatmentFilter, statusFilter]);
+  }, [archivedAppointments, searchQuery, phoneSearch, dateFrom, dateTo, hourFilter, treatmentFilter, statusFilter]);
 
   const sortedAppointments = useMemo(() => {
     if (!sortField) return filteredAppointments;
@@ -519,7 +523,8 @@ const AdminArchive = () => {
     setSearchQuery('');
     setPhoneSearch('');
     setPhoneError('');
-    setDateFilter('');
+    setDateFrom(undefined);
+    setDateTo(undefined);
     setHourFilter('');
     setTreatmentFilter('');
     setStatusFilter(null);
@@ -624,26 +629,54 @@ const AdminArchive = () => {
             {phoneError && <span style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{phoneError}</span>}
           </FilterGroup>
           <FilterGroup>
-            <FilterLabel><CalendarIcon size={14} />תאריך</FilterLabel>
+            <FilterLabel><CalendarIcon size={14} />מתאריך</FilterLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <button
                   className={cn(
                     "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border rounded-lg bg-background text-foreground transition-all",
                     "hover:border-primary focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15",
-                    !dateFilter && "text-muted-foreground"
+                    !dateFrom && "text-muted-foreground"
                   )}
                   style={{ borderColor: 'hsl(var(--border))' }}
                 >
-                  {dateFilter ? format(new Date(dateFilter), 'dd/MM/yyyy', { locale: he }) : 'בחר תאריך'}
+                  {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
                   <CalendarIcon size={14} className="opacity-50" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={dateFilter ? new Date(dateFilter) : undefined}
-                  onSelect={(date) => setDateFilter(date ? format(date, 'yyyy-MM-dd') : '')}
+                  selected={dateFrom}
+                  onSelect={setDateFrom}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><CalendarIcon size={14} />עד תאריך</FilterLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className={cn(
+                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm border rounded-lg bg-background text-foreground transition-all",
+                    "hover:border-primary focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/15",
+                    !dateTo && "text-muted-foreground"
+                  )}
+                  style={{ borderColor: 'hsl(var(--border))' }}
+                >
+                  {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
+                  <CalendarIcon size={14} className="opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={setDateTo}
+                  disabled={(date) => dateFrom ? date < dateFrom : false}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
