@@ -285,6 +285,7 @@ interface Appointment {
   status: string;
   created_at: string;
   treatment_slug: string | null;
+  images: string[];
 }
 
 // --- Component ---
@@ -628,6 +629,17 @@ const AdminArchive = () => {
                   <Text>{selectedAppointment.notes}</Text>
                 </div>
               </DetailRow>
+            )}
+
+            {selectedAppointment.images && selectedAppointment.images.length > 0 && (
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: `1px solid var(--border, #e5e7eb)` }}>
+                <Text $size="sm" $color="muted" style={{ marginBottom: '0.5rem' }}>תמונות</Text>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
+                  {selectedAppointment.images.map((url, i) => (
+                    <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px' }} />
+                  ))}
+                </div>
+              </div>
             )}
 
             <Button
