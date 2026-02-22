@@ -160,6 +160,14 @@ const FooterBottom = styled.div`
   text-align: center;
 `;
 
+const FooterBottomLinks = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+`;
+
 const Copyright = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   opacity: 0.6;
@@ -238,6 +246,11 @@ const Footer = () => {
           </FooterGrid>
 
           <FooterBottom>
+            <FooterBottomLinks>
+              <FooterLink to="/privacy">מדיניות פרטיות</FooterLink>
+              <span style={{ opacity: 0.4 }}>|</span>
+              <FooterLink to="/terms">תנאי שימוש</FooterLink>
+            </FooterBottomLinks>
             <Copyright>© 2026 מרפאת שיניים. כל הזכויות שמורות.</Copyright>
           </FooterBottom>
         </FooterContent>
