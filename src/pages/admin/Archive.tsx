@@ -118,6 +118,7 @@ const FilterInput = styled.input`
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: center;
 
   &:focus {
     outline: none;
@@ -127,6 +128,7 @@ const FilterInput = styled.input`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: center;
   }
 `;
 
@@ -140,6 +142,7 @@ const FilterSelect = styled.select`
   color: ${({ theme }) => theme.colors.foreground};
   transition: all ${({ theme }) => theme.transitions.fast};
   cursor: pointer;
+  text-align: center;
 
   &:focus {
     outline: none;
@@ -152,7 +155,7 @@ const DatePickerButton = styled.button<{ $hasValue?: boolean }>`
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 0.875rem;
   border: 1px solid ${({ theme }) => theme.colors.border};
