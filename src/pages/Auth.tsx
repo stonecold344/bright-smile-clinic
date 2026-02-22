@@ -260,7 +260,7 @@ const Auth = () => {
           </GeneralError>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <FormGroup>
             <StyledLabel htmlFor="email">אימייל</StyledLabel>
             <InputWrapper $hasError={!!errors.email}>
@@ -272,7 +272,6 @@ const Auth = () => {
                 onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
                 placeholder="your@email.com"
                 dir="ltr"
-                required
               />
             </InputWrapper>
             {errors.email && (
@@ -294,7 +293,6 @@ const Auth = () => {
                 onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }}
                 placeholder="••••••••"
                 dir="ltr"
-                required
               />
             </InputWrapper>
             {errors.password && (
