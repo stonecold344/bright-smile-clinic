@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -6,6 +6,8 @@ import { Container, Badge } from '@/components/styled/Layout';
 import { Title, Text } from '@/components/styled/Typography';
 import { Loader2, X } from 'lucide-react';
 import { useGallery } from '@/hooks/useGallery';
+
+const MOBILE_BREAKPOINT = '768px';
 
 const HeroSection = styled.section`
   padding-top: 8rem;
@@ -125,13 +127,7 @@ const Lightbox = styled.div`
   align-items: center;
   justify-content: center;
   padding: 2rem;
-`;
-
-const LightboxImage = styled.img`
-  max-width: 90vw;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: ${({ theme }) => theme.radii.lg};
+  touch-action: none;
 `;
 
 const LightboxClose = styled.button`
@@ -146,6 +142,7 @@ const LightboxClose = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 `;
 
 const LightboxNav = styled.button`
@@ -165,6 +162,61 @@ const LightboxNav = styled.button`
   &:hover {
     background: rgba(255, 255, 255, 0.3);
   }
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    display: none;
+  }
+`;
+
+const LightboxContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+`;
+
+const LightboxImage = styled.img`
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: ${({ theme }) => theme.radii.lg};
+`;
+
+const DesktopCounter = styled.div`
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 0.875rem;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    display: none;
+  }
+`;
+
+const Dots = styled.div`
+  display: none;
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 0.5rem;
+  align-items: center;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    display: flex;
+  }
+`;
+
+const Dot = styled.div<{ $active: boolean }>`
+  width: ${({ $active }) => $active ? '10px' : '7px'};
+  height: ${({ $active }) => $active ? '10px' : '7px'};
+  border-radius: 50%;
+  background: ${({ $active }) => $active ? 'white' : 'rgba(255,255,255,0.4)'};
+  transition: all 0.2s ease;
 `;
 
 const LoadingWrapper = styled.div`
@@ -179,10 +231,15 @@ const EmptyState = styled.div`
   padding: 4rem 2rem;
 `;
 
+const SWIPE_THRESHOLD = 50;
+
 const Gallery = () => {
   const { data: items = [], isLoading } = useGallery();
   const [activeCategory, setActiveCategory] = useState<string>('הכל');
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [translateX, setTranslateX] = useState(0);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const isSwipingRef = useRef(false);
 
   const categories = ['הכל', ...Array.from(new Set(items.map(item => item.category)))];
   const filtered = activeCategory === 'הכל' ? items : items.filter(item => item.category === activeCategory);
@@ -190,11 +247,69 @@ const Gallery = () => {
   const openLightbox = (images: string[], index = 0) => setLightbox({ images, index });
   const closeLightbox = () => setLightbox(null);
 
-  const navigateLightbox = (dir: number) => {
+  const navigateLightbox = useCallback((dir: number) => {
+    setLightbox(prev => {
+      if (!prev) return null;
+      const newIndex = (prev.index + dir + prev.images.length) % prev.images.length;
+      return { ...prev, index: newIndex };
+    });
+  }, []);
+
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (lightbox) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [lightbox]);
+
+  // Keyboard navigation
+  useEffect(() => {
     if (!lightbox) return;
-    const newIndex = (lightbox.index + dir + lightbox.images.length) % lightbox.images.length;
-    setLightbox({ ...lightbox, index: newIndex });
-  };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') navigateLightbox(1);
+      if (e.key === 'ArrowRight') navigateLightbox(-1);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightbox, navigateLightbox]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    isSwipingRef.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || !lightbox) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartRef.current.x;
+    const dy = touch.clientY - touchStartRef.current.y;
+
+    if (!isSwipingRef.current && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      isSwipingRef.current = true;
+    }
+
+    if (isSwipingRef.current && lightbox.images.length > 1) {
+      setTranslateX(dx);
+    }
+  }, [lightbox]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (isSwipingRef.current && lightbox && lightbox.images.length > 1) {
+      if (translateX > SWIPE_THRESHOLD) {
+        navigateLightbox(-1);
+      } else if (translateX < -SWIPE_THRESHOLD) {
+        navigateLightbox(1);
+      }
+    }
+    setTranslateX(0);
+    touchStartRef.current = null;
+    isSwipingRef.current = false;
+  }, [translateX, navigateLightbox, lightbox]);
 
   return (
     <div>
@@ -247,7 +362,7 @@ const Gallery = () => {
                           ))}
                           {item.images.length > 3 ? (
                             <MoreImages>+{item.images.length - 3}</MoreImages>
-                          ) : item.images.length === 2 ? null : null}
+                          ) : null}
                         </CardImageGrid>
                       )}
                       <CardBody>
@@ -280,11 +395,32 @@ const Gallery = () => {
               </LightboxNav>
             </>
           )}
-          <LightboxImage
-            src={lightbox.images[lightbox.index]}
-            alt="תמונה"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <LightboxContent
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onClick={e => e.stopPropagation()}
+            style={{
+              transform: `translateX(${translateX}px)`,
+              transition: translateX === 0 ? 'transform 0.25s ease' : 'none',
+            }}
+          >
+            <LightboxImage
+              src={lightbox.images[lightbox.index]}
+              alt="תמונה"
+              draggable={false}
+            />
+          </LightboxContent>
+          {lightbox.images.length > 1 && (
+            <>
+              <DesktopCounter>{lightbox.index + 1} / {lightbox.images.length}</DesktopCounter>
+              <Dots>
+                {lightbox.images.map((_, i) => (
+                  <Dot key={i} $active={i === lightbox.index} />
+                ))}
+              </Dots>
+            </>
+          )}
         </Lightbox>
       )}
     </div>

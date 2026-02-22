@@ -146,6 +146,12 @@ const ImageLightbox = ({ images, initialIndex, onClose }: ImageLightboxProps) =>
   const prev = useCallback(() => setIndex(i => (i - 1 + images.length) % images.length), [images.length]);
   const next = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length]);
 
+  // Lock body scroll
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
