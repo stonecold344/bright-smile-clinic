@@ -196,7 +196,7 @@ const HeroSection = () => {
   return <HeroWrapper>
       <HeroBackground>
         <HeroVideo autoPlay muted loop playsInline>
-          <source src="https://videos.pexels.com/video-files/7579961/7579961-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+          <source src="https://cdn.pixabay.com/video/2020/02/10/32112-391539498_large.mp4" type="video/mp4" />
         </HeroVideo>
         <HeroOverlay />
       </HeroBackground>
