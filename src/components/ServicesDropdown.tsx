@@ -44,7 +44,8 @@ const DropdownTrigger = styled.button<{ $active?: boolean; $scrolled?: boolean }
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ $active, $scrolled, theme }) => 
     $active ? theme.colors.primary : ($scrolled ? theme.colors.foreground : 'white')};
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  text-shadow: ${({ $scrolled }) => $scrolled ? 'none' : '0 1px 4px rgba(0,0,0,0.5)'};
   padding-bottom: 0.25rem;
   border-bottom: ${({ $active, theme }) => $active ? `2px solid ${theme.colors.primary}` : '2px solid transparent'};
   background: transparent;
