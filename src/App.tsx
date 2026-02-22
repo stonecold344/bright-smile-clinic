@@ -10,12 +10,17 @@ import Services from "./pages/Services";
 import TreatmentPage from "./pages/TreatmentPage";
 import Appointments from "./pages/Appointments";
 import Contact from "./pages/Contact";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import Gallery from "./pages/Gallery";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminOverview from "./pages/admin/Overview";
 import AdminAppointments from "./pages/admin/Appointments";
 import AdminTreatments from "./pages/admin/Treatments";
 import AdminTestimonials from "./pages/admin/Testimonials";
+import AdminBlog from "./pages/admin/Blog";
+import AdminGallery from "./pages/admin/Gallery";
 import NotFound from "./pages/NotFound";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import ScrollToTop from "./components/ScrollToTop";
@@ -37,12 +42,17 @@ const App = () => (
           <Route path="/treatment/:slug" element={<TreatmentPage />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Dashboard />}>
             <Route index element={<AdminOverview />} />
             <Route path="appointments" element={<AdminAppointments />} />
             <Route path="treatments" element={<AdminTreatments />} />
             <Route path="testimonials" element={<AdminTestimonials />} />
+            <Route path="blog" element={<AdminBlog />} />
+            <Route path="gallery" element={<AdminGallery />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

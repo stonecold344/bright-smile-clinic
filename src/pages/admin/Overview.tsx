@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
-import { Calendar, Stethoscope, MessageSquare, TrendingUp, Loader2 } from 'lucide-react';
+import { Calendar, Stethoscope, MessageSquare, TrendingUp, Loader2, FileText, Image } from 'lucide-react';
 
 const Grid = styled.div`
   display: grid;
@@ -90,15 +90,19 @@ const AdminOverview = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const [appointmentsRes, treatmentsRes, testimonialsRes] = await Promise.all([
+      const [appointmentsRes, treatmentsRes, testimonialsRes, blogRes, galleryRes] = await Promise.all([
         supabase.from('appointments').select('id, status'),
         supabase.from('treatments').select('id'),
         supabase.from('testimonials').select('id, is_visible'),
+        supabase.from('blog_posts').select('id, is_published'),
+        supabase.from('gallery').select('id'),
       ]);
 
       const appointments = appointmentsRes.data || [];
       const treatments = treatmentsRes.data || [];
       const testimonials = testimonialsRes.data || [];
+      const blogPosts = blogRes.data || [];
+      const galleryItems = galleryRes.data || [];
 
       return {
         totalAppointments: appointments.length,
@@ -106,6 +110,9 @@ const AdminOverview = () => {
         totalTreatments: treatments.length,
         totalTestimonials: testimonials.length,
         visibleTestimonials: testimonials.filter(t => t.is_visible).length,
+        totalBlogPosts: blogPosts.length,
+        publishedBlogPosts: blogPosts.filter(p => p.is_published).length,
+        totalGalleryItems: galleryItems.length,
       };
     },
   });
@@ -155,6 +162,26 @@ const AdminOverview = () => {
           </StatHeader>
           <StatValue>{stats?.totalTestimonials || 0}</StatValue>
           <StatLabel>המלצות ({stats?.visibleTestimonials || 0} מוצגות)</StatLabel>
+        </StatCard>
+
+        <StatCard to="/admin/blog">
+          <StatHeader>
+            <IconWrapper>
+              <FileText size={24} />
+            </IconWrapper>
+          </StatHeader>
+          <StatValue>{stats?.totalBlogPosts || 0}</StatValue>
+          <StatLabel>מאמרים ({stats?.publishedBlogPosts || 0} פורסמו)</StatLabel>
+        </StatCard>
+
+        <StatCard to="/admin/gallery">
+          <StatHeader>
+            <IconWrapper>
+              <Image size={24} />
+            </IconWrapper>
+          </StatHeader>
+          <StatValue>{stats?.totalGalleryItems || 0}</StatValue>
+          <StatLabel>פריטים בגלריה</StatLabel>
         </StatCard>
       </Grid>
     </div>
