@@ -14,24 +14,28 @@ const teamMembers = [
     role: 'רופא שיניים ראשי',
     specialization: 'התמחות באורתודנטיה',
     experience: '15 שנות ניסיון',
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face',
   },
   {
     name: 'ד״ר מיכל לוי',
     role: 'רופאת שיניים',
     specialization: 'התמחות בהשתלות',
     experience: '12 שנות ניסיון',
+    image: 'https://images.unsplash.com/photo-1594824476967-48c8b964ac31?w=300&h=300&fit=crop&crop=face',
   },
   {
     name: 'ד״ר דוד ישראלי',
     role: 'רופא שיניים',
     specialization: 'התמחות באנדודונטיה',
     experience: '10 שנות ניסיון',
+    image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=300&fit=crop&crop=face',
   },
   {
     name: 'ד״ר שרה אברהם',
     role: 'רופאת שיניים',
     specialization: 'התמחות בפריודונטיה',
     experience: '8 שנות ניסיון',
+    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face',
   },
 ];
 
@@ -73,7 +77,7 @@ const TeamSection = styled.section`padding: ${({ theme }) => theme.spacing[24]} 
 const TeamHeader = styled.div`text-align: center; max-width: 42rem; margin: 0 auto ${({ theme }) => theme.spacing[16]};`;
 const TeamGrid = styled.div`display: grid; grid-template-columns: 1fr; gap: 2rem; @media (min-width: ${({ theme }) => theme.breakpoints.sm}) { grid-template-columns: repeat(2, 1fr); } @media (min-width: ${({ theme }) => theme.breakpoints.lg}) { grid-template-columns: repeat(4, 1fr); }`;
 const TeamCard = styled.div`text-align: center; padding: ${({ theme }) => theme.spacing[6]}; background: ${({ theme }) => theme.colors.card}; border-radius: ${({ theme }) => theme.radii['2xl']}; box-shadow: ${({ theme }) => theme.shadows.soft}; transition: all ${({ theme }) => theme.transitions.normal}; &:hover { box-shadow: ${({ theme }) => theme.shadows.elevated}; transform: translateY(-4px); }`;
-const TeamAvatar = styled.div`width: 5rem; height: 5rem; background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii.full}; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; svg { color: ${({ theme }) => theme.colors.primaryForeground}; }`;
+const TeamAvatar = styled.div`width: 5rem; height: 5rem; border-radius: ${({ theme }) => theme.radii.full}; overflow: hidden; margin: 0 auto 1rem; box-shadow: ${({ theme }) => theme.shadows.soft}; img { width: 100%; height: 100%; object-fit: cover; }`;
 const TeamName = styled.h3`font-size: ${({ theme }) => theme.fontSizes.lg}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.foreground}; margin-bottom: 0.25rem;`;
 const TeamRole = styled.p`font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.primary}; font-weight: ${({ theme }) => theme.fontWeights.medium}; margin-bottom: 0.75rem;`;
 const TeamInfo = styled.div`display: flex; flex-direction: column; gap: 0.25rem;`;
@@ -109,7 +113,7 @@ const About = () => (
           <TeamGrid>
             {teamMembers.map((member, i) => (
               <TeamCard key={i}>
-                <TeamAvatar><Stethoscope size={32} /></TeamAvatar>
+                <TeamAvatar><img src={member.image} alt={member.name} /></TeamAvatar>
                 <TeamName>{member.name}</TeamName>
                 <TeamRole>{member.role}</TeamRole>
                 <TeamInfo>
