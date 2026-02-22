@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Calendar, Menu, X, Smile, ChevronDown, LogOut, Settings } from 'lucide-react';
@@ -274,11 +274,20 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { data: treatments = [] } = useTreatments();
+
+  // Pages that always have a light background (no dark hero)
+  const alwaysLightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
+  const isAlwaysLight = alwaysLightPages.some(page => location.pathname.startsWith(page));
+  
+  const [isScrolled, setIsScrolled] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
+    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > window.innerHeight * 0.55;
+  });
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -305,25 +314,27 @@ const Header = () => {
     }
   };
 
-  // Pages that always have a light background (no dark hero)
-  const alwaysLightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
-  const isAlwaysLight = alwaysLightPages.some(page => location.pathname.startsWith(page));
-
   // Simple, reliable scroll-based detection for the home page hero
-  useEffect(() => {
+
+  // Synchronously update scrolled state on route change to prevent flicker
+  useLayoutEffect(() => {
     if (isAlwaysLight) {
       setIsScrolled(true);
-      return;
+    } else {
+      const threshold = window.innerHeight * 0.55;
+      setIsScrolled(window.scrollY > threshold);
     }
+  }, [isAlwaysLight, location.pathname]);
+
+  // Scroll listener for home page hero transition
+  useEffect(() => {
+    if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      // The hero section is ~70vh. Switch to light mode when scrolled past 60% of viewport height.
       const threshold = window.innerHeight * 0.55;
-      const scrollY = window.scrollY || window.pageYOffset;
-      setIsScrolled(scrollY > threshold);
+      setIsScrolled(window.scrollY > threshold);
     };
 
-    handleScroll(); // Initial check
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isAlwaysLight, location.pathname]);
