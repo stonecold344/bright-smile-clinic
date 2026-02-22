@@ -7,6 +7,7 @@ import { Button } from '@/components/styled/Button';
 import { Input, Textarea, Label, FormGroup } from '@/components/styled/Input';
 import { Stethoscope, Loader2, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import ImageUpload from '@/components/ImageUpload';
 
 const PageHeader = styled.div`
   display: flex;
@@ -73,6 +74,25 @@ const CardMeta = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+const CardImage = styled.img`
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  margin-bottom: 0.75rem;
+`;
+
+const CardIconFallback = styled.div`
+  width: 3.5rem;
+  height: 3.5rem;
+  background: ${({ theme }) => theme.gradients?.hero || 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))'};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
 `;
 
 const LoadingWrapper = styled.div`
@@ -147,13 +167,17 @@ interface Treatment {
   price_range: string | null;
 }
 
+const isImageUrl = (value: string) => {
+  return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/');
+};
+
 const AdminTreatments = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
-    icon: '🦷',
+    icon: '',
     short_description: '',
     full_description: '',
     features: '',
@@ -254,7 +278,7 @@ const AdminTreatments = () => {
     setFormData({
       title: '',
       slug: '',
-      icon: '🦷',
+      icon: '',
       short_description: '',
       full_description: '',
       features: '',
@@ -298,6 +322,7 @@ const AdminTreatments = () => {
     if (!formData.short_description.trim()) { toast.error('יש למלא תיאור קצר'); return; }
     if (formData.short_description.trim().length > 500) { toast.error('תיאור קצר ארוך מדי (מקסימום 500 תווים)'); return; }
     if (formData.full_description && formData.full_description.length > 5000) { toast.error('תיאור מלא ארוך מדי (מקסימום 5000 תווים)'); return; }
+    // Icon (image) is optional - will use fallback if not provided
     if (editingTreatment) {
       updateTreatment.mutate({ id: editingTreatment.id, data: formData });
     } else {
@@ -337,7 +362,16 @@ const AdminTreatments = () => {
           {treatments.map((treatment) => (
             <Card key={treatment.id}>
               <CardHeader>
-                <CardTitle>{treatment.title}</CardTitle>
+                <div>
+                  {isImageUrl(treatment.icon) ? (
+                    <CardImage src={treatment.icon} alt={treatment.title} />
+                  ) : (
+                    <CardIconFallback>
+                      <Stethoscope size={20} color="white" />
+                    </CardIconFallback>
+                  )}
+                  <CardTitle>{treatment.title}</CardTitle>
+                </div>
                 <CardActions>
                   <ActionButton onClick={() => openEditModal(treatment)} title="ערוך">
                     <Pencil size={16} />
@@ -382,7 +416,6 @@ const AdminTreatments = () => {
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                
                 />
               </FormGroup>
 
@@ -394,7 +427,16 @@ const AdminTreatments = () => {
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   dir="ltr"
                   placeholder="general-dentistry"
-                
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label>תמונת טיפול</Label>
+                <ImageUpload
+                  images={formData.icon && isImageUrl(formData.icon) ? [formData.icon] : []}
+                  onChange={(images) => setFormData({ ...formData, icon: images[0] || '' })}
+                  multiple={false}
+                  folder="treatments"
                 />
               </FormGroup>
 
@@ -404,7 +446,6 @@ const AdminTreatments = () => {
                   id="short_description"
                   value={formData.short_description}
                   onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                  
                 />
               </FormGroup>
 
