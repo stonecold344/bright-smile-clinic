@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Clock, Search, Filter, User, Phone, Eye, Stethoscope, X, Mail, FileText, ArrowUp, ArrowDown } from 'lucide-react';
+import { Calendar, Clock, Search, Filter, User, Phone, Eye, Stethoscope, X, Mail, FileText, ArrowUp, ArrowDown, ImagePlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { useTreatments } from '@/hooks/useTreatments';
 import { Button } from '@/components/styled/Button';
 import ImageLightbox from '@/components/ImageLightbox';
+import ImageUpload from '@/components/ImageUpload';
+import { toast } from '@/components/ui/sonner';
 
 // Archived statuses - these don't appear in active appointments
 const ARCHIVED_STATUSES = ['cancelled', 'no_show', 'completed'];
@@ -314,6 +316,31 @@ const AdminArchive = () => {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const { data: treatments = [] } = useTreatments();
+  const queryClient = useQueryClient();
+  const [imageModal, setImageModal] = useState<{ id: string; images: string[] } | null>(null);
+
+  const updateImages = useMutation({
+    mutationFn: async ({ id, images }: { id: string; images: string[] }) => {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ images } as any)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
+      toast.success('הקבצים עודכנו בהצלחה');
+    },
+    onError: () => {
+      toast.error('שגיאה בעדכון הקבצים');
+    },
+  });
+
+  const handleImageChange = (images: string[]) => {
+    if (!imageModal) return;
+    setImageModal({ ...imageModal, images });
+    updateImages.mutate({ id: imageModal.id, images });
+  };
 
   const { data: allAppointments = [], isLoading } = useQuery({
     queryKey: ['admin-archive'],
@@ -598,9 +625,14 @@ const AdminArchive = () => {
                   </StatusBadge>
                 </Td>
                 <Td>
-                  <ActionButton onClick={() => setSelectedAppointment(apt)} title="פרטים">
-                    <Eye size={18} />
-                  </ActionButton>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <ActionButton onClick={() => setSelectedAppointment(apt)} title="פרטים">
+                      <Eye size={18} />
+                    </ActionButton>
+                    <ActionButton onClick={() => setImageModal({ id: apt.id, images: apt.images || [] })} title="העלאת קבצים">
+                      <ImagePlus size={18} />
+                    </ActionButton>
+                  </div>
                 </Td>
               </tr>
             ))}
@@ -696,6 +728,34 @@ const AdminArchive = () => {
               $variant="outline"
               $fullWidth
               onClick={() => setSelectedAppointment(null)}
+              style={{ marginTop: '1.5rem' }}
+            >
+              סגור
+            </Button>
+          </ModalContent>
+        </Modal>
+      )}
+
+      {/* Image/PDF upload modal */}
+      {imageModal && (
+        <Modal onClick={() => setImageModal(null)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <Title $size="sm">תמונות וקבצים</Title>
+            </ModalHeader>
+            <Text $color="muted" style={{ marginBottom: '1rem' }}>
+              העלה תמונות או קבצי PDF הקשורים לתור זה
+            </Text>
+            <ImageUpload
+              images={imageModal.images}
+              onChange={handleImageChange}
+              multiple
+              folder="appointments"
+            />
+            <Button
+              $variant="outline"
+              $fullWidth
+              onClick={() => setImageModal(null)}
               style={{ marginTop: '1.5rem' }}
             >
               סגור
