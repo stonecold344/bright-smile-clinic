@@ -18,7 +18,7 @@ const Header = styled.div`
   margin: 0 auto ${({ theme }) => theme.spacing[16]};
 `;
 
-// Desktop Grid
+// Desktop Grid (for 4 or fewer)
 const TestimonialsGrid = styled.div`
   display: none;
   
@@ -30,6 +30,86 @@ const TestimonialsGrid = styled.div`
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
+// Desktop Carousel (for more than 4)
+const DesktopCarouselWrapper = styled.div`
+  display: none;
+  position: relative;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: block;
+  }
+`;
+
+const DesktopCarouselViewport = styled.div`
+  overflow: hidden;
+`;
+
+const DesktopCarouselContainer = styled.div`
+  display: flex;
+`;
+
+const DesktopCarouselSlide = styled.div`
+  flex: 0 0 50%;
+  min-width: 0;
+  padding: 0 0.75rem;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    flex: 0 0 25%;
+  }
+`;
+
+const DesktopCarouselNav = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+`;
+
+const DesktopNavButton = styled.button<{ $disabled?: boolean }>`
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.primary};
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: ${({ $disabled }) => $disabled ? 0.5 : 1};
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    background: ${({ theme }) => theme.colors.primary}dd;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const DesktopDots = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const DesktopDot = styled.button<{ $active: boolean }>`
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  border: none;
+  background: ${({ theme, $active }) => $active ? theme.colors.primary : theme.colors.border};
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary}80;
   }
 `;
 
@@ -122,7 +202,12 @@ const TestimonialCard = styled.div`
   height: 320px;
   width: 100%;
   max-width: 300px;
+  margin: 0 auto;
   cursor: pointer;
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    max-width: none;
+  }
   
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.elevated};
@@ -458,6 +543,8 @@ const TestimonialsSection = () => {
   const { data: testimonials = [], isLoading } = useTestimonials();
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  
+  // Mobile carousel
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -467,7 +554,12 @@ const TestimonialsSection = () => {
     [Autoplay({ delay: 4000, stopOnInteraction: true })]
   );
 
-  
+  // Desktop carousel
+  const [desktopSelectedIndex, setDesktopSelectedIndex] = useState(0);
+  const [desktopEmblaRef, desktopEmblaApi] = useEmblaCarousel(
+    { loop: true, direction: 'rtl', align: 'start', slidesToScroll: 1 },
+    [Autoplay({ delay: 5000, stopOnInteraction: true })]
+  );
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -487,9 +579,29 @@ const TestimonialsSection = () => {
     };
   }, [emblaApi, onSelect]);
 
+  const onDesktopSelect = useCallback(() => {
+    if (!desktopEmblaApi) return;
+    setDesktopSelectedIndex(desktopEmblaApi.selectedScrollSnap());
+  }, [desktopEmblaApi]);
+
+  useEffect(() => {
+    if (!desktopEmblaApi) return;
+    onDesktopSelect();
+    desktopEmblaApi.on('select', onDesktopSelect);
+    desktopEmblaApi.on('reInit', onDesktopSelect);
+    return () => {
+      desktopEmblaApi.off('select', onDesktopSelect);
+      desktopEmblaApi.off('reInit', onDesktopSelect);
+    };
+  }, [desktopEmblaApi, onDesktopSelect]);
+
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
   const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi]);
+
+  const desktopScrollPrev = useCallback(() => desktopEmblaApi?.scrollPrev(), [desktopEmblaApi]);
+  const desktopScrollNext = useCallback(() => desktopEmblaApi?.scrollNext(), [desktopEmblaApi]);
+  const desktopScrollTo = useCallback((index: number) => desktopEmblaApi?.scrollTo(index), [desktopEmblaApi]);
 
   const handleCloseModal = () => {
     setIsClosing(true);
@@ -527,7 +639,9 @@ const TestimonialsSection = () => {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [selectedTestimonial]);
 
-  const displayedTestimonials = testimonials.slice(0, 4);
+  const visibleTestimonials = testimonials.filter(t => t.is_visible);
+  const useDesktopCarousel = visibleTestimonials.length > 4;
+  const desktopScrollSnaps = desktopEmblaApi?.scrollSnapList() || [];
 
   return (
     <>
@@ -549,22 +663,58 @@ const TestimonialsSection = () => {
             </LoadingWrapper>
           ) : (
             <>
-              {/* Desktop Grid */}
-              <TestimonialsGrid>
-                {displayedTestimonials.map((testimonial) => (
-                  <TestimonialCardComponent
-                    key={testimonial.id}
-                    testimonial={testimonial}
-                    onOpenModal={handleOpenModal}
-                  />
-                ))}
-              </TestimonialsGrid>
+              {/* Desktop: Grid for ≤4, Carousel for >4 */}
+              {useDesktopCarousel ? (
+                <DesktopCarouselWrapper>
+                  <DesktopCarouselViewport ref={desktopEmblaRef}>
+                    <DesktopCarouselContainer>
+                      {visibleTestimonials.map((testimonial) => (
+                        <DesktopCarouselSlide key={testimonial.id}>
+                          <TestimonialCardComponent
+                            testimonial={testimonial}
+                            onOpenModal={handleOpenModal}
+                          />
+                        </DesktopCarouselSlide>
+                      ))}
+                    </DesktopCarouselContainer>
+                  </DesktopCarouselViewport>
+                  
+                  <DesktopCarouselNav>
+                    <DesktopNavButton onClick={desktopScrollNext} aria-label="הבא">
+                      <ChevronRight size={22} />
+                    </DesktopNavButton>
+                    <DesktopDots>
+                      {desktopScrollSnaps.map((_, index) => (
+                        <DesktopDot
+                          key={index}
+                          $active={index === desktopSelectedIndex}
+                          onClick={() => desktopScrollTo(index)}
+                          aria-label={`עבור להמלצה ${index + 1}`}
+                        />
+                      ))}
+                    </DesktopDots>
+                    <DesktopNavButton onClick={desktopScrollPrev} aria-label="הקודם">
+                      <ChevronLeft size={22} />
+                    </DesktopNavButton>
+                  </DesktopCarouselNav>
+                </DesktopCarouselWrapper>
+              ) : (
+                <TestimonialsGrid>
+                  {visibleTestimonials.map((testimonial) => (
+                    <TestimonialCardComponent
+                      key={testimonial.id}
+                      testimonial={testimonial}
+                      onOpenModal={handleOpenModal}
+                    />
+                  ))}
+                </TestimonialsGrid>
+              )}
 
               {/* Mobile Carousel */}
               <CarouselWrapper>
                 <CarouselViewport ref={emblaRef}>
                   <CarouselContainer>
-                    {displayedTestimonials.map((testimonial) => (
+                    {visibleTestimonials.map((testimonial) => (
                       <CarouselSlide key={testimonial.id}>
                         <TestimonialCardComponent
                           testimonial={testimonial}
@@ -580,7 +730,7 @@ const TestimonialsSection = () => {
                     <ChevronRight size={20} />
                   </NavButton>
                   <CarouselDots>
-                    {displayedTestimonials.map((_, index) => (
+                    {visibleTestimonials.map((_, index) => (
                       <Dot
                         key={index}
                         $active={index === selectedIndex}
