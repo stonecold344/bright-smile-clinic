@@ -550,7 +550,7 @@ const AdminArchive = () => {
             {filteredAppointments.map((apt) => (
               <tr key={apt.id}>
                 <Td>{apt.client_name}</Td>
-                <Td dir="ltr">{apt.client_phone}</Td>
+                <Td dir="ltr" style={{ textAlign: 'right' }}>{apt.client_phone}</Td>
                 <Td>{formatDate(apt.appointment_date)}</Td>
                 <Td>{apt.appointment_time}</Td>
                 <Td>{getTreatmentTitle(apt.treatment_slug)}</Td>
