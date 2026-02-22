@@ -9,6 +9,12 @@
   -ms-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 img {
