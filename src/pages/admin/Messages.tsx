@@ -5,10 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Mail, Phone, User, Clock, Loader2, Trash2, Eye, CheckCircle, Search, X, MessageCircle, Archive, Send } from 'lucide-react';
+import { Mail, Phone, User, Clock, Loader2, Trash2, Eye, CheckCircle, Search, X, MessageCircle, Archive, Send, Filter, ArrowUp, ArrowDown, Undo2 } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+
+// --- Styled Components ---
 
 const PageHeader = styled.div`
   display: flex;
@@ -21,11 +27,11 @@ const PageHeader = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 `;
 
@@ -53,26 +59,148 @@ const StatLabel = styled.div<{ $active?: boolean }>`
   ${({ $active, theme }) => !$active && `color: ${theme.colors.mutedForeground};`}
 `;
 
-const SearchWrapper = styled.div`
+const FiltersWrapper = styled.div`
+  background: ${({ theme }) => theme.colors.card};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.soft};
+  margin-bottom: 2rem;
+`;
+
+const FiltersTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: ${({ theme }) => theme.colors.card};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radii.lg};
-  padding: 0 1rem;
-  margin-bottom: 1.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.foreground};
+  margin-bottom: 1rem;
 `;
 
-const SearchInput = styled.input`
-  flex: 1;
-  padding: 0.75rem 0;
-  border: none;
-  background: transparent;
+const FiltersGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+`;
+
+const FilterGroup = styled.div``;
+
+const FilterLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin-bottom: 0.375rem;
+`;
+
+const FilterInput = styled.input`
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
-  &:focus { outline: none; }
-  &::placeholder { color: ${({ theme }) => theme.colors.mutedForeground}; }
+  transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: center;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: center;
+  }
+`;
+
+const DatePickerButton = styled.button<{ $hasValue?: boolean }>`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ $hasValue, theme }) => $hasValue ? theme.colors.foreground : theme.colors.mutedForeground};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}25;
+  }
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+
+  svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+`;
+
+const ClearFilters = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.primary};
+  margin-top: 1rem;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+const TabsRow = styled.div`
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.border};
+`;
+
+const Tab = styled.button<{ $active?: boolean }>`
+  padding: 0.75rem 1.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.mutedForeground};
+  border-bottom: 2px solid ${({ $active, theme }) => $active ? theme.colors.primary : 'transparent'};
+  margin-bottom: -2px;
+  background: none;
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.foreground};
+  }
+`;
+
+const TabBadge = styled.span<{ $active?: boolean }>`
+  background: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.secondary};
+  color: ${({ $active, theme }) => $active ? theme.colors.primaryForeground : theme.colors.mutedForeground};
+  padding: 0.125rem 0.5rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
 `;
 
 const CardsGrid = styled.div`
@@ -207,12 +335,22 @@ const NotesTextarea = styled.textarea`
   &:focus { outline: none; border-color: ${({ theme }) => theme.colors.primary}; }
 `;
 
+const ResultCount = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  margin-bottom: 1rem;
+`;
+
+// --- Types & Constants ---
+
 const statusLabels: Record<string, string> = {
   new: 'חדש',
   read: 'נקרא',
   replied: 'הושב',
   archived: 'בארכיון',
 };
+
+const ISRAELI_PHONE_REGEX = /^0[2-9]\d{0,8}$/;
 
 interface ContactMessage {
   id: string;
@@ -226,9 +364,16 @@ interface ContactMessage {
   updated_at: string;
 }
 
+// --- Component ---
+
 const AdminMessages = () => {
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [phoneSearch, setPhoneSearch] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const queryClient = useQueryClient();
@@ -285,29 +430,73 @@ const AdminMessages = () => {
     onError: () => toast.error('שגיאה במחיקה'),
   });
 
+  // Split messages into active and archived
+  const activeMessages = useMemo(() => messages.filter(m => m.status !== 'archived'), [messages]);
+  const archivedMessages = useMemo(() => messages.filter(m => m.status === 'archived'), [messages]);
+
+  const currentMessages = activeTab === 'active' ? activeMessages : archivedMessages;
+
+  const handlePhoneChange = (value: string) => {
+    const cleaned = value.replace(/[^0-9-]/g, '');
+    setPhoneSearch(cleaned);
+    if (cleaned && !ISRAELI_PHONE_REGEX.test(cleaned.replace(/-/g, ''))) {
+      setPhoneError('פורמט ישראלי: 05X-XXXXXXX');
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  const handleNameChange = (value: string) => {
+    const cleaned = value.replace(/[^a-zA-Zא-ת\s\-']/g, '');
+    setSearchQuery(cleaned);
+  };
+
+  const hasActiveFilters = searchQuery || phoneSearch || dateFrom || dateTo || statusFilter;
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setPhoneSearch('');
+    setPhoneError('');
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setStatusFilter(null);
+  };
+
   const filteredMessages = useMemo(() => {
-    let result = messages;
+    let result = currentMessages;
     if (statusFilter) {
       result = result.filter(m => m.status === statusFilter);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(m =>
-        m.name.toLowerCase().includes(q) ||
-        m.phone.includes(q) ||
-        (m.email && m.email.toLowerCase().includes(q)) ||
-        (m.message && m.message.toLowerCase().includes(q))
-      );
+      result = result.filter(m => m.name.toLowerCase().includes(q));
+    }
+    if (phoneSearch) {
+      const cleanPhone = phoneSearch.replace(/-/g, '');
+      result = result.filter(m => m.phone.replace(/-/g, '').includes(cleanPhone));
+    }
+    if (dateFrom) {
+      const fromStr = format(dateFrom, 'yyyy-MM-dd');
+      result = result.filter(m => m.created_at.substring(0, 10) >= fromStr);
+    }
+    if (dateTo) {
+      const toStr = format(dateTo, 'yyyy-MM-dd');
+      result = result.filter(m => m.created_at.substring(0, 10) <= toStr);
     }
     return result;
-  }, [messages, statusFilter, searchQuery]);
+  }, [currentMessages, statusFilter, searchQuery, phoneSearch, dateFrom, dateTo]);
 
   const stats = useMemo(() => ({
-    total: messages.length,
-    new: messages.filter(m => m.status === 'new').length,
-    read: messages.filter(m => m.status === 'read').length,
-    replied: messages.filter(m => m.status === 'replied').length,
-  }), [messages]);
+    total: activeMessages.length,
+    new: activeMessages.filter(m => m.status === 'new').length,
+    read: activeMessages.filter(m => m.status === 'read').length,
+    replied: activeMessages.filter(m => m.status === 'replied').length,
+    archived: archivedMessages.length,
+  }), [activeMessages, archivedMessages]);
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilter(prev => prev === status ? null : status);
+  };
 
   const openMessage = (msg: ContactMessage) => {
     setSelectedMessage(msg);
@@ -343,40 +532,136 @@ const AdminMessages = () => {
         </div>
       </PageHeader>
 
-      <StatsGrid>
-        <StatCard $active={statusFilter === null} onClick={() => setStatusFilter(null)}>
-          <StatValue $active={statusFilter === null}>{stats.total}</StatValue>
-          <StatLabel $active={statusFilter === null}>סה״כ הודעות</StatLabel>
-        </StatCard>
-        <StatCard $active={statusFilter === 'new'} onClick={() => setStatusFilter(statusFilter === 'new' ? null : 'new')}>
-          <StatValue $active={statusFilter === 'new'}>{stats.new}</StatValue>
-          <StatLabel $active={statusFilter === 'new'}>הודעות חדשות</StatLabel>
-        </StatCard>
-        <StatCard $active={statusFilter === 'replied'} onClick={() => setStatusFilter(statusFilter === 'replied' ? null : 'replied')}>
-          <StatValue $active={statusFilter === 'replied'}>{stats.replied}</StatValue>
-          <StatLabel $active={statusFilter === 'replied'}>נענו</StatLabel>
-        </StatCard>
-      </StatsGrid>
+      {/* Tabs */}
+      <TabsRow>
+        <Tab $active={activeTab === 'active'} onClick={() => { setActiveTab('active'); clearAllFilters(); }}>
+          <Mail size={18} />
+          הודעות פעילות
+          <TabBadge $active={activeTab === 'active'}>{activeMessages.length}</TabBadge>
+        </Tab>
+        <Tab $active={activeTab === 'archived'} onClick={() => { setActiveTab('archived'); clearAllFilters(); }}>
+          <Archive size={18} />
+          ארכיון
+          <TabBadge $active={activeTab === 'archived'}>{archivedMessages.length}</TabBadge>
+        </Tab>
+      </TabsRow>
 
-      <SearchWrapper>
-        <Search size={18} style={{ color: 'hsl(174, 62%, 45%)' }} />
-        <SearchInput
-          placeholder="חיפוש לפי שם, טלפון, אימייל..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} style={{ padding: '0.25rem' }}>
-            <X size={16} />
-          </button>
+      {/* Stats - only for active tab */}
+      {activeTab === 'active' && (
+        <StatsGrid>
+          <StatCard $active={statusFilter === null} onClick={() => setStatusFilter(null)}>
+            <StatValue $active={statusFilter === null}>{stats.total}</StatValue>
+            <StatLabel $active={statusFilter === null}>סה״כ פעילות</StatLabel>
+          </StatCard>
+          <StatCard $active={statusFilter === 'new'} onClick={() => toggleStatusFilter('new')}>
+            <StatValue $active={statusFilter === 'new'}>{stats.new}</StatValue>
+            <StatLabel $active={statusFilter === 'new'}>חדשות</StatLabel>
+          </StatCard>
+          <StatCard $active={statusFilter === 'read'} onClick={() => toggleStatusFilter('read')}>
+            <StatValue $active={statusFilter === 'read'}>{stats.read}</StatValue>
+            <StatLabel $active={statusFilter === 'read'}>נקראו</StatLabel>
+          </StatCard>
+          <StatCard $active={statusFilter === 'replied'} onClick={() => toggleStatusFilter('replied')}>
+            <StatValue $active={statusFilter === 'replied'}>{stats.replied}</StatValue>
+            <StatLabel $active={statusFilter === 'replied'}>נענו</StatLabel>
+          </StatCard>
+        </StatsGrid>
+      )}
+
+      {/* Filters */}
+      <FiltersWrapper>
+        <FiltersTitle>
+          <Filter size={18} />
+          סינון וחיפוש
+        </FiltersTitle>
+        <FiltersGrid>
+          <FilterGroup>
+            <FilterLabel><Search size={14} />חיפוש לפי שם</FilterLabel>
+            <FilterInput
+              type="text"
+              placeholder="שם פרטי או משפחה..."
+              value={searchQuery}
+              onChange={(e) => handleNameChange(e.target.value)}
+              maxLength={50}
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><Phone size={14} />חיפוש לפי טלפון</FilterLabel>
+            <FilterInput
+              type="tel"
+              dir="ltr"
+              placeholder="05X-XXXXXXX"
+              value={phoneSearch}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              maxLength={11}
+            />
+            {phoneError && <span style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block', textAlign: 'center' }}>{phoneError}</span>}
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><CalendarIcon size={14} />מתאריך</FilterLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <DatePickerButton $hasValue={!!dateFrom}>
+                  {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
+                  <CalendarIcon size={14} />
+                </DatePickerButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={setDateFrom}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><CalendarIcon size={14} />עד תאריך</FilterLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <DatePickerButton $hasValue={!!dateTo}>
+                  {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
+                  <CalendarIcon size={14} />
+                </DatePickerButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={setDateTo}
+                  disabled={(date) => dateFrom ? date < dateFrom : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </FilterGroup>
+        </FiltersGrid>
+        {hasActiveFilters && (
+          <ClearFilters onClick={clearAllFilters}>
+            <X size={14} />
+            נקה סינון
+          </ClearFilters>
         )}
-      </SearchWrapper>
+      </FiltersWrapper>
+
+      <ResultCount>
+        {hasActiveFilters
+          ? `נמצאו ${filteredMessages.length} תוצאות מתוך ${currentMessages.length}`
+          : `${currentMessages.length} הודעות ${activeTab === 'active' ? 'פעילות' : 'בארכיון'}`
+        }
+      </ResultCount>
 
       {filteredMessages.length === 0 ? (
         <EmptyState>
           <Mail size={48} style={{ color: 'hsl(174, 62%, 45%)', margin: '0 auto 1rem' }} />
-          <Title $size="md">אין הודעות</Title>
-          <Text $color="muted">לא נמצאו הודעות{statusFilter ? ' בסטטוס זה' : ''}</Text>
+          <Title $size="md">{activeTab === 'archived' ? 'הארכיון ריק' : 'אין הודעות'}</Title>
+          <Text $color="muted">
+            {hasActiveFilters ? 'לא נמצאו תוצאות - נסה לשנות את הסינון' :
+              activeTab === 'archived' ? 'הודעות שתעביר לארכיון יופיעו כאן' : 'לא נמצאו הודעות'}
+          </Text>
         </EmptyState>
       ) : (
         <CardsGrid>
@@ -404,14 +689,24 @@ const AdminMessages = () => {
                   <Eye size={16} />
                   צפייה
                 </Button>
-                <Button $variant="heroPrimary" $size="sm" onClick={() => handleReplyWhatsApp(msg)}>
-                  <MessageCircle size={16} />
-                  השב ב-WhatsApp
-                </Button>
-                <Button $variant="ghost" $size="sm" onClick={() => updateMessage.mutate({ id: msg.id, updates: { status: 'archived' } })}>
-                  <Archive size={16} />
-                  ארכיון
-                </Button>
+                {activeTab === 'active' && (
+                  <>
+                    <Button $variant="heroPrimary" $size="sm" onClick={() => handleReplyWhatsApp(msg)}>
+                      <MessageCircle size={16} />
+                      השב ב-WhatsApp
+                    </Button>
+                    <Button $variant="ghost" $size="sm" onClick={() => updateMessage.mutate({ id: msg.id, updates: { status: 'archived' } })}>
+                      <Archive size={16} />
+                      ארכיון
+                    </Button>
+                  </>
+                )}
+                {activeTab === 'archived' && (
+                  <Button $variant="ghost" $size="sm" onClick={() => updateMessage.mutate({ id: msg.id, updates: { status: 'read' } })}>
+                    <Undo2 size={16} />
+                    שחזר
+                  </Button>
+                )}
                 <Button $variant="ghost" $size="sm" onClick={() => { if (confirm('למחוק את ההודעה?')) deleteMessage.mutate(msg.id); }}>
                   <Trash2 size={16} />
                 </Button>
