@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { useTreatments } from '@/hooks/useTreatments';
 import { Button } from '@/components/styled/Button';
+import ImageLightbox from '@/components/ImageLightbox';
 
 // Archived statuses - these don't appear in active appointments
 const ARCHIVED_STATUSES = ['cancelled', 'no_show', 'completed'];
@@ -301,6 +302,7 @@ const AdminArchive = () => {
   const [treatmentFilter, setTreatmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const { data: treatments = [] } = useTreatments();
 
@@ -636,10 +638,13 @@ const AdminArchive = () => {
                 <Text $size="sm" $color="muted" style={{ marginBottom: '0.5rem' }}>תמונות</Text>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
                   {selectedAppointment.images.map((url, i) => (
-                    <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px' }} />
+                    <img key={i} src={url} alt={`תמונה ${i + 1}`} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setLightboxIndex(i)} />
                   ))}
                 </div>
               </div>
+            )}
+            {lightboxIndex !== null && selectedAppointment.images && (
+              <ImageLightbox images={selectedAppointment.images} initialIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
             )}
 
             <Button
