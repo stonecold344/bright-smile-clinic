@@ -167,27 +167,43 @@ const MobileMenuButton = styled.button`
     display: none;
   }
 `;
-const MobileNav = styled.nav`
-  background: ${({
-  theme
-}) => theme.colors.card};
-  border-top: 1px solid ${({
-  theme
-}) => theme.colors.border};
-  animation: fadeIn 0.3s ease-out;
+const MobileNav = styled.nav<{ $closing?: boolean }>`
+  background: ${({ theme }) => theme.colors.card};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   max-height: calc(100vh - 5.5rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  animation: ${({ $closing }) => $closing ? 'mobileSlideUp 0.25s ease-in forwards' : 'mobileSlideDown 0.3s ease-out forwards'};
+  transform-origin: top;
   
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  @keyframes mobileSlideDown {
+    from { 
+      opacity: 0; 
+      transform: translateY(-8px) scaleY(0.96);
+      clip-path: inset(0 0 100% 0);
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0) scaleY(1);
+      clip-path: inset(0 0 0 0);
+    }
   }
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.md}) {
+  @keyframes mobileSlideUp {
+    from { 
+      opacity: 1; 
+      transform: translateY(0) scaleY(1);
+      clip-path: inset(0 0 0 0);
+    }
+    to { 
+      opacity: 0; 
+      transform: translateY(-8px) scaleY(0.96);
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     display: none;
   }
 `;
@@ -275,6 +291,7 @@ const MobileDropdownTrigger = styled.button<{
 `;
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
@@ -289,6 +306,23 @@ const Header = () => {
     if (!error) {
       toast.success('התנתקת בהצלחה');
       navigate('/');
+    }
+  };
+
+  const closeMenu = () => {
+    setIsMenuClosing(true);
+    setTimeout(() => {
+      setIsMenuOpen(false);
+      setIsMenuClosing(false);
+      setIsMobileServicesOpen(false);
+    }, 250);
+  };
+
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      closeMenu();
+    } else {
+      setIsMenuOpen(true);
     }
   };
 
@@ -498,16 +532,16 @@ const Header = () => {
             </ButtonRouterLink>
           </CTAWrapper>
 
-          <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+          <MobileMenuButton onClick={toggleMenu} aria-label="Toggle menu">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </MobileMenuButton>
         </HeaderInner>
       </Container>
 
-      {isMenuOpen && <MobileNav>
+      {isMenuOpen && <MobileNav $closing={isMenuClosing}>
           <Container>
             <MobileNavInner>
-              <MobileNavLink to="/" $active={isActive('/')} onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink to="/" $active={isActive('/')} onClick={closeMenu}>
                 בית
               </MobileNavLink>
               
@@ -518,45 +552,45 @@ const Header = () => {
                   <ChevronDown size={18} />
                 </MobileDropdownTrigger>
                 {isMobileServicesOpen && <MobileSubMenu>
-                    {treatments.map(treatment => <MobileSubMenuItem key={treatment.id} to={`/treatment/${treatment.slug}`} onClick={() => setIsMenuOpen(false)}>
+                    {treatments.map(treatment => <MobileSubMenuItem key={treatment.id} to={`/treatment/${treatment.slug}`} onClick={closeMenu}>
                         {treatment.title}
                       </MobileSubMenuItem>)}
-                    <MobileSubMenuItem to="/services" onClick={() => setIsMenuOpen(false)}>
+                    <MobileSubMenuItem to="/services" onClick={closeMenu}>
                       לכל השירותים ←
                     </MobileSubMenuItem>
                   </MobileSubMenu>}
               </div>
               
-              <MobileNavLink to="/gallery" $active={isActive('/gallery')} onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink to="/gallery" $active={isActive('/gallery')} onClick={closeMenu}>
                 גלריה
               </MobileNavLink>
-              <MobileNavLink to="/blog" $active={location.pathname.startsWith('/blog')} onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink to="/blog" $active={location.pathname.startsWith('/blog')} onClick={closeMenu}>
                 בלוג
               </MobileNavLink>
-              <MobileNavLink to="/about" $active={isActive('/about')} onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink to="/about" $active={isActive('/about')} onClick={closeMenu}>
                 אודות
               </MobileNavLink>
-              <MobileNavLink to="/contact" $active={isActive('/contact')} onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink to="/contact" $active={isActive('/contact')} onClick={closeMenu}>
                 צור קשר
               </MobileNavLink>
               
               <ButtonRouterLink to="/appointments" $variant="call" $size="lg" $fullWidth style={{
             marginTop: '1rem'
-          }} onClick={() => setIsMenuOpen(false)}>
+          }} onClick={closeMenu}>
                 <Calendar size={20} />
                 קביעת תור
               </ButtonRouterLink>
 
               {user && isAdmin && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
-                  <ButtonRouterLink to="/admin" $variant="outline" $size="sm" $fullWidth onClick={() => setIsMenuOpen(false)}>
+                  <ButtonRouterLink to="/admin" $variant="outline" $size="sm" $fullWidth onClick={closeMenu}>
                     <Settings size={18} />
                     ניהול מערכת
                   </ButtonRouterLink>
                 </div>
               )}
               {user && (
-                <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} $variant="outline" $size="sm" $fullWidth style={{ marginTop: '0.25rem' }}>
+                <Button onClick={() => { handleSignOut(); closeMenu(); }} $variant="outline" $size="sm" $fullWidth style={{ marginTop: '0.25rem' }}>
                   <LogOut size={18} />
                   התנתקות
                 </Button>
