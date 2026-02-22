@@ -167,13 +167,33 @@ interface Treatment {
   price_range: string | null;
 }
 
+const DURATION_OPTIONS = [
+  '15 דקות', '30 דקות', '45 דקות', '60 דקות',
+  '75 דקות', '90 דקות', '105 דקות', '120 דקות',
+  '135 דקות', '150 דקות', '165 דקות', '180 דקות',
+];
+
+const ErrorText = styled.span`
+  color: #dc2626;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  margin-top: 0.25rem;
+  display: block;
+`;
+
 const isImageUrl = (value: string) => {
   return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/');
+};
+
+const parsePriceRange = (priceRange: string | null): { min: string; max: string } => {
+  if (!priceRange) return { min: '', max: '' };
+  const numbers = priceRange.replace(/[^\d-]/g, '').split('-').map(s => s.trim()).filter(Boolean);
+  return { min: numbers[0] || '', max: numbers[1] || numbers[0] || '' };
 };
 
 const AdminTreatments = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -184,7 +204,8 @@ const AdminTreatments = () => {
     benefits: '',
     process_steps: '',
     duration: '',
-    price_range: '',
+    price_min: '',
+    price_max: '',
   });
   
   const queryClient = useQueryClient();
@@ -223,7 +244,7 @@ const AdminTreatments = () => {
         benefits: data.benefits ? data.benefits.split('\n').filter(b => b.trim()) : null,
         process_steps: data.process_steps ? data.process_steps.split('\n').filter(p => p.trim()) : null,
         duration: data.duration || null,
-        price_range: data.price_range || null,
+        price_range: (data.price_min && data.price_max) ? `₪${data.price_min} - ₪${data.price_max}` : null,
       });
       
       if (error) throw error;
@@ -251,7 +272,7 @@ const AdminTreatments = () => {
         benefits: data.benefits ? data.benefits.split('\n').filter(b => b.trim()) : null,
         process_steps: data.process_steps ? data.process_steps.split('\n').filter(p => p.trim()) : null,
         duration: data.duration || null,
-        price_range: data.price_range || null,
+        price_range: (data.price_min && data.price_max) ? `₪${data.price_min} - ₪${data.price_max}` : null,
       }).eq('id', id);
       
       if (error) throw error;
@@ -294,8 +315,10 @@ const AdminTreatments = () => {
       benefits: '',
       process_steps: '',
       duration: '',
-      price_range: '',
+      price_min: '',
+      price_max: '',
     });
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -311,8 +334,10 @@ const AdminTreatments = () => {
       benefits: treatment.benefits?.join('\n') || '',
       process_steps: treatment.process_steps?.join('\n') || '',
       duration: treatment.duration || '',
-      price_range: treatment.price_range || '',
+      price_min: parsePriceRange(treatment.price_range).min,
+      price_max: parsePriceRange(treatment.price_range).max,
     });
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -323,15 +348,27 @@ const AdminTreatments = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) { toast.error('יש למלא שם טיפול'); return; }
-    if (formData.title.trim().length < 2) { toast.error('שם טיפול חייב להכיל לפחות 2 תווים'); return; }
-    if (formData.title.trim().length > 100) { toast.error('שם טיפול ארוך מדי (מקסימום 100 תווים)'); return; }
-    if (!formData.slug.trim()) { toast.error('יש למלא slug'); return; }
-    if (!/^[a-z0-9-]+$/.test(formData.slug.trim())) { toast.error('Slug יכול להכיל רק אותיות קטנות באנגלית, מספרים ומקפים'); return; }
-    if (!formData.short_description.trim()) { toast.error('יש למלא תיאור קצר'); return; }
-    if (formData.short_description.trim().length > 500) { toast.error('תיאור קצר ארוך מדי (מקסימום 500 תווים)'); return; }
-    if (formData.full_description && formData.full_description.length > 5000) { toast.error('תיאור מלא ארוך מדי (מקסימום 5000 תווים)'); return; }
-    // Icon (image) is optional - will use fallback if not provided
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.title.trim()) newErrors.title = 'יש למלא שם טיפול';
+    else if (formData.title.trim().length < 2) newErrors.title = 'שם טיפול חייב להכיל לפחות 2 תווים';
+    else if (formData.title.trim().length > 100) newErrors.title = 'מקסימום 100 תווים';
+    
+    if (!formData.slug.trim()) newErrors.slug = 'יש למלא slug';
+    else if (!/^[a-z0-9-]+$/.test(formData.slug.trim())) newErrors.slug = 'רק אותיות קטנות באנגלית, מספרים ומקפים';
+    
+    if (!formData.short_description.trim()) newErrors.short_description = 'יש למלא תיאור קצר';
+    else if (formData.short_description.trim().length > 500) newErrors.short_description = 'מקסימום 500 תווים';
+    
+    if (formData.full_description && formData.full_description.length > 5000) newErrors.full_description = 'מקסימום 5000 תווים';
+    
+    if (formData.price_min && isNaN(Number(formData.price_min))) newErrors.price_min = 'יש להזין מספר בלבד';
+    if (formData.price_max && isNaN(Number(formData.price_max))) newErrors.price_max = 'יש להזין מספר בלבד';
+    if (formData.price_min && formData.price_max && Number(formData.price_min) > Number(formData.price_max)) newErrors.price_max = 'מחיר מקסימלי חייב להיות גדול מהמינימלי';
+    
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     if (editingTreatment) {
       updateTreatment.mutate({ id: editingTreatment.id, data: formData });
     } else {
@@ -417,8 +454,10 @@ const AdminTreatments = () => {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, title: e.target.value }); setErrors(prev => ({ ...prev, title: '' })); }}
+                  style={errors.title ? { borderColor: '#dc2626' } : {}}
                 />
+                {errors.title && <ErrorText>{errors.title}</ErrorText>}
               </FormGroup>
 
               <FormGroup>
@@ -426,10 +465,12 @@ const AdminTreatments = () => {
                 <Input
                   id="slug"
                   value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, slug: e.target.value }); setErrors(prev => ({ ...prev, slug: '' })); }}
                   dir="ltr"
                   placeholder="general-dentistry"
+                  style={errors.slug ? { borderColor: '#dc2626' } : {}}
                 />
+                {errors.slug && <ErrorText>{errors.slug}</ErrorText>}
               </FormGroup>
 
               <FormGroup>
@@ -447,8 +488,10 @@ const AdminTreatments = () => {
                 <Textarea
                   id="short_description"
                   value={formData.short_description}
-                  onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, short_description: e.target.value }); setErrors(prev => ({ ...prev, short_description: '' })); }}
+                  style={errors.short_description ? { borderColor: '#dc2626' } : {}}
                 />
+                {errors.short_description && <ErrorText>{errors.short_description}</ErrorText>}
               </FormGroup>
 
               <FormGroup>
@@ -456,9 +499,10 @@ const AdminTreatments = () => {
                 <Textarea
                   id="full_description"
                   value={formData.full_description}
-                  onChange={(e) => setFormData({ ...formData, full_description: e.target.value })}
-                  style={{ minHeight: '100px' }}
+                  onChange={(e) => { setFormData({ ...formData, full_description: e.target.value }); setErrors(prev => ({ ...prev, full_description: '' })); }}
+                  style={{ minHeight: '100px', ...(errors.full_description ? { borderColor: '#dc2626' } : {}) }}
                 />
+                {errors.full_description && <ErrorText>{errors.full_description}</ErrorText>}
               </FormGroup>
 
               <FormGroup>
@@ -482,22 +526,54 @@ const AdminTreatments = () => {
 
               <FormGroup>
                 <Label htmlFor="duration">משך זמן</Label>
-                <Input
+                <select
                   id="duration"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  placeholder="30-60 דקות"
-                />
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.75rem',
+                    border: '1px solid hsl(var(--border))',
+                    background: 'hsl(var(--card))',
+                    color: 'hsl(var(--foreground))',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  <option value="">בחר משך זמן</option>
+                  {DURATION_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </FormGroup>
 
               <FormGroup>
-                <Label htmlFor="price_range">טווח מחירים</Label>
-                <Input
-                  id="price_range"
-                  value={formData.price_range}
-                  onChange={(e) => setFormData({ ...formData, price_range: e.target.value })}
-                  placeholder="₪200-500"
-                />
+                <Label>טווח מחירים (₪)</Label>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <Input
+                    id="price_min"
+                    type="number"
+                    value={formData.price_min}
+                    onChange={(e) => setFormData({ ...formData, price_min: e.target.value })}
+                    placeholder="מחיר מינימום"
+                    min="0"
+                    dir="ltr"
+                    style={{ flex: 1, textAlign: 'center' }}
+                  />
+                  <span style={{ fontWeight: 'bold', color: 'hsl(var(--muted-foreground))' }}>-</span>
+                  <Input
+                    id="price_max"
+                    type="number"
+                    value={formData.price_max}
+                    onChange={(e) => setFormData({ ...formData, price_max: e.target.value })}
+                    placeholder="מחיר מקסימום"
+                    min="0"
+                    dir="ltr"
+                    style={{ flex: 1, textAlign: 'center' }}
+                  />
+                </div>
+                {errors.price_min && <ErrorText>{errors.price_min}</ErrorText>}
+                {errors.price_max && <ErrorText>{errors.price_max}</ErrorText>}
               </FormGroup>
 
               <ButtonGroup>
