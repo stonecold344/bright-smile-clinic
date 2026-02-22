@@ -14,39 +14,58 @@ const PageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, hsla(174, 62%, 45%, 0.12) 0%, hsla(200, 40%, 96%, 0.5) 50%, hsla(174, 62%, 45%, 0.06) 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(160deg, hsl(200, 50%, 10%) 0%, hsl(200, 50%, 18%) 40%, hsl(174, 50%, 20%) 100%);
 
   &::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -30%;
-    width: 60vw;
-    height: 60vw;
+    top: -20%;
+    right: -15%;
+    width: 50vw;
+    height: 50vw;
     border-radius: 50%;
-    background: hsla(174, 62%, 45%, 0.05);
+    background: radial-gradient(circle, hsla(174, 62%, 45%, 0.25) 0%, transparent 70%);
+    filter: blur(60px);
+    animation: floatOrb1 8s ease-in-out infinite;
   }
 
   &::after {
     content: '';
     position: absolute;
-    bottom: -40%;
-    left: -20%;
-    width: 50vw;
-    height: 50vw;
+    bottom: -25%;
+    left: -10%;
+    width: 45vw;
+    height: 45vw;
     border-radius: 50%;
-    background: hsla(200, 40%, 96%, 0.4);
+    background: radial-gradient(circle, hsla(38, 90%, 55%, 0.15) 0%, transparent 70%);
+    filter: blur(50px);
+    animation: floatOrb2 10s ease-in-out infinite;
+  }
+
+  @keyframes floatOrb1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-30px, 20px) scale(1.05); }
+  }
+
+  @keyframes floatOrb2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -30px) scale(1.08); }
   }
 `;
 
 const AuthCard = styled.div`
-  background: ${({ theme }) => theme.colors.card};
+  background: hsla(200, 30%, 15%, 0.6);
+  backdrop-filter: blur(24px);
+  border: 1px solid hsla(174, 62%, 45%, 0.2);
   border-radius: ${({ theme }) => theme.radii['2xl']};
   padding: ${({ theme }) => theme.spacing[10]};
-  box-shadow: ${({ theme }) => theme.shadows.elevated};
+  box-shadow: 
+    0 0 40px -10px hsla(174, 62%, 45%, 0.2),
+    0 20px 60px -20px hsla(0, 0%, 0%, 0.5),
+    inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
   width: 100%;
   max-width: 420px;
   position: relative;
@@ -61,14 +80,15 @@ const LogoWrapper = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  width: 4rem;
-  height: 4rem;
+  width: 4.5rem;
+  height: 4.5rem;
   background: ${({ theme }) => theme.gradients.hero};
   border-radius: ${({ theme }) => theme.radii.xl};
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+  box-shadow: 0 0 30px -5px hsla(174, 62%, 45%, 0.4);
 `;
 
 const InputWrapper = styled.div`
@@ -79,12 +99,33 @@ const InputWrapper = styled.div`
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: ${({ theme }) => theme.colors.mutedForeground};
+    color: hsla(174, 62%, 45%, 0.6);
   }
   
   input {
     padding-left: 3rem;
+    background: hsla(200, 30%, 15%, 0.5);
+    border: 1px solid hsla(174, 62%, 45%, 0.15);
+    color: hsl(0, 0%, 95%);
+    
+    &::placeholder {
+      color: hsla(200, 15%, 60%, 0.5);
+    }
+    
+    &:focus {
+      border-color: hsla(174, 62%, 45%, 0.5);
+      box-shadow: 0 0 20px -5px hsla(174, 62%, 45%, 0.2);
+    }
   }
+`;
+
+const StyledTitle = styled(Title)`
+  text-align: center;
+  color: hsl(0, 0%, 95%);
+`;
+
+const StyledLabel = styled(Label)`
+  color: hsla(200, 15%, 75%, 0.9);
 `;
 
 const emailSchema = z.string().email('כתובת אימייל לא תקינה');
@@ -151,15 +192,15 @@ const Auth = () => {
       <AuthCard>
         <LogoWrapper>
           <LogoIcon>
-            <Smile size={32} color="white" />
+            <Smile size={36} color="white" />
           </LogoIcon>
-          <Title $size="md" style={{ textAlign: 'center' }}>כניסת מנהל</Title>
-          <Text $color="muted">ניהול מערכת המרפאה</Text>
+          <StyledTitle $size="md">כניסת מנהל</StyledTitle>
+          <Text $color="muted" style={{ color: 'hsla(200, 15%, 65%, 0.8)' }}>ניהול מערכת המרפאה</Text>
         </LogoWrapper>
 
         <form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label htmlFor="email">אימייל</Label>
+            <StyledLabel htmlFor="email">אימייל</StyledLabel>
             <InputWrapper>
               <Mail size={18} />
               <Input
@@ -172,11 +213,11 @@ const Auth = () => {
                 required
               />
             </InputWrapper>
-            {errors.email && <Text $color="muted" $size="sm" style={{ color: 'red', marginTop: '0.25rem' }}>{errors.email}</Text>}
+            {errors.email && <Text $color="muted" $size="sm" style={{ color: 'hsl(0, 84%, 65%)', marginTop: '0.25rem' }}>{errors.email}</Text>}
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="password">סיסמה</Label>
+            <StyledLabel htmlFor="password">סיסמה</StyledLabel>
             <InputWrapper>
               <Lock size={18} />
               <Input
@@ -189,7 +230,7 @@ const Auth = () => {
                 required
               />
             </InputWrapper>
-            {errors.password && <Text $color="muted" $size="sm" style={{ color: 'red', marginTop: '0.25rem' }}>{errors.password}</Text>}
+            {errors.password && <Text $color="muted" $size="sm" style={{ color: 'hsl(0, 84%, 65%)', marginTop: '0.25rem' }}>{errors.password}</Text>}
           </FormGroup>
 
           <Button type="submit" $variant="heroPrimary" $size="lg" $fullWidth disabled={loading}>
