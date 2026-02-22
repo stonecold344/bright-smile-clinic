@@ -8,18 +8,16 @@ import ServicesDropdown from '@/components/ServicesDropdown';
 import { useTreatments } from '@/hooks/useTreatments';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-const HeaderWrapper = styled.header`
+const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
   left: 0;
   z-index: 50;
-  background: ${({
-  theme
-}) => theme.colors.card};
-  box-shadow: ${({
-  theme
-}) => theme.shadows.soft};
+  background: ${({ $scrolled, theme }) => $scrolled ? `${theme.colors.card}f2` : 'transparent'};
+  backdrop-filter: ${({ $scrolled }) => $scrolled ? 'blur(12px)' : 'none'};
+  box-shadow: ${({ $scrolled, theme }) => $scrolled ? theme.shadows.soft : 'none'};
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 `;
 const HeaderInner = styled.div`
   display: flex;
@@ -85,31 +83,23 @@ const LogoText = styled.div`
     display: block;
   }
 `;
-const LogoTitle = styled.h1`
-  font-size: ${({
-  theme
-}) => theme.fontSizes['2xl']};
-  font-weight: ${({
-  theme
-}) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primary};
+const LogoTitle = styled.h1<{ $scrolled?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ $scrolled, theme }) => $scrolled ? theme.colors.primary : 'white'};
   margin: 0;
+  transition: color 0.3s ease;
 `;
-const LogoSubtitle = styled.p`
-  font-size: ${({
-  theme
-}) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.mutedForeground};
+const LogoSubtitle = styled.p<{ $scrolled?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ $scrolled }) => $scrolled ? 'hsl(200, 15%, 45%)' : 'hsla(0, 0%, 100%, 0.8)'};
   margin: 0;
   display: none;
+  transition: color 0.3s ease;
   
-  @media (min-width: ${({
-  theme
-}) => theme.breakpoints.sm}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     display: block;
-    font-size: ${({
-  theme
-}) => theme.fontSizes.sm};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 `;
 const Nav = styled.nav`
@@ -127,11 +117,12 @@ const Nav = styled.nav`
 `;
 const NavLink = styled(Link)<{
   $active?: boolean;
+  $scrolled?: boolean;
 }>`
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ $active, theme }) => 
-    $active ? theme.colors.primary : theme.colors.foreground};
+  color: ${({ $active, $scrolled, theme }) => 
+    $active ? theme.colors.primary : $scrolled ? theme.colors.foreground : 'white'};
   transition: color 0.3s ease;
   padding-bottom: 0.25rem;
   border-bottom: ${({ $active, theme }) => 
@@ -461,14 +452,14 @@ const Header = () => {
   }];
   const isActive = (path: string) => location.pathname === path;
   const isServicesActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
-  return <HeaderWrapper>
+  return <HeaderWrapper $scrolled={effectiveScrolled}>
       <Container>
         <HeaderInner>
           <Logo to="/">
             <LogoIcon><Smile size={32} color="white" /></LogoIcon>
             <LogoText>
-              <LogoTitle>מרפאת שיניים</LogoTitle>
-              <LogoSubtitle>חיוך בריא לכל החיים</LogoSubtitle>
+              <LogoTitle $scrolled={effectiveScrolled}>מרפאת שיניים</LogoTitle>
+              <LogoSubtitle $scrolled={effectiveScrolled}>חיוך בריא לכל החיים</LogoSubtitle>
             </LogoText>
           </Logo>
           
@@ -477,12 +468,12 @@ const Header = () => {
           </MobileCenterTitle>
 
           <Nav>
-            <NavLink to="/" $active={isActive('/')}>בית</NavLink>
-            <ServicesDropdown scrolled={true} />
-            <NavLink to="/gallery" $active={isActive('/gallery')}>גלריה</NavLink>
-            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')}>בלוג</NavLink>
-            <NavLink to="/about" $active={isActive('/about')}>אודות</NavLink>
-            <NavLink to="/contact" $active={isActive('/contact')}>צור קשר</NavLink>
+            <NavLink to="/" $active={isActive('/')} $scrolled={effectiveScrolled}>בית</NavLink>
+            <ServicesDropdown scrolled={effectiveScrolled} />
+            <NavLink to="/gallery" $active={isActive('/gallery')} $scrolled={effectiveScrolled}>גלריה</NavLink>
+            <NavLink to="/blog" $active={location.pathname.startsWith('/blog')} $scrolled={effectiveScrolled}>בלוג</NavLink>
+            <NavLink to="/about" $active={isActive('/about')} $scrolled={effectiveScrolled}>אודות</NavLink>
+            <NavLink to="/contact" $active={isActive('/contact')} $scrolled={effectiveScrolled}>צור קשר</NavLink>
           </Nav>
 
           <CTAWrapper>
