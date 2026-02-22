@@ -5,10 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Title, Text } from '@/components/styled/Typography';
 import { Button } from '@/components/styled/Button';
 import { Badge } from '@/components/styled/Layout';
-import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Calendar, Phone, Mail, Clock, Loader2, Trash2, CheckCircle, XCircle, Eye, UserCheck, UserX, Stethoscope } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
+import { useTreatments } from '@/hooks/useTreatments';
+
+// --- Styled Components ---
 
 const PageHeader = styled.div`
   display: flex;
@@ -19,7 +22,7 @@ const PageHeader = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
   
@@ -71,6 +74,7 @@ const Th = styled.th`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.foreground};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
@@ -90,27 +94,35 @@ const StatusBadge = styled.span<{ $status: string }>`
   background: ${({ $status }) => 
     $status === 'confirmed' ? '#dcfce7' :
     $status === 'cancelled' ? '#fee2e2' :
+    $status === 'arrived' ? '#dbeafe' :
+    $status === 'no_show' ? '#fce4ec' :
+    $status === 'completed' ? '#e8f5e9' :
     '#fef3c7'
   };
   color: ${({ $status }) => 
     $status === 'confirmed' ? '#166534' :
     $status === 'cancelled' ? '#991b1b' :
+    $status === 'arrived' ? '#1e40af' :
+    $status === 'no_show' ? '#880e4f' :
+    $status === 'completed' ? '#1b5e20' :
     '#92400e'
   };
 `;
 
 const Actions = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  flex-wrap: wrap;
 `;
 
-const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'default' }>`
-  padding: 0.5rem;
+const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' | 'default' }>`
+  padding: 0.4rem;
   border-radius: ${({ theme }) => theme.radii.md};
   transition: all ${({ theme }) => theme.transitions.normal};
   color: ${({ $variant }) => 
     $variant === 'success' ? '#16a34a' :
     $variant === 'danger' ? '#dc2626' :
+    $variant === 'info' ? '#2563eb' :
     'inherit'
   };
   
@@ -170,8 +182,41 @@ const DetailRow = styled.div`
   
   svg {
     color: ${({ theme }) => theme.colors.primary};
+    flex-shrink: 0;
   }
 `;
+
+const TreatmentSelect = styled.select`
+  padding: 0.5rem 0.75rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.foreground};
+  cursor: pointer;
+  min-width: 140px;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+`;
+
+const ModalActionsRow = styled.div`
+  display: flex;
+  gap: 0.75rem;
+`;
+
+// --- Types ---
+
+const ACTIVE_STATUSES = ['pending', 'confirmed', 'arrived'];
 
 interface Appointment {
   id: string;
@@ -183,14 +228,19 @@ interface Appointment {
   notes: string | null;
   status: string;
   created_at: string;
+  treatment_slug: string | null;
 }
+
+// --- Component ---
 
 const AdminAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [treatmentModal, setTreatmentModal] = useState<{ id: string; slug: string } | null>(null);
   const queryClient = useQueryClient();
+  const { data: treatments = [] } = useTreatments();
 
-  const { data: appointments = [], isLoading } = useQuery({
+  const { data: allAppointments = [], isLoading } = useQuery({
     queryKey: ['admin-appointments'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -204,17 +254,27 @@ const AdminAppointments = () => {
     },
   });
 
+  // Only show active appointments (not archived)
+  const appointments = useMemo(() => 
+    allAppointments.filter(a => ACTIVE_STATUSES.includes(a.status)),
+    [allAppointments]
+  );
+
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, treatment_slug }: { id: string; status: string; treatment_slug?: string | null }) => {
+      const updateData: Record<string, any> = { status };
+      if (treatment_slug !== undefined) updateData.treatment_slug = treatment_slug;
+      
       const { error } = await supabase
         .from('appointments')
-        .update({ status })
+        .update(updateData as any)
         .eq('id', id);
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
       toast.success('סטטוס התור עודכן בהצלחה');
     },
     onError: () => {
@@ -233,6 +293,7 @@ const AdminAppointments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-archive'] });
       toast.success('התור נמחק בהצלחה');
     },
     onError: () => {
@@ -244,7 +305,6 @@ const AdminAppointments = () => {
     total: appointments.length,
     pending: appointments.filter(a => a.status === 'pending').length,
     confirmed: appointments.filter(a => a.status === 'confirmed').length,
-    cancelled: appointments.filter(a => a.status === 'cancelled').length,
   };
 
   const filteredAppointments = useMemo(() => {
@@ -264,8 +324,21 @@ const AdminAppointments = () => {
     switch (status) {
       case 'confirmed': return 'מאושר';
       case 'cancelled': return 'בוטל';
+      case 'arrived': return 'הגיע';
+      case 'no_show': return 'לא הגיע';
+      case 'completed': return 'טופל';
       default: return 'ממתין';
     }
+  };
+
+  const handleCompleteWithTreatment = () => {
+    if (!treatmentModal) return;
+    updateStatus.mutate({
+      id: treatmentModal.id,
+      status: 'completed',
+      treatment_slug: treatmentModal.slug || null,
+    });
+    setTreatmentModal(null);
   };
 
   if (isLoading) {
@@ -281,14 +354,14 @@ const AdminAppointments = () => {
       <PageHeader>
         <div>
           <Title $size="md">ניהול תורים</Title>
-          <Text $color="muted">צפה ונהל את כל התורים במערכת</Text>
+          <Text $color="muted">צפה ונהל את התורים הפעילים</Text>
         </div>
       </PageHeader>
 
       <StatsGrid>
         <StatCard $active={statusFilter === null} onClick={() => setStatusFilter(null)}>
           <StatValue $active={statusFilter === null}>{stats.total}</StatValue>
-          <StatLabel $active={statusFilter === null}>סה"כ תורים</StatLabel>
+          <StatLabel $active={statusFilter === null}>סה"כ פעילים</StatLabel>
         </StatCard>
         <StatCard $active={statusFilter === 'pending'} onClick={() => toggleFilter('pending')}>
           <StatValue $active={statusFilter === 'pending'}>{stats.pending}</StatValue>
@@ -298,16 +371,12 @@ const AdminAppointments = () => {
           <StatValue $active={statusFilter === 'confirmed'}>{stats.confirmed}</StatValue>
           <StatLabel $active={statusFilter === 'confirmed'}>מאושרים</StatLabel>
         </StatCard>
-        <StatCard $active={statusFilter === 'cancelled'} onClick={() => toggleFilter('cancelled')}>
-          <StatValue $active={statusFilter === 'cancelled'}>{stats.cancelled}</StatValue>
-          <StatLabel $active={statusFilter === 'cancelled'}>בוטלו</StatLabel>
-        </StatCard>
       </StatsGrid>
 
       {filteredAppointments.length === 0 ? (
         <EmptyState>
           <Calendar size={64} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
-          <Title $size="sm">{statusFilter ? 'אין תורים בסטטוס זה' : 'אין תורים במערכת'}</Title>
+          <Title $size="sm">{statusFilter ? 'אין תורים בסטטוס זה' : 'אין תורים פעילים'}</Title>
           <Text $color="muted">{statusFilter ? 'נסה לבחור סטטוס אחר' : 'תורים חדשים יופיעו כאן'}</Text>
         </EmptyState>
       ) : (
@@ -339,20 +408,47 @@ const AdminAppointments = () => {
                     <ActionButton onClick={() => setSelectedAppointment(appointment)} title="פרטים">
                       <Eye size={18} />
                     </ActionButton>
-                    {appointment.status !== 'confirmed' && (
+                    {appointment.status === 'pending' && (
                       <ActionButton 
                         $variant="success" 
                         onClick={() => updateStatus.mutate({ id: appointment.id, status: 'confirmed' })}
-                        title="אשר"
+                        title="אשר תור"
                       >
                         <CheckCircle size={18} />
+                      </ActionButton>
+                    )}
+                    {(appointment.status === 'confirmed' || appointment.status === 'arrived') && (
+                      <ActionButton 
+                        $variant="info"
+                        onClick={() => updateStatus.mutate({ id: appointment.id, status: 'arrived' })}
+                        title="לקוח הגיע"
+                      >
+                        <UserCheck size={18} />
+                      </ActionButton>
+                    )}
+                    {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+                      <ActionButton 
+                        $variant="danger"
+                        onClick={() => updateStatus.mutate({ id: appointment.id, status: 'no_show' })}
+                        title="לקוח לא הגיע (העבר לארכיון)"
+                      >
+                        <UserX size={18} />
+                      </ActionButton>
+                    )}
+                    {(appointment.status === 'arrived' || appointment.status === 'confirmed') && (
+                      <ActionButton 
+                        $variant="success"
+                        onClick={() => setTreatmentModal({ id: appointment.id, slug: appointment.treatment_slug || '' })}
+                        title="סמן כטופל (בחר טיפול והעבר לארכיון)"
+                      >
+                        <Stethoscope size={18} />
                       </ActionButton>
                     )}
                     {appointment.status !== 'cancelled' && (
                       <ActionButton 
                         $variant="danger" 
                         onClick={() => updateStatus.mutate({ id: appointment.id, status: 'cancelled' })}
-                        title="בטל"
+                        title="בטל תור (העבר לארכיון)"
                       >
                         <XCircle size={18} />
                       </ActionButton>
@@ -376,6 +472,40 @@ const AdminAppointments = () => {
         </Table>
       )}
 
+      {/* Treatment completion modal */}
+      {treatmentModal && (
+        <Modal onClick={() => setTreatmentModal(null)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <Title $size="sm">סיום טיפול</Title>
+            </ModalHeader>
+            <Text $color="muted" style={{ marginBottom: '1.5rem' }}>
+              בחר את הטיפול שבוצע ולחץ אישור. התור יועבר לארכיון.
+            </Text>
+            <TreatmentSelect
+              value={treatmentModal.slug}
+              onChange={(e) => setTreatmentModal({ ...treatmentModal, slug: e.target.value })}
+              style={{ width: '100%', marginBottom: '1rem' }}
+            >
+              <option value="">ללא טיפול ספציפי</option>
+              {treatments.map(t => (
+                <option key={t.slug} value={t.slug}>{t.title}</option>
+              ))}
+            </TreatmentSelect>
+            <ModalActionsRow>
+              <Button $variant="heroPrimary" $fullWidth onClick={handleCompleteWithTreatment}>
+                <CheckCircle size={18} />
+                אשר וסיים
+              </Button>
+              <Button $variant="outline" $fullWidth onClick={() => setTreatmentModal(null)}>
+                ביטול
+              </Button>
+            </ModalActionsRow>
+          </ModalContent>
+        </Modal>
+      )}
+
+      {/* Appointment details modal */}
       {selectedAppointment && (
         <Modal onClick={() => setSelectedAppointment(null)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
