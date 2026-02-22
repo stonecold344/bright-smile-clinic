@@ -27,7 +27,7 @@ const PageHeader = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
   
@@ -546,6 +546,7 @@ const AdminAppointments = () => {
     total: appointments.length,
     pending: appointments.filter(a => a.status === 'pending').length,
     confirmed: appointments.filter(a => a.status === 'confirmed').length,
+    arrived: appointments.filter(a => a.status === 'arrived').length,
   };
 
   const hasActiveFilters = searchQuery || phoneSearch || dateFrom || dateTo || hourFilter || statusFilter;
@@ -707,6 +708,10 @@ const AdminAppointments = () => {
         <StatCard $active={statusFilter === 'confirmed'} onClick={() => toggleFilter('confirmed')}>
           <StatValue $active={statusFilter === 'confirmed'}>{stats.confirmed}</StatValue>
           <StatLabel $active={statusFilter === 'confirmed'}>מאושרים</StatLabel>
+        </StatCard>
+        <StatCard $active={statusFilter === 'arrived'} onClick={() => toggleFilter('arrived')}>
+          <StatValue $active={statusFilter === 'arrived'}>{stats.arrived}</StatValue>
+          <StatLabel $active={statusFilter === 'arrived'}>הגיעו</StatLabel>
         </StatCard>
       </StatsGrid>
 
