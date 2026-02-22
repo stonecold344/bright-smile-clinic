@@ -519,8 +519,11 @@ const AdminAppointments = () => {
   };
 
   const SortIcon = ({ field }: { field: 'date' | 'time' | 'status' }) => {
-    if (sortField !== field) return null;
-    return sortDir === 'asc' ? <ArrowUp size={14} style={{ display: 'inline', marginRight: '4px' }} /> : <ArrowDown size={14} style={{ display: 'inline', marginRight: '4px' }} />;
+    return (
+      <span style={{ display: 'inline-block', width: '14px', marginRight: '4px', verticalAlign: 'middle' }}>
+        {sortField === field && (sortDir === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
+      </span>
+    );
   };
 
   const clearAllFilters = () => {
