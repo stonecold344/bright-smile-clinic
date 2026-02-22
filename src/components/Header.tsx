@@ -143,7 +143,7 @@ const NavLink = styled(Link)<{
   }
 `;
 
-const CTAWrapper = styled.div`
+const CTAWrapper = styled.div<{ $scrolled?: boolean }>`
   display: none;
   flex-shrink: 0;
   
@@ -156,6 +156,20 @@ const CTAWrapper = styled.div`
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) and (max-width: ${({ theme }) => theme.breakpoints.lg}) {
     gap: 0.5rem;
   }
+
+  /* Adapt ghost/outline button colors when over dark hero */
+  ${({ $scrolled }) => !$scrolled && `
+    button, a {
+      color: white;
+      border-color: hsla(0, 0%, 100%, 0.4);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      
+      &:hover {
+        background: hsla(0, 0%, 100%, 0.15);
+        color: white;
+      }
+    }
+  `}
 `;
 
 const MobileMenuButton = styled.button`
@@ -386,7 +400,7 @@ const Header = () => {
             <NavLink to="/contact" $active={isActive('/contact')} $scrolled={isScrolled}>צור קשר</NavLink>
           </Nav>
 
-          <CTAWrapper>
+          <CTAWrapper $scrolled={isScrolled}>
             {user && isAdmin && (
               <ButtonRouterLink to="/admin" $variant="ghost" $size="sm">
                 <Settings size={18} />
