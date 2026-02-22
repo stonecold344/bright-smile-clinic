@@ -87,7 +87,7 @@ const FiltersGrid = styled.div`
   gap: 1rem;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
 `;
 
@@ -289,8 +289,12 @@ interface Appointment {
 
 // --- Component ---
 
+const ISRAELI_PHONE_REGEX = /^0[2-9]\d{0,8}$/;
+
 const AdminArchive = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [phoneSearch, setPhoneSearch] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [hourFilter, setHourFilter] = useState('');
   const [treatmentFilter, setTreatmentFilter] = useState('');
@@ -326,13 +330,32 @@ const AdminArchive = () => {
     completed: archivedAppointments.filter(a => a.status === 'completed').length,
   }), [archivedAppointments]);
 
-  const hasActiveFilters = searchQuery || dateFilter || hourFilter || treatmentFilter || statusFilter;
+  const hasActiveFilters = searchQuery || phoneSearch || dateFilter || hourFilter || treatmentFilter || statusFilter;
+
+  const handlePhoneChange = (value: string) => {
+    const cleaned = value.replace(/[^0-9-]/g, '');
+    setPhoneSearch(cleaned);
+    if (cleaned && !ISRAELI_PHONE_REGEX.test(cleaned.replace(/-/g, ''))) {
+      setPhoneError('פורמט ישראלי: 05X-XXXXXXX');
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  const handleNameChange = (value: string) => {
+    const cleaned = value.replace(/[^a-zA-Zא-ת\s\-']/g, '');
+    setSearchQuery(cleaned);
+  };
 
   const filteredAppointments = useMemo(() => {
     return archivedAppointments.filter(apt => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         if (!apt.client_name.toLowerCase().includes(query)) return false;
+      }
+      if (phoneSearch) {
+        const cleanPhone = phoneSearch.replace(/-/g, '');
+        if (!apt.client_phone.replace(/-/g, '').includes(cleanPhone)) return false;
       }
       if (dateFilter) {
         if (apt.appointment_date !== dateFilter) return false;
@@ -349,10 +372,12 @@ const AdminArchive = () => {
       }
       return true;
     });
-  }, [archivedAppointments, searchQuery, dateFilter, hourFilter, treatmentFilter, statusFilter]);
+  }, [archivedAppointments, searchQuery, phoneSearch, dateFilter, hourFilter, treatmentFilter, statusFilter]);
 
   const clearAllFilters = () => {
     setSearchQuery('');
+    setPhoneSearch('');
+    setPhoneError('');
     setDateFilter('');
     setHourFilter('');
     setTreatmentFilter('');
@@ -441,8 +466,21 @@ const AdminArchive = () => {
               type="text"
               placeholder="שם פרטי או משפחה..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
+              maxLength={50}
             />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><Phone size={14} />חיפוש לפי טלפון</FilterLabel>
+            <FilterInput
+              type="tel"
+              dir="ltr"
+              placeholder="05X-XXXXXXX"
+              value={phoneSearch}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              maxLength={11}
+            />
+            {phoneError && <span style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{phoneError}</span>}
           </FilterGroup>
           <FilterGroup>
             <FilterLabel><Calendar size={14} />תאריך</FilterLabel>

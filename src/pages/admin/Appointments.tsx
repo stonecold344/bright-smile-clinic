@@ -84,7 +84,7 @@ const FiltersGrid = styled.div`
   gap: 1rem;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 `;
 
@@ -333,10 +333,14 @@ interface Appointment {
 
 // --- Component ---
 
+const ISRAELI_PHONE_REGEX = /^0[2-9]\d{0,8}$/;
+
 const AdminAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [phoneSearch, setPhoneSearch] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [hourFilter, setHourFilter] = useState('');
   const [treatmentModal, setTreatmentModal] = useState<{ id: string; slug: string } | null>(null);
@@ -430,7 +434,24 @@ const AdminAppointments = () => {
     confirmed: appointments.filter(a => a.status === 'confirmed').length,
   };
 
-  const hasActiveFilters = searchQuery || dateFilter || hourFilter || statusFilter;
+  const hasActiveFilters = searchQuery || phoneSearch || dateFilter || hourFilter || statusFilter;
+
+  const handlePhoneChange = (value: string) => {
+    // Allow only digits and dashes
+    const cleaned = value.replace(/[^0-9-]/g, '');
+    setPhoneSearch(cleaned);
+    if (cleaned && !ISRAELI_PHONE_REGEX.test(cleaned.replace(/-/g, ''))) {
+      setPhoneError('פורמט ישראלי: 05X-XXXXXXX');
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  const handleNameChange = (value: string) => {
+    // Allow only letters, spaces, and hyphens (Hebrew + English)
+    const cleaned = value.replace(/[^a-zA-Zא-ת\s\-']/g, '');
+    setSearchQuery(cleaned);
+  };
 
   const availableHours = useMemo(() => {
     const hours: string[] = [];
@@ -449,6 +470,10 @@ const AdminAppointments = () => {
       const query = searchQuery.toLowerCase();
       result = result.filter(a => a.client_name.toLowerCase().includes(query));
     }
+    if (phoneSearch) {
+      const cleanPhone = phoneSearch.replace(/-/g, '');
+      result = result.filter(a => a.client_phone.replace(/-/g, '').includes(cleanPhone));
+    }
     if (dateFilter) {
       result = result.filter(a => a.appointment_date === dateFilter);
     }
@@ -456,10 +481,12 @@ const AdminAppointments = () => {
       result = result.filter(a => a.appointment_time.substring(0, 2) === hourFilter);
     }
     return result;
-  }, [appointments, statusFilter, searchQuery, dateFilter, hourFilter]);
+  }, [appointments, statusFilter, searchQuery, phoneSearch, dateFilter, hourFilter]);
 
   const clearAllFilters = () => {
     setSearchQuery('');
+    setPhoneSearch('');
+    setPhoneError('');
     setDateFilter('');
     setHourFilter('');
     setStatusFilter(null);
@@ -544,8 +571,21 @@ const AdminAppointments = () => {
               type="text"
               placeholder="שם פרטי או משפחה..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
+              maxLength={50}
             />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel><Phone size={14} />חיפוש לפי טלפון</FilterLabel>
+            <FilterInput
+              type="tel"
+              dir="ltr"
+              placeholder="05X-XXXXXXX"
+              value={phoneSearch}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              maxLength={11}
+            />
+            {phoneError && <span style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{phoneError}</span>}
           </FilterGroup>
           <FilterGroup>
             <FilterLabel><Calendar size={14} />תאריך</FilterLabel>
