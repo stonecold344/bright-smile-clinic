@@ -708,7 +708,7 @@ const AdminAppointments = () => {
                     )}
                     {appointment.status === 'arrived' && (
                       <ActionButton 
-                        $variant="info"
+                        $variant={appointment.images && appointment.images.length > 0 ? 'success' : 'info'}
                         onClick={() => setImageModal({ id: appointment.id, images: appointment.images || [] })}
                         title="העלאת תמונות"
                       >
