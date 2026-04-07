@@ -47,6 +47,7 @@ const BookingCard = styled.div`
   border-radius: ${({ theme }) => theme.radii['2xl']};
   box-shadow: ${({ theme }) => theme.shadows.card};
   overflow: visible;
+  direction: rtl;
 `;
 
 const BookingGrid = styled.div`
