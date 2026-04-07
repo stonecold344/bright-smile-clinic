@@ -346,6 +346,9 @@ const Textarea = styled.textarea`
   min-height: 60px;
   resize: vertical;
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
@@ -355,6 +358,7 @@ const Textarea = styled.textarea`
   
   &::placeholder {
     color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: right;
   }
 `;
 
