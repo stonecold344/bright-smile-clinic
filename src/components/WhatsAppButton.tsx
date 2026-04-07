@@ -48,6 +48,11 @@ const FloatingButton = styled.a`
 `;
 
 const WhatsAppButton = () => {
+  const location = useLocation();
+  
+  // Hide WhatsApp button on admin pages
+  if (location.pathname.startsWith('/admin')) return null;
+  
   return (
     <FloatingButton
       href="https://wa.me/972507334482"
