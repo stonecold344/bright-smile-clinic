@@ -65,6 +65,7 @@ const BookingColumn = styled.div<{ $withBorder?: boolean }>`
   padding: ${({ theme }) => theme.spacing[5]};
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     padding: ${({ theme }) => theme.spacing[6]};
