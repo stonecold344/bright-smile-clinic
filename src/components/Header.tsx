@@ -342,8 +342,10 @@ const Header = () => {
   useLayoutEffect(() => {
     if (isAlwaysLight) {
       setIsScrolled(true);
+      setIsBlurred(false);
     } else {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.8);
+      setIsBlurred(window.scrollY > 20);
     }
   }, [isAlwaysLight, location.pathname]);
 
@@ -352,7 +354,8 @@ const Header = () => {
     if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.8);
+      setIsBlurred(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
