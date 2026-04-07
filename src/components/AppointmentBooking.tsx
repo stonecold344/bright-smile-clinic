@@ -207,6 +207,7 @@ const TimeSlotsContainer = styled.div`
   max-height: 320px;
   overflow-y: auto;
   padding-left: 0.5rem;
+  width: 100%;
   
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: ${({ theme }) => theme.colors.secondary}; border-radius: 2px; }
