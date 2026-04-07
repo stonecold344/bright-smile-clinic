@@ -122,7 +122,7 @@ const FilterInput = styled.input`
   }
 `;
 
-const DatePickerButton = styled.button<{ $hasValue?: boolean }>`
+const DatePickerButton = styled(PopoverTrigger)<{ $hasValue?: boolean }>`
   width: 100%;
   display: flex;
   align-items: center;
@@ -600,13 +600,11 @@ const AdminMessages = () => {
           <FilterGroup>
             <FilterLabel><CalendarIcon size={14} />מתאריך</FilterLabel>
             <Popover>
-              <PopoverTrigger asChild>
-                <DatePickerButton $hasValue={!!dateFrom}>
-                  {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
-                  <CalendarIcon size={14} />
-                </DatePickerButton>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
+              <DatePickerButton $hasValue={!!dateFrom}>
+                {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
+                <CalendarIcon size={14} />
+              </DatePickerButton>
+              <PopoverContent className="w-[min(92vw,22rem)] p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateFrom}
@@ -619,13 +617,11 @@ const AdminMessages = () => {
           <FilterGroup>
             <FilterLabel><CalendarIcon size={14} />עד תאריך</FilterLabel>
             <Popover>
-              <PopoverTrigger asChild>
-                <DatePickerButton $hasValue={!!dateTo}>
-                  {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
-                  <CalendarIcon size={14} />
-                </DatePickerButton>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
+              <DatePickerButton $hasValue={!!dateTo}>
+                {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
+                <CalendarIcon size={14} />
+              </DatePickerButton>
+              <PopoverContent className="w-[min(92vw,22rem)] p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateTo}

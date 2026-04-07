@@ -14,6 +14,8 @@ const MONTHS_HE = [
   "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר",
 ];
 
+const calendarShellClassName = "pointer-events-auto w-full max-w-[22rem] mx-auto rounded-[1.25rem] border border-border bg-background p-3 shadow-xl";
+
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
   const [pickerView, setPickerView] = React.useState<"days" | "months" | "years">("days");
   const [viewDate, setViewDate] = React.useState(() => {
@@ -27,39 +29,40 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   const years = Array.from({ length: yearEnd - yearStart + 1 }, (_, i) => yearStart + i);
 
   const handleMonthSelect = (monthIndex: number) => {
-    setViewDate(prev => setMonth(prev, monthIndex));
+    setViewDate((prev) => setMonth(prev, monthIndex));
     setPickerView("days");
   };
 
   const handleYearSelect = (year: number) => {
-    setViewDate(prev => setYear(prev, year));
+    setViewDate((prev) => setYear(prev, year));
     setPickerView("months");
   };
 
   if (pickerView === "years") {
     return (
-      <div className={cn("p-3 pointer-events-auto w-full max-w-[320px] mx-auto", className)} dir="rtl">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-bold text-foreground">בחר שנה</span>
+      <div className={cn(calendarShellClassName, className)} dir="rtl">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-sm font-bold text-foreground">בחירת שנה</span>
           <button
             type="button"
             onClick={() => setPickerView("days")}
-            className="text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-accent"
+            className="rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            חזרה ←
+            חזרה
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-1.5 max-h-[200px] overflow-y-auto">
-          {years.map(year => (
+
+        <div className="grid max-h-[14rem] grid-cols-4 gap-2 overflow-y-auto pr-1">
+          {years.map((year) => (
             <button
               key={year}
               type="button"
               onClick={() => handleYearSelect(year)}
               className={cn(
-                "py-2 rounded-lg text-xs font-semibold transition-all",
+                "rounded-xl px-2 py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
                 viewDate.getFullYear() === year
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-accent"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-secondary text-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
               {year}
@@ -72,34 +75,35 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 
   if (pickerView === "months") {
     return (
-      <div className={cn("p-3 pointer-events-auto w-full max-w-[320px] mx-auto", className)} dir="rtl">
-        <div className="flex items-center justify-between mb-3">
+      <div className={cn(calendarShellClassName, className)} dir="rtl">
+        <div className="mb-3 flex items-center justify-between">
           <button
             type="button"
             onClick={() => setPickerView("years")}
-            className="text-sm font-bold text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+            className="text-sm font-bold text-foreground underline underline-offset-4 transition-colors hover:text-primary"
           >
             {viewDate.getFullYear()}
           </button>
           <button
             type="button"
             onClick={() => setPickerView("days")}
-            className="text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-accent"
+            className="rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            חזרה ←
+            חזרה
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-1.5">
-          {MONTHS_HE.map((month, i) => (
+
+        <div className="grid grid-cols-3 gap-2">
+          {MONTHS_HE.map((month, index) => (
             <button
-              key={i}
+              key={month}
               type="button"
-              onClick={() => handleMonthSelect(i)}
+              onClick={() => handleMonthSelect(index)}
               className={cn(
-                "py-2 px-1 rounded-lg text-xs font-semibold transition-all",
-                viewDate.getMonth() === i
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-accent"
+                "rounded-2xl px-2 py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
+                viewDate.getMonth() === index
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-secondary text-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
               {month}
@@ -115,57 +119,47 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       dir="rtl"
       locale={he}
       showOutsideDays={showOutsideDays}
+      fixedWeeks
       month={viewDate}
       onMonthChange={setViewDate}
-      className={cn("p-3 pointer-events-auto w-full max-w-[320px] mx-auto", className)}
+      className={cn(calendarShellClassName, className)}
       classNames={{
-        months: "flex flex-col w-full",
+        months: "w-full",
         month: "w-full",
-        caption: "flex justify-center pt-1 pb-2 relative items-center",
-        caption_label: "text-sm font-bold cursor-pointer hover:text-primary transition-colors",
-        nav: "flex items-center gap-1",
+        caption: "relative mb-2 flex h-10 items-center justify-center",
+        caption_label: "text-sm font-bold text-foreground",
+        nav: "absolute inset-x-0 top-0 flex items-center justify-between",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-60 hover:opacity-100 hover:bg-accent transition-all",
+          "flex h-9 w-9 items-center justify-center rounded-full border-border bg-background p-0 text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground active:scale-95"
         ),
-        nav_button_previous: "absolute left-0",
-        nav_button_next: "absolute right-0",
-        table: "w-full border-collapse",
-        head_row: "flex w-full",
-        head_cell: "text-muted-foreground flex-1 font-medium text-[11px] text-center py-1",
-        row: "flex w-full",
-        cell: cn(
-          "flex-1 text-center p-px relative",
-          "[&:has([aria-selected].day-range-end)]:rounded-r-md",
-          "[&:has([aria-selected].day-outside)]:bg-accent/50",
-          "[&:has([aria-selected])]:bg-accent",
-          "first:[&:has([aria-selected])]:rounded-l-md",
-          "last:[&:has([aria-selected])]:rounded-r-md",
-          "focus-within:relative focus-within:z-20"
-        ),
+        nav_button_previous: "!absolute right-0 top-0",
+        nav_button_next: "!absolute left-0 top-0",
+        table: "w-full table-fixed border-separate border-spacing-y-1.5",
+        head_row: "",
+        head_cell: "pb-1 text-center text-[0.72rem] font-semibold text-muted-foreground",
+        row: "",
+        cell: "p-0 text-center align-middle",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 w-full p-0 text-xs font-medium aria-selected:opacity-100 rounded-lg"
+          "flex h-10 w-10 mx-auto items-center justify-center rounded-xl p-0 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground active:scale-95"
         ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground font-bold ring-1 ring-primary/30",
-        day_outside:
-          "day-outside text-muted-foreground opacity-40 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-40",
-        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_selected: "bg-primary text-primary-foreground shadow-md hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_today: "border border-primary/30 bg-accent/20 text-foreground",
+        day_outside: "text-muted-foreground opacity-35",
+        day_disabled: "text-muted-foreground opacity-25",
+        day_range_middle: "bg-accent text-accent-foreground",
         day_hidden: "invisible",
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-3.5 w-3.5" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-3.5 w-3.5" />,
+        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+        IconRight: () => <ChevronRight className="h-4 w-4" />,
         CaptionLabel: ({ displayMonth }) => (
           <button
             type="button"
             onClick={() => setPickerView("months")}
-            className="cursor-pointer bg-transparent border-none text-sm font-bold text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+            className="rounded-full px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-secondary hover:text-primary"
           >
             {format(displayMonth, "MMMM yyyy", { locale: he })}
           </button>
@@ -175,6 +169,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
     />
   );
 }
+
 Calendar.displayName = "Calendar";
 
 export { Calendar };
