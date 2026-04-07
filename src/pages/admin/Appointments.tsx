@@ -306,9 +306,14 @@ const Actions = styled.div`
 `;
 
 const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' | 'default' }>`
-  padding: 0.4rem;
+  padding: 0.5rem;
   border-radius: ${({ theme }) => theme.radii.md};
   transition: all ${({ theme }) => theme.transitions.normal};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
   color: ${({ $variant }) => 
     $variant === 'success' ? '#16a34a' :
     $variant === 'danger' ? '#dc2626' :
