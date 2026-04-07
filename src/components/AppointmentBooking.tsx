@@ -319,6 +319,9 @@ const Input = styled.input<{ $hasError?: boolean }>`
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
@@ -328,6 +331,7 @@ const Input = styled.input<{ $hasError?: boolean }>`
   
   &::placeholder {
     color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: right;
   }
 `;
 
