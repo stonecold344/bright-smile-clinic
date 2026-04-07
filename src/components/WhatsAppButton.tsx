@@ -35,8 +35,8 @@ const FloatingButton = styled.a`
   }
 
   @media (max-width: 480px) {
-    bottom: 5rem;
-    right: 1.25rem;
+    bottom: 5.5rem;
+    right: 2rem;
     width: 3rem;
     height: 3rem;
 
