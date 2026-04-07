@@ -1,19 +1,19 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  addDays, 
-  addMonths, 
-  subMonths, 
-  isSameMonth, 
-  isSameDay, 
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  addMonths,
+  subMonths,
+  isSameMonth,
+  isSameDay,
   isToday,
   setMonth as setDateMonth,
-  setYear as setDateYear
+  setYear as setDateYear,
 } from "date-fns";
 import { he } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -37,11 +37,9 @@ function Calendar({ selected, onSelect, disabled, className }: CalendarProps) {
   const [viewDate, setViewDate] = React.useState(() => selected || new Date());
   const [showMonths, setShowMonths] = React.useState(false);
   const [showYears, setShowYears] = React.useState(false);
-  const [animDir, setAnimDir] = React.useState<"left" | "right" | null>(null);
 
   const monthStart = startOfMonth(viewDate);
   const monthEnd = endOfMonth(viewDate);
-  // Week starts on Sunday (0) for Hebrew calendar
   const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
   const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
@@ -57,64 +55,59 @@ function Calendar({ selected, onSelect, disabled, className }: CalendarProps) {
     weeks.push(days.slice(i, i + 7));
   }
 
-  const goNext = () => {
-    setAnimDir("left");
-    setViewDate(prev => addMonths(prev, 1));
-    setTimeout(() => setAnimDir(null), 250);
-  };
-
-  const goPrev = () => {
-    setAnimDir("right");
-    setViewDate(prev => subMonths(prev, 1));
-    setTimeout(() => setAnimDir(null), 250);
-  };
-
-  const handleMonthSelect = (idx: number) => {
-    setViewDate(prev => setDateMonth(prev, idx));
-    setShowMonths(false);
-  };
-
-  const handleYearSelect = (year: number) => {
-    setViewDate(prev => setDateYear(prev, year));
-    setShowYears(false);
-    setShowMonths(true);
-  };
-
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+
+  const shellStyle: React.CSSProperties = {
+    width: "300px",
+    maxWidth: "92vw",
+    padding: "16px",
+    borderRadius: "16px",
+    background: "#fff",
+    border: "1px solid hsl(200, 20%, 90%)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+    direction: "rtl",
+    fontFamily: "Heebo, sans-serif",
+    pointerEvents: "auto",
+    userSelect: "none",
+  };
 
   // Year picker
   if (showYears) {
     return (
-      <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-bold text-foreground">בחירת שנה</span>
+      <div style={shellStyle} className={className}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "hsl(200,50%,15%)" }}>בחירת שנה</span>
+          <button
+            type="button"
+            onClick={() => { setShowYears(false); setShowMonths(true); }}
+            style={{ fontSize: 12, color: "hsl(200,15%,45%)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8 }}
+          >
+            חזרה
+          </button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, maxHeight: 240, overflowY: "auto" }}>
+          {years.map(y => (
             <button
+              key={y}
               type="button"
-              onClick={() => { setShowYears(false); setShowMonths(true); }}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-accent"
+              onClick={() => { setViewDate(prev => setDateYear(prev, y)); setShowYears(false); setShowMonths(true); }}
+              style={{
+                padding: "10px 0",
+                borderRadius: 12,
+                border: "none",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                background: viewDate.getFullYear() === y ? "hsl(174,62%,45%)" : "hsl(200,40%,96%)",
+                color: viewDate.getFullYear() === y ? "#fff" : "hsl(200,50%,15%)",
+                boxShadow: viewDate.getFullYear() === y ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+              }}
             >
-              חזרה
+              {y}
             </button>
-          </div>
-          <div className="grid grid-cols-4 gap-1.5 max-h-[240px] overflow-y-auto scrollbar-thin">
-            {years.map(y => (
-              <button
-                key={y}
-                type="button"
-                onClick={() => handleYearSelect(y)}
-                className={cn(
-                  "rounded-xl py-2.5 text-xs font-semibold transition-all duration-200 active:scale-95",
-                  viewDate.getFullYear() === y
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-foreground hover:bg-accent"
-                )}
-              >
-                {y}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -123,138 +116,159 @@ function Calendar({ selected, onSelect, disabled, className }: CalendarProps) {
   // Month picker
   if (showMonths) {
     return (
-      <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
+      <div style={shellStyle} className={className}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <button
+            type="button"
+            onClick={() => setShowYears(true)}
+            style={{ fontSize: 14, fontWeight: 700, color: "hsl(200,50%,15%)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+          >
+            {viewDate.getFullYear()}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowMonths(false)}
+            style={{ fontSize: 12, color: "hsl(200,15%,45%)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8 }}
+          >
+            חזרה
+          </button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+          {MONTHS_HE.map((m, idx) => (
             <button
+              key={m}
               type="button"
-              onClick={() => setShowYears(true)}
-              className="text-sm font-bold text-foreground hover:text-primary transition-colors"
+              onClick={() => { setViewDate(prev => setDateMonth(prev, idx)); setShowMonths(false); }}
+              style={{
+                padding: "12px 0",
+                borderRadius: 12,
+                border: "none",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                background: viewDate.getMonth() === idx ? "hsl(174,62%,45%)" : "hsl(200,40%,96%)",
+                color: viewDate.getMonth() === idx ? "#fff" : "hsl(200,50%,15%)",
+                boxShadow: viewDate.getMonth() === idx ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+              }}
             >
-              {viewDate.getFullYear()}
+              {m}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowMonths(false)}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-accent"
-            >
-              חזרה
-            </button>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {MONTHS_HE.map((m, idx) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => handleMonthSelect(idx)}
-                className={cn(
-                  "rounded-xl py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
-                  viewDate.getMonth() === idx
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-foreground hover:bg-accent"
-                )}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  // Main calendar
+  // Main calendar view
+  const cellSize = 36;
+
   return (
-    <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
-        {/* Header: arrows in corners, month label in center */}
-        <div className="flex items-center justify-between mb-3">
-          <button
-            type="button"
-            onClick={goPrev}
-            className="flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200 active:scale-90"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowMonths(true)}
-            className="px-3 py-1.5 rounded-xl text-sm font-bold text-foreground hover:bg-accent transition-all duration-200"
-          >
-            {format(viewDate, "MMMM yyyy", { locale: he })}
-          </button>
-
-          <button
-            type="button"
-            onClick={goNext}
-            className="flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200 active:scale-90"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Day names */}
-        <div className="grid grid-cols-7 mb-1">
-          {DAY_NAMES.map(d => (
-            <div key={d} className="text-center text-[11px] font-semibold text-muted-foreground py-1">
-              {d}
-            </div>
-          ))}
-        </div>
-
-        {/* Day grid with animation */}
-        <div
-          className={cn(
-            "transition-all duration-200 ease-out",
-            animDir === "left" && "animate-slide-left",
-            animDir === "right" && "animate-slide-right"
-          )}
+    <div style={shellStyle} className={className}>
+      {/* Header row: right arrow | month label | left arrow */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <button
+          type="button"
+          onClick={() => setViewDate(prev => subMonths(prev, 1))}
+          style={{
+            width: 32, height: 32, borderRadius: "50%", border: "1px solid hsl(200,20%,90%)",
+            background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s", color: "hsl(200,15%,45%)",
+          }}
         >
-          {weeks.map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7">
-              {week.map((d, di) => {
-                const inMonth = isSameMonth(d, viewDate);
-                const isSelected = selected && isSameDay(d, selected);
-                const isTodayDate = isToday(d);
-                const isDisabled = disabled?.(d);
+          <ChevronRight style={{ width: 16, height: 16 }} />
+        </button>
 
-                return (
-                  <div key={di} className="flex items-center justify-center py-[3px]">
-                    <button
-                      type="button"
-                      disabled={isDisabled}
-                      onClick={() => {
-                        if (!isDisabled && onSelect) {
-                          onSelect(isSelected ? undefined : d);
-                        }
-                      }}
-                      className={cn(
-                        "relative w-9 h-9 rounded-xl text-sm font-medium transition-all duration-200 active:scale-90",
-                        !inMonth && "opacity-25",
-                        isDisabled && "opacity-20 cursor-not-allowed",
-                        !isSelected && !isTodayDate && inMonth && "text-foreground hover:bg-accent",
-                        isTodayDate && !isSelected && "text-primary font-bold",
-                        isSelected && "bg-primary text-primary-foreground shadow-md font-bold"
-                      )}
-                    >
-                      {d.getDate()}
-                      {/* Today indicator dot */}
-                      {isTodayDate && !isSelected && (
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
-                      )}
-                      {/* Selected indicator ring */}
-                      {isSelected && (
-                        <span className="absolute inset-0 rounded-xl ring-2 ring-primary/30 ring-offset-1 ring-offset-card" />
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowMonths(true)}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 15, fontWeight: 700, color: "hsl(174,62%,45%)",
+            padding: "4px 12px", borderRadius: 10, transition: "all 0.2s",
+          }}
+        >
+          {format(viewDate, "MMMM yyyy", { locale: he })}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setViewDate(prev => addMonths(prev, 1))}
+          style={{
+            width: 32, height: 32, borderRadius: "50%", border: "1px solid hsl(200,20%,90%)",
+            background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s", color: "hsl(200,15%,45%)",
+          }}
+        >
+          <ChevronLeft style={{ width: 16, height: 16 }} />
+        </button>
       </div>
+
+      {/* Day names header */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 4 }}>
+        {DAY_NAMES.map(d => (
+          <div key={d} style={{
+            textAlign: "center", fontSize: 11, fontWeight: 600,
+            color: "hsl(200,15%,45%)", padding: "4px 0",
+          }}>
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Weeks grid */}
+      {weeks.map((week, wi) => (
+        <div key={wi} style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+          {week.map((d, di) => {
+            const inMonth = isSameMonth(d, viewDate);
+            const sel = selected && isSameDay(d, selected);
+            const today = isToday(d);
+            const dis = disabled?.(d);
+
+            return (
+              <div key={di} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "2px 0" }}>
+                <button
+                  type="button"
+                  disabled={dis}
+                  onClick={() => {
+                    if (!dis && onSelect) onSelect(sel ? undefined : d);
+                  }}
+                  style={{
+                    position: "relative",
+                    width: cellSize,
+                    height: cellSize,
+                    borderRadius: 10,
+                    border: today && !sel ? "2px solid hsl(174,62%,45%)" : "2px solid transparent",
+                    background: sel ? "hsl(174,62%,45%)" : "transparent",
+                    color: sel ? "#fff" : !inMonth ? "hsl(200,15%,80%)" : dis ? "hsl(200,15%,80%)" : "hsl(200,50%,15%)",
+                    fontSize: 13,
+                    fontWeight: sel || today ? 700 : 500,
+                    cursor: dis ? "not-allowed" : "pointer",
+                    transition: "all 0.15s ease",
+                    boxShadow: sel ? "0 2px 8px hsla(174,62%,45%,0.35)" : "none",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {d.getDate()}
+                  {/* Today dot indicator */}
+                  {today && !sel && (
+                    <span style={{
+                      position: "absolute",
+                      bottom: 3,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: 4,
+                      height: 4,
+                      borderRadius: "50%",
+                      background: "hsl(174,62%,45%)",
+                    }} />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
