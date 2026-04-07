@@ -158,6 +158,7 @@ const WeekDays = styled.div`
   gap: 0;
   margin-bottom: 0.375rem;
   width: 100%;
+  direction: rtl;
 `;
 
 const WeekDay = styled.div`
