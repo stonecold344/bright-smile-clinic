@@ -778,7 +778,7 @@ const AdminAppointments = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
+              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateTo}
