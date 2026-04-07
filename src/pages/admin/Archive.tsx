@@ -671,7 +671,7 @@ const AdminArchive = () => {
                 {dateFrom ? format(dateFrom, 'dd/MM/yyyy', { locale: he }) : 'מתאריך'}
                 <CalendarIcon size={14} />
               </DatePickerButton>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
+              <PopoverContent className="w-[320px] max-w-[92vw] p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateFrom}
@@ -688,7 +688,7 @@ const AdminArchive = () => {
                 {dateTo ? format(dateTo, 'dd/MM/yyyy', { locale: he }) : 'עד תאריך'}
                 <CalendarIcon size={14} />
               </DatePickerButton>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
+              <PopoverContent className="w-[320px] max-w-[92vw] p-0 z-[9999]" align="center" side="bottom" sideOffset={8} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateTo}
