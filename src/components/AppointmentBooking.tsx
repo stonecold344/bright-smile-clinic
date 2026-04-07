@@ -83,6 +83,7 @@ const ColumnHeader = styled.div`
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  width: 100%;
 `;
 
 const ColumnIcon = styled.div`
