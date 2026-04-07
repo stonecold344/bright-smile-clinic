@@ -385,7 +385,7 @@ const Header = () => {
   const isServicesActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
 
   return (
-    <HeaderWrapper $scrolled={isScrolled}>
+    <HeaderWrapper $scrolled={isScrolled} $blurred={isBlurred}>
       <Container>
         <HeaderInner>
           <Logo to="/">
