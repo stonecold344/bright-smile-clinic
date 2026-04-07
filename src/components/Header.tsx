@@ -335,7 +335,7 @@ const Header = () => {
     if (isAlwaysLight) {
       setIsScrolled(true);
     } else {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.65);
     }
   }, [isAlwaysLight, location.pathname]);
 
