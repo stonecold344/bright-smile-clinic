@@ -294,13 +294,13 @@ const Header = () => {
   const { data: treatments = [] } = useTreatments();
 
   // Pages that always have a light background (no dark hero)
-  const alwaysLightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
+  const alwaysLightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin', '/faq'];
   const isAlwaysLight = alwaysLightPages.some(page => location.pathname.startsWith(page));
   
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window === 'undefined') return true;
-    const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin'];
-    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > window.innerHeight * 0.55;
+    const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin', '/faq'];
+    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > 100;
   });
 
   const handleSignOut = async () => {
@@ -335,8 +335,7 @@ const Header = () => {
     if (isAlwaysLight) {
       setIsScrolled(true);
     } else {
-      const threshold = window.innerHeight * 0.55;
-      setIsScrolled(window.scrollY > threshold);
+      setIsScrolled(window.scrollY > 100);
     }
   }, [isAlwaysLight, location.pathname]);
 
@@ -345,8 +344,7 @@ const Header = () => {
     if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      const threshold = window.innerHeight * 0.55;
-      setIsScrolled(window.scrollY > threshold);
+      setIsScrolled(window.scrollY > 100);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

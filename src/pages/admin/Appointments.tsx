@@ -87,6 +87,10 @@ const FiltersGrid = styled.div`
   grid-template-columns: 1fr;
   gap: 1rem;
 
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: 1fr 1fr;
+  }
+
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
@@ -299,15 +303,21 @@ const StatusBadge = styled.span<{ $status: string }>`
 
 const Actions = styled.div`
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
 `;
 
 const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' | 'default' }>`
-  padding: 0.4rem;
+  padding: 0.5rem;
   border-radius: ${({ theme }) => theme.radii.md};
   transition: all ${({ theme }) => theme.transitions.normal};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
   color: ${({ $variant }) => 
     $variant === 'success' ? '#16a34a' :
     $variant === 'danger' ? '#dc2626' :
@@ -752,7 +762,7 @@ const AdminAppointments = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
+              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateFrom}
@@ -772,7 +782,7 @@ const AdminAppointments = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
+              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateTo}

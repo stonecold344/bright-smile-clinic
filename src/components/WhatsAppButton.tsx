@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 const pulse = keyframes`
@@ -8,8 +9,8 @@ const pulse = keyframes`
 
 const FloatingButton = styled.a`
   position: fixed;
-  bottom: 2rem;
-  left: 2rem;
+  bottom: 6rem;
+  right: 2rem;
   width: 3.5rem;
   height: 3.5rem;
   background: #25d366;
@@ -34,8 +35,8 @@ const FloatingButton = styled.a`
   }
 
   @media (max-width: 480px) {
-    bottom: 1.25rem;
-    left: 1.25rem;
+    bottom: 5rem;
+    right: 1.25rem;
     width: 3rem;
     height: 3rem;
 
@@ -47,6 +48,11 @@ const FloatingButton = styled.a`
 `;
 
 const WhatsAppButton = () => {
+  const location = useLocation();
+  
+  // Hide WhatsApp button on admin pages
+  if (location.pathname.startsWith('/admin')) return null;
+  
   return (
     <FloatingButton
       href="https://wa.me/972507334482"
