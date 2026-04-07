@@ -344,8 +344,7 @@ const Header = () => {
     if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      const threshold = window.innerHeight * 0.55;
-      setIsScrolled(window.scrollY > threshold);
+      setIsScrolled(window.scrollY > 100);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
