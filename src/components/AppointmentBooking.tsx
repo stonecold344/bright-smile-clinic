@@ -306,6 +306,7 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 const FormGroup = styled.div`
   margin-bottom: 1rem;
   text-align: right;
+  width: 100%;
 `;
 
 const Label = styled.label`
