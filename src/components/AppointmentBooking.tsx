@@ -770,7 +770,7 @@ const AppointmentBooking = () => {
                 </SelectedAppointment>
               )}
 
-              <form onSubmit={handleSubmit} noValidate>
+              <form onSubmit={handleSubmit} noValidate style={{ width: '100%' }}>
                 {formError && (
                   <FormError>
                     <AlertTriangle size={18} />
