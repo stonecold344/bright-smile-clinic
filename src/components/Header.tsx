@@ -9,16 +9,20 @@ import { useTreatments } from '@/hooks/useTreatments';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/sonner';
 
-const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
+const HeaderWrapper = styled.header<{ $scrolled?: boolean; $blurred?: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
   left: 0;
   z-index: 50;
-  background: ${({ $scrolled, theme }) => $scrolled ? `${theme.colors.card}f2` : 'transparent'};
-  backdrop-filter: ${({ $scrolled }) => $scrolled ? 'blur(12px)' : 'none'};
+  background: ${({ $scrolled, $blurred, theme }) => 
+    $scrolled ? `${theme.colors.card}f2` : 
+    $blurred ? 'hsla(0, 0%, 100%, 0.08)' : 'transparent'};
+  backdrop-filter: ${({ $scrolled, $blurred }) => 
+    $scrolled ? 'blur(12px)' : 
+    $blurred ? 'blur(8px)' : 'none'};
   box-shadow: ${({ $scrolled, theme }) => $scrolled ? theme.shadows.soft : 'none'};
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease;
 `;
 
 const HeaderInner = styled.div`
@@ -300,7 +304,11 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window === 'undefined') return true;
     const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin', '/faq'];
-    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > 100;
+    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > window.innerHeight * 0.8;
+  });
+  const [isBlurred, setIsBlurred] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.scrollY > 20;
   });
 
   const handleSignOut = async () => {
@@ -334,8 +342,10 @@ const Header = () => {
   useLayoutEffect(() => {
     if (isAlwaysLight) {
       setIsScrolled(true);
+      setIsBlurred(false);
     } else {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.8);
+      setIsBlurred(window.scrollY > 20);
     }
   }, [isAlwaysLight, location.pathname]);
 
@@ -344,7 +354,8 @@ const Header = () => {
     if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.8);
+      setIsBlurred(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -374,7 +385,7 @@ const Header = () => {
   const isServicesActive = location.pathname.startsWith('/services') || location.pathname.startsWith('/treatment');
 
   return (
-    <HeaderWrapper $scrolled={isScrolled}>
+    <HeaderWrapper $scrolled={isScrolled} $blurred={isBlurred}>
       <Container>
         <HeaderInner>
           <Logo to="/">
