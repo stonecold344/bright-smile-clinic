@@ -9,8 +9,8 @@ const pulse = keyframes`
 
 const FloatingButton = styled.a`
   position: fixed;
-  bottom: 2rem;
-  left: 2rem;
+  bottom: 6rem;
+  right: 2rem;
   width: 3.5rem;
   height: 3.5rem;
   background: #25d366;
