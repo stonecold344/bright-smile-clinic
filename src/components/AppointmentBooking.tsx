@@ -114,6 +114,7 @@ const CalendarNav = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  width: 100%;
 `;
 
 const MonthLabel = styled.span`
