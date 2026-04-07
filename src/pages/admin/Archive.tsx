@@ -673,13 +673,12 @@ const AdminArchive = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-auto min-w-[280px] p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
+              <PopoverContent className="w-[calc(100vw-2rem)] sm:w-auto min-w-[300px] p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateFrom}
                   onSelect={setDateFrom}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
