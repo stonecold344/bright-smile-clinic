@@ -42,7 +42,7 @@ const ContactIconWrapper = styled.div`width: 3rem; height: 3rem; background: ${(
 const ContactItemContent = styled.div``;
 const ContactItemTitle = styled.h3`font-weight: ${({ theme }) => theme.fontWeights.semibold}; color: ${({ theme }) => theme.colors.foreground}; margin: 0;`;
 const ContactItemValue = styled.p`color: ${({ theme }) => theme.colors.mutedForeground}; margin: 0;`;
-const QuickCallCTA = styled.div`background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii['2xl']}; padding: 2rem; text-align: right; @media (min-width: ${({ theme }) => theme.breakpoints.lg}) { text-align: center; }`;
+const QuickCallCTA = styled.div`background: ${({ theme }) => theme.gradients.hero}; border-radius: ${({ theme }) => theme.radii['2xl']}; padding: 2rem; text-align: center; display: flex; flex-direction: column; align-items: center;`;
 const QuickCallTitle = styled.h3`font-size: ${({ theme }) => theme.fontSizes['2xl']}; font-weight: ${({ theme }) => theme.fontWeights.bold}; color: ${({ theme }) => theme.colors.primaryForeground}; margin-bottom: 1rem;`;
 const QuickCallText = styled.p`color: ${({ theme }) => theme.colors.primaryForeground}e6; margin-bottom: 1.5rem;`;
 const MapSection = styled.section`height: 24rem; background: ${({ theme }) => theme.colors.muted}; iframe { width: 100%; height: 100%; border: 0; }`;
