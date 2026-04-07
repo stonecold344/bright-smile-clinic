@@ -46,7 +46,8 @@ const BookingCard = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   box-shadow: ${({ theme }) => theme.shadows.card};
-  overflow: hidden;
+  overflow: visible;
+  direction: rtl;
 `;
 
 const BookingGrid = styled.div`
@@ -59,9 +60,10 @@ const BookingGrid = styled.div`
 `;
 
 const BookingColumn = styled.div<{ $withBorder?: boolean }>`
-  padding: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[4]};
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    padding: ${({ theme }) => theme.spacing[6]};
     border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
   }
   
@@ -73,6 +75,7 @@ const BookingColumn = styled.div<{ $withBorder?: boolean }>`
 const ColumnHeader = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
@@ -145,7 +148,7 @@ const NavButton = styled.button`
 const WeekDays = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
+  gap: 0;
   margin-bottom: 0.375rem;
   direction: rtl;
 `;
@@ -161,7 +164,7 @@ const WeekDay = styled.div`
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
+  gap: 0;
   direction: rtl;
 `;
 
@@ -294,11 +297,13 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;
+  text-align: right;
 `;
 
 const Label = styled.label`
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -315,6 +320,9 @@ const Input = styled.input<{ $hasError?: boolean }>`
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.foreground};
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
@@ -324,6 +332,7 @@ const Input = styled.input<{ $hasError?: boolean }>`
   
   &::placeholder {
     color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: right;
   }
 `;
 
@@ -338,6 +347,9 @@ const Textarea = styled.textarea`
   min-height: 60px;
   resize: vertical;
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
@@ -347,6 +359,7 @@ const Textarea = styled.textarea`
   
   &::placeholder {
     color: ${({ theme }) => theme.colors.mutedForeground};
+    text-align: right;
   }
 `;
 
@@ -360,6 +373,9 @@ const Select = styled.select`
   color: ${({ theme }) => theme.colors.foreground};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
