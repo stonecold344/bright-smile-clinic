@@ -163,7 +163,7 @@ const WeekDay = styled.div`
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
+  gap: 0;
   direction: rtl;
 `;
 
