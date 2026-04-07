@@ -63,7 +63,7 @@ const BookingGrid = styled.div`
 `;
 
 const BookingColumn = styled.div<{ $withBorder?: boolean }>`
-  padding: ${({ theme }) => theme.spacing[5]};
+  padding: 1rem;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
