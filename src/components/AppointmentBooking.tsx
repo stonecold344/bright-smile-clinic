@@ -49,28 +49,47 @@ const BookingCard = styled.div`
   width: 100%;
   box-sizing: border-box;
   direction: rtl;
+  overflow: hidden;
 `;
 
 const BookingGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
+  align-items: start;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
-    grid-template-columns: 300px 1fr 320px;
+    grid-template-columns: 300px minmax(0, 1fr) 320px;
   }
 `;
 
 const BookingColumn = styled.div<{ $withBorder?: boolean }>`
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.875rem;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   text-align: center;
+
+  > * {
+    width: 100%;
+    max-width: 22rem;
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    align-items: stretch;
     padding: ${({ theme }) => theme.spacing[6]};
     border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
     text-align: right;
+
+    > * {
+      max-width: none;
+      margin-inline: 0;
+    }
   }
   
   @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
@@ -87,6 +106,11 @@ const ColumnHeader = styled.div`
   padding-bottom: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   width: 100%;
+  text-align: center;
+
+  > div {
+    min-width: 0;
+  }
 `;
 
 const ColumnIcon = styled.div`
@@ -116,14 +140,18 @@ const CalendarNav = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 1rem;
   width: 100%;
 `;
 
 const MonthLabel = styled.span`
+  flex: 1;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.foreground};
+  text-align: center;
+  min-width: 0;
 `;
 
 const NavButtons = styled.div`
@@ -155,7 +183,7 @@ const NavButton = styled.button`
 
 const WeekDays = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0;
   margin-bottom: 0.375rem;
   width: 100%;
@@ -172,15 +200,20 @@ const WeekDay = styled.div`
 
 const DaysGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0;
   width: 100%;
   direction: rtl;
 `;
 
 const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $isDisabled?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   aspect-ratio: 1;
   width: 100%;
+  min-width: 0;
+  padding: 0;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -207,12 +240,13 @@ const DayButton = styled.button<{ $isSelected?: boolean; $isToday?: boolean; $is
 
 const TimeSlotsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   max-height: 320px;
   overflow-y: auto;
-  padding-left: 0.5rem;
+  padding-inline: 0.25rem;
   width: 100%;
+  box-sizing: border-box;
   
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: ${({ theme }) => theme.colors.secondary}; border-radius: 2px; }
@@ -221,6 +255,7 @@ const TimeSlotsContainer = styled.div`
 
 const TimeSlot = styled.button<{ $isSelected?: boolean; $isBooked?: boolean }>`
   padding: 0.625rem 0.5rem;
+  min-width: 0;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -261,6 +296,8 @@ const EmptyState = styled.div`
   text-align: center;
   color: ${({ theme }) => theme.colors.mutedForeground};
   padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 const EmptyStateIcon = styled.div`
@@ -283,6 +320,7 @@ const EmptyStateText = styled.p`
 const Legend = styled.div`
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
@@ -310,19 +348,30 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;
-  text-align: right;
+  text-align: center;
   width: 100%;
+  box-sizing: border-box;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    text-align: right;
+  }
 `;
 
 const Label = styled.label`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.foreground};
   margin-bottom: 0.375rem;
+  text-align: center;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    justify-content: flex-start;
+    text-align: right;
+  }
 `;
 
 const Input = styled.input<{ $hasError?: boolean }>`
@@ -417,6 +466,8 @@ const SelectedLabel = styled.p`
 const SelectedValue = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 `;
 
 /* Inline error styles */
@@ -428,9 +479,16 @@ const slideDown = keyframes`
 const FieldError = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   margin-top: 0.35rem;
   animation: ${slideDown} 0.2s ease-out;
+  text-align: center;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    justify-content: flex-start;
+    text-align: right;
+  }
 
   svg {
     flex-shrink: 0;
@@ -446,6 +504,7 @@ const FieldError = styled.div`
 const FormError = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
@@ -453,6 +512,12 @@ const FormError = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.destructive}40;
   border-radius: ${({ theme }) => theme.radii.lg};
   animation: ${slideDown} 0.3s ease-out;
+  text-align: center;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
+    justify-content: flex-start;
+    text-align: right;
+  }
 
   svg { flex-shrink: 0; color: ${({ theme }) => theme.colors.destructive}; }
   span { font-size: ${({ theme }) => theme.fontSizes.sm}; color: ${({ theme }) => theme.colors.destructive}; line-height: 1.4; }
@@ -530,7 +595,8 @@ const AppointmentBooking = () => {
     for (let i = 0; i < startDay; i++) { days.push(null); }
     let currentDate = monthStart;
     while (currentDate <= monthEnd) { days.push(currentDate); currentDate = addDays(currentDate, 1); }
-    return days.slice(0, 28);
+    while (days.length % 7 !== 0) { days.push(null); }
+    return days;
   };
 
   const isWorkingDay = (date: Date) => {
