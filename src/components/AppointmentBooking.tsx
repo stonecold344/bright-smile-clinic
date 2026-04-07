@@ -147,7 +147,7 @@ const NavButton = styled.button`
 const WeekDays = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
+  gap: 0;
   margin-bottom: 0.375rem;
   direction: rtl;
 `;
