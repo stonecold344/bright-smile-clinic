@@ -300,7 +300,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window === 'undefined') return true;
     const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin', '/faq'];
-    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > 100;
+    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > window.innerHeight * 0.65;
   });
 
   const handleSignOut = async () => {
@@ -335,7 +335,7 @@ const Header = () => {
     if (isAlwaysLight) {
       setIsScrolled(true);
     } else {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.65);
     }
   }, [isAlwaysLight, location.pathname]);
 
@@ -344,7 +344,7 @@ const Header = () => {
     if (isAlwaysLight) return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > window.innerHeight * 0.65);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
