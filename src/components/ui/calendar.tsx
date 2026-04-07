@@ -1,172 +1,261 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
-import { format, setMonth, setYear } from "date-fns";
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  startOfWeek, 
+  endOfWeek, 
+  addDays, 
+  addMonths, 
+  subMonths, 
+  isSameMonth, 
+  isSameDay, 
+  isToday,
+  setMonth as setDateMonth,
+  setYear as setDateYear
+} from "date-fns";
 import { he } from "date-fns/locale";
-
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
-
+const DAY_NAMES = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
 const MONTHS_HE = [
   "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
   "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר",
 ];
 
-const calendarShellClassName = "pointer-events-auto w-full max-w-[22rem] mx-auto rounded-[1.25rem] border border-border bg-background p-3 shadow-xl";
+export interface CalendarProps {
+  mode?: "single";
+  selected?: Date;
+  onSelect?: (date: Date | undefined) => void;
+  disabled?: (date: Date) => boolean;
+  className?: string;
+  initialFocus?: boolean;
+}
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
-  const [pickerView, setPickerView] = React.useState<"days" | "months" | "years">("days");
-  const [viewDate, setViewDate] = React.useState(() => {
-    if (props.selected && props.selected instanceof Date) return props.selected;
-    return new Date();
-  });
+function Calendar({ selected, onSelect, disabled, className }: CalendarProps) {
+  const [viewDate, setViewDate] = React.useState(() => selected || new Date());
+  const [showMonths, setShowMonths] = React.useState(false);
+  const [showYears, setShowYears] = React.useState(false);
+  const [animDir, setAnimDir] = React.useState<"left" | "right" | null>(null);
 
-  const currentYear = new Date().getFullYear();
-  const yearStart = currentYear - 10;
-  const yearEnd = currentYear + 10;
-  const years = Array.from({ length: yearEnd - yearStart + 1 }, (_, i) => yearStart + i);
+  const monthStart = startOfMonth(viewDate);
+  const monthEnd = endOfMonth(viewDate);
+  // Week starts on Sunday (0) for Hebrew calendar
+  const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
-  const handleMonthSelect = (monthIndex: number) => {
-    setViewDate((prev) => setMonth(prev, monthIndex));
-    setPickerView("days");
+  const days: Date[] = [];
+  let day = calStart;
+  while (day <= calEnd) {
+    days.push(day);
+    day = addDays(day, 1);
+  }
+
+  const weeks: Date[][] = [];
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+
+  const goNext = () => {
+    setAnimDir("left");
+    setViewDate(prev => addMonths(prev, 1));
+    setTimeout(() => setAnimDir(null), 250);
+  };
+
+  const goPrev = () => {
+    setAnimDir("right");
+    setViewDate(prev => subMonths(prev, 1));
+    setTimeout(() => setAnimDir(null), 250);
+  };
+
+  const handleMonthSelect = (idx: number) => {
+    setViewDate(prev => setDateMonth(prev, idx));
+    setShowMonths(false);
   };
 
   const handleYearSelect = (year: number) => {
-    setViewDate((prev) => setYear(prev, year));
-    setPickerView("months");
+    setViewDate(prev => setDateYear(prev, year));
+    setShowYears(false);
+    setShowMonths(true);
   };
 
-  if (pickerView === "years") {
-    return (
-      <div className={cn(calendarShellClassName, className)} dir="rtl">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-bold text-foreground">בחירת שנה</span>
-          <button
-            type="button"
-            onClick={() => setPickerView("days")}
-            className="rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            חזרה
-          </button>
-        </div>
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
-        <div className="grid max-h-[14rem] grid-cols-4 gap-2 overflow-y-auto pr-1">
-          {years.map((year) => (
+  // Year picker
+  if (showYears) {
+    return (
+      <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-bold text-foreground">בחירת שנה</span>
             <button
-              key={year}
               type="button"
-              onClick={() => handleYearSelect(year)}
-              className={cn(
-                "rounded-xl px-2 py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
-                viewDate.getFullYear() === year
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-secondary text-foreground hover:bg-accent hover:text-accent-foreground"
-              )}
+              onClick={() => { setShowYears(false); setShowMonths(true); }}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-accent"
             >
-              {year}
+              חזרה
             </button>
-          ))}
+          </div>
+          <div className="grid grid-cols-4 gap-1.5 max-h-[240px] overflow-y-auto scrollbar-thin">
+            {years.map(y => (
+              <button
+                key={y}
+                type="button"
+                onClick={() => handleYearSelect(y)}
+                className={cn(
+                  "rounded-xl py-2.5 text-xs font-semibold transition-all duration-200 active:scale-95",
+                  viewDate.getFullYear() === y
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-accent"
+                )}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
-  if (pickerView === "months") {
+  // Month picker
+  if (showMonths) {
     return (
-      <div className={cn(calendarShellClassName, className)} dir="rtl">
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setPickerView("years")}
-            className="text-sm font-bold text-foreground underline underline-offset-4 transition-colors hover:text-primary"
-          >
-            {viewDate.getFullYear()}
-          </button>
-          <button
-            type="button"
-            onClick={() => setPickerView("days")}
-            className="rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            חזרה
-          </button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          {MONTHS_HE.map((month, index) => (
+      <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
             <button
-              key={month}
               type="button"
-              onClick={() => handleMonthSelect(index)}
-              className={cn(
-                "rounded-2xl px-2 py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
-                viewDate.getMonth() === index
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-secondary text-foreground hover:bg-accent hover:text-accent-foreground"
-              )}
+              onClick={() => setShowYears(true)}
+              className="text-sm font-bold text-foreground hover:text-primary transition-colors"
             >
-              {month}
+              {viewDate.getFullYear()}
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setShowMonths(false)}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-accent"
+            >
+              חזרה
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {MONTHS_HE.map((m, idx) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => handleMonthSelect(idx)}
+                className={cn(
+                  "rounded-xl py-3 text-xs font-semibold transition-all duration-200 active:scale-95",
+                  viewDate.getMonth() === idx
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-accent"
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
+  // Main calendar
   return (
-    <DayPicker
-      dir="rtl"
-      locale={he}
-      showOutsideDays={showOutsideDays}
-      fixedWeeks
-      month={viewDate}
-      onMonthChange={setViewDate}
-      className={cn(calendarShellClassName, className)}
-      classNames={{
-        months: "w-full",
-        month: "w-full",
-        caption: "relative mb-2 flex h-10 items-center justify-center",
-        caption_label: "text-sm font-bold text-foreground",
-        nav: "absolute inset-x-0 top-0 flex items-center justify-between",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "flex h-9 w-9 items-center justify-center rounded-full border-border bg-background p-0 text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground active:scale-95"
-        ),
-        nav_button_previous: "!absolute right-0 top-0",
-        nav_button_next: "!absolute left-0 top-0",
-        table: "w-full table-fixed border-separate border-spacing-y-1.5",
-        head_row: "",
-        head_cell: "pb-1 text-center text-[0.72rem] font-semibold text-muted-foreground",
-        row: "",
-        cell: "p-0 text-center align-middle",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "flex h-10 w-10 mx-auto items-center justify-center rounded-xl p-0 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground active:scale-95"
-        ),
-        day_selected: "bg-primary text-primary-foreground shadow-md hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "border border-primary/30 bg-accent/20 text-foreground",
-        day_outside: "text-muted-foreground opacity-35",
-        day_disabled: "text-muted-foreground opacity-25",
-        day_range_middle: "bg-accent text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-        IconRight: () => <ChevronRight className="h-4 w-4" />,
-        CaptionLabel: ({ displayMonth }) => (
+    <div className={cn("pointer-events-auto w-full max-w-[320px] mx-auto select-none", className)} dir="rtl">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-lg">
+        {/* Header: arrows in corners, month label in center */}
+        <div className="flex items-center justify-between mb-3">
           <button
             type="button"
-            onClick={() => setPickerView("months")}
-            className="rounded-full px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-secondary hover:text-primary"
+            onClick={goPrev}
+            className="flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200 active:scale-90"
           >
-            {format(displayMonth, "MMMM yyyy", { locale: he })}
+            <ChevronRight className="w-4 h-4" />
           </button>
-        ),
-      }}
-      {...props}
-    />
+
+          <button
+            type="button"
+            onClick={() => setShowMonths(true)}
+            className="px-3 py-1.5 rounded-xl text-sm font-bold text-foreground hover:bg-accent transition-all duration-200"
+          >
+            {format(viewDate, "MMMM yyyy", { locale: he })}
+          </button>
+
+          <button
+            type="button"
+            onClick={goNext}
+            className="flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200 active:scale-90"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Day names */}
+        <div className="grid grid-cols-7 mb-1">
+          {DAY_NAMES.map(d => (
+            <div key={d} className="text-center text-[11px] font-semibold text-muted-foreground py-1">
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* Day grid with animation */}
+        <div
+          className={cn(
+            "transition-all duration-200 ease-out",
+            animDir === "left" && "animate-slide-left",
+            animDir === "right" && "animate-slide-right"
+          )}
+        >
+          {weeks.map((week, wi) => (
+            <div key={wi} className="grid grid-cols-7">
+              {week.map((d, di) => {
+                const inMonth = isSameMonth(d, viewDate);
+                const isSelected = selected && isSameDay(d, selected);
+                const isTodayDate = isToday(d);
+                const isDisabled = disabled?.(d);
+
+                return (
+                  <div key={di} className="flex items-center justify-center py-[3px]">
+                    <button
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        if (!isDisabled && onSelect) {
+                          onSelect(isSelected ? undefined : d);
+                        }
+                      }}
+                      className={cn(
+                        "relative w-9 h-9 rounded-xl text-sm font-medium transition-all duration-200 active:scale-90",
+                        !inMonth && "opacity-25",
+                        isDisabled && "opacity-20 cursor-not-allowed",
+                        !isSelected && !isTodayDate && inMonth && "text-foreground hover:bg-accent",
+                        isTodayDate && !isSelected && "text-primary font-bold",
+                        isSelected && "bg-primary text-primary-foreground shadow-md font-bold"
+                      )}
+                    >
+                      {d.getDate()}
+                      {/* Today indicator dot */}
+                      {isTodayDate && !isSelected && (
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                      )}
+                      {/* Selected indicator ring */}
+                      {isSelected && (
+                        <span className="absolute inset-0 rounded-xl ring-2 ring-primary/30 ring-offset-1 ring-offset-card" />
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
