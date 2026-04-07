@@ -48,7 +48,6 @@ const BookingCard = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.card};
   width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
   direction: rtl;
 `;
 
