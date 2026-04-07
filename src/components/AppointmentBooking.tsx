@@ -74,6 +74,7 @@ const BookingColumn = styled.div<{ $withBorder?: boolean }>`
 const ColumnHeader = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
