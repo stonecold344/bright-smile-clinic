@@ -92,7 +92,15 @@ const FiltersGrid = styled.div`
   grid-template-columns: 1fr;
   gap: 1rem;
 
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: 1fr 1fr;
+  }
+
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   }
 `;

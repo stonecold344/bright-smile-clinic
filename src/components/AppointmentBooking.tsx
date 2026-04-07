@@ -83,7 +83,7 @@ const BookingColumn = styled.div<{ $withBorder?: boolean }>`
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     align-items: stretch;
     padding: ${({ theme }) => theme.spacing[6]};
-    border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
+    border-inline-start: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
     text-align: right;
 
     > * {
