@@ -61,14 +61,12 @@ const BookingGrid = styled.div`
 
 const BookingColumn = styled.div<{ $withBorder?: boolean }>`
   padding: ${({ theme }) => theme.spacing[5]};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     padding: ${({ theme }) => theme.spacing[6]};
     border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
-    align-items: stretch;
   }
   
   @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
