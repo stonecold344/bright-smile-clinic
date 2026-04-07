@@ -606,7 +606,7 @@ const AdminMessages = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-[calc(100vw-2rem)] sm:w-auto min-w-[300px] p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
+              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateFrom}
@@ -625,7 +625,7 @@ const AdminMessages = () => {
                   <CalendarIcon size={14} />
                 </DatePickerButton>
               </PopoverTrigger>
-              <PopoverContent className="w-[calc(100vw-2rem)] sm:w-auto min-w-[300px] p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
+              <PopoverContent className="w-auto p-0 z-[9999]" align="center" side="bottom" sideOffset={4} avoidCollisions>
                 <Calendar
                   mode="single"
                   selected={dateTo}
