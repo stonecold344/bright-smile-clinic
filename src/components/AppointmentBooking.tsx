@@ -155,7 +155,7 @@ const WeekDays = styled.div`
   grid-template-columns: repeat(7, 1fr);
   gap: 0;
   margin-bottom: 0.375rem;
-  direction: rtl;
+  width: 100%;
 `;
 
 const WeekDay = styled.div`
