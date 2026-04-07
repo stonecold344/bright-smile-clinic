@@ -399,6 +399,8 @@ const SelectedAppointment = styled.div`
   padding: 0.875rem;
   margin-bottom: 1.25rem;
   color: ${({ theme }) => theme.colors.primaryForeground};
+  width: 100%;
+  text-align: center;
 `;
 
 const SelectedLabel = styled.p`
