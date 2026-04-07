@@ -296,11 +296,13 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;
+  text-align: right;
 `;
 
 const Label = styled.label`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.5rem;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
