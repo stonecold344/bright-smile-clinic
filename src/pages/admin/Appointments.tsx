@@ -299,9 +299,10 @@ const StatusBadge = styled.span<{ $status: string }>`
 
 const Actions = styled.div`
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
 `;
 
 const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' | 'default' }>`
