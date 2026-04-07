@@ -46,13 +46,15 @@ const BookingCard = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   box-shadow: ${({ theme }) => theme.shadows.card};
-  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
   direction: rtl;
 `;
 
 const BookingGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
+  width: 100%;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: 300px 1fr 320px;
@@ -60,11 +62,15 @@ const BookingGrid = styled.div`
 `;
 
 const BookingColumn = styled.div<{ $withBorder?: boolean }>`
-  padding: ${({ theme }) => theme.spacing[4]};
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     padding: ${({ theme }) => theme.spacing[6]};
     border-left: ${({ $withBorder, theme }) => $withBorder ? `1px solid ${theme.colors.border}` : 'none'};
+    text-align: right;
   }
   
   @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
@@ -80,6 +86,7 @@ const ColumnHeader = styled.div`
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  width: 100%;
 `;
 
 const ColumnIcon = styled.div`
@@ -110,6 +117,7 @@ const CalendarNav = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  width: 100%;
 `;
 
 const MonthLabel = styled.span`
@@ -150,6 +158,7 @@ const WeekDays = styled.div`
   grid-template-columns: repeat(7, 1fr);
   gap: 0;
   margin-bottom: 0.375rem;
+  width: 100%;
   direction: rtl;
 `;
 
@@ -165,6 +174,7 @@ const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0;
+  width: 100%;
   direction: rtl;
 `;
 
@@ -202,6 +212,7 @@ const TimeSlotsContainer = styled.div`
   max-height: 320px;
   overflow-y: auto;
   padding-left: 0.5rem;
+  width: 100%;
   
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: ${({ theme }) => theme.colors.secondary}; border-radius: 2px; }
@@ -271,10 +282,12 @@ const EmptyStateText = styled.p`
 
 const Legend = styled.div`
   display: flex;
+  justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
+  width: 100%;
 `;
 
 const LegendItem = styled.div`
@@ -298,6 +311,7 @@ const LegendDot = styled.div<{ $variant: 'available' | 'booked' | 'selected' }>`
 const FormGroup = styled.div`
   margin-bottom: 1rem;
   text-align: right;
+  width: 100%;
 `;
 
 const Label = styled.label`
@@ -390,6 +404,8 @@ const SelectedAppointment = styled.div`
   padding: 0.875rem;
   margin-bottom: 1.25rem;
   color: ${({ theme }) => theme.colors.primaryForeground};
+  width: 100%;
+  text-align: center;
 `;
 
 const SelectedLabel = styled.p`
@@ -759,7 +775,7 @@ const AppointmentBooking = () => {
                 </SelectedAppointment>
               )}
 
-              <form onSubmit={handleSubmit} noValidate>
+              <form onSubmit={handleSubmit} noValidate style={{ width: '100%' }}>
                 {formError && (
                   <FormError>
                     <AlertTriangle size={18} />
