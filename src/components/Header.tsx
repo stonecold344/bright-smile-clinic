@@ -9,16 +9,20 @@ import { useTreatments } from '@/hooks/useTreatments';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/sonner';
 
-const HeaderWrapper = styled.header<{ $scrolled?: boolean }>`
+const HeaderWrapper = styled.header<{ $scrolled?: boolean; $blurred?: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
   left: 0;
   z-index: 50;
-  background: ${({ $scrolled, theme }) => $scrolled ? `${theme.colors.card}f2` : 'transparent'};
-  backdrop-filter: ${({ $scrolled }) => $scrolled ? 'blur(12px)' : 'none'};
+  background: ${({ $scrolled, $blurred, theme }) => 
+    $scrolled ? `${theme.colors.card}f2` : 
+    $blurred ? 'hsla(0, 0%, 100%, 0.08)' : 'transparent'};
+  backdrop-filter: ${({ $scrolled, $blurred }) => 
+    $scrolled ? 'blur(12px)' : 
+    $blurred ? 'blur(8px)' : 'none'};
   box-shadow: ${({ $scrolled, theme }) => $scrolled ? theme.shadows.soft : 'none'};
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease;
 `;
 
 const HeaderInner = styled.div`
