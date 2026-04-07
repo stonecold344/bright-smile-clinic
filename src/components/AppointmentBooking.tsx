@@ -54,6 +54,7 @@ const BookingCard = styled.div`
 const BookingGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
+  width: 100%;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: 300px 1fr 320px;
