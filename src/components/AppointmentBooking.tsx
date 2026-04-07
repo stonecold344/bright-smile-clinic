@@ -372,6 +372,9 @@ const Select = styled.select`
   color: ${({ theme }) => theme.colors.foreground};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
