@@ -304,7 +304,11 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window === 'undefined') return true;
     const lightPages = ['/about', '/contact', '/services', '/appointments', '/blog', '/gallery', '/privacy', '/terms', '/auth', '/admin', '/faq'];
-    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > 100;
+    return lightPages.some(page => window.location.pathname.startsWith(page)) || window.scrollY > window.innerHeight * 0.8;
+  });
+  const [isBlurred, setIsBlurred] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.scrollY > 20;
   });
 
   const handleSignOut = async () => {
