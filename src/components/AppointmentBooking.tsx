@@ -46,7 +46,6 @@ const BookingCard = styled.div`
   background: ${({ theme }) => theme.colors.card};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   box-shadow: ${({ theme }) => theme.shadows.card};
-  overflow: hidden;
   width: 100%;
   box-sizing: border-box;
 `;
