@@ -277,10 +277,12 @@ const EmptyStateText = styled.p`
 
 const Legend = styled.div`
   display: flex;
+  justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
+  width: 100%;
 `;
 
 const LegendItem = styled.div`
